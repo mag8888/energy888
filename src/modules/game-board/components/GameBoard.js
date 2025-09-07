@@ -8,6 +8,7 @@ import { useUIState } from '../hooks/useUIState.js';
 import { useGameLogic } from '../hooks/useGameLogic.js';
 import { CELL_CONFIG } from '../../../data/gameCells.js';
 import { PLAYER_COLORS, assignPlayerColor, getColorByIndex, getContrastTextColor } from '../../../styles/playerColors.js';
+import socket from '../../../socket.js';
 
 const GameBoard = ({ roomId, playerData, onExit }) => {
   // Хуки для управления состоянием
@@ -73,118 +74,172 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
   // Рендер игровой доски
   const renderGameBoard = () => {
     return (
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0, rotateY: -15 }}
+        animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+        transition={{ duration: 1, type: "spring", stiffness: 80 }}
+        whileHover={{ scale: 1.02 }}
+      >
       <Box
         sx={{
           position: 'relative',
-          width: isMobile ? '400px' : '650px',
-          height: isMobile ? '400px' : '650px',
+            width: isMobile ? '420px' : '720px',
+            height: isMobile ? '420px' : '720px',
           margin: '0 auto',
-          background: 'linear-gradient(145deg, #0F172A 0%, #1E293B 50%, #334155 100%)',
-          borderRadius: '32px',
-          border: '3px solid transparent',
-          backgroundClip: 'padding-box',
-          boxShadow: `
-            0 0 0 1px rgba(255,255,255,0.1),
-            0 25px 50px rgba(0,0,0,0.4),
-            0 0 100px rgba(139, 92, 246, 0.1),
-            inset 0 1px 0 rgba(255,255,255,0.1)
-          `,
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            borderRadius: '32px',
-            padding: '3px',
-            background: 'linear-gradient(145deg, #8B5CF6, #3B82F6, #10B981, #F59E0B)',
-            mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-            maskComposite: 'xor',
-            WebkitMaskComposite: 'xor',
-            zIndex: -1
-          }
-        }}
-      >
-        {/* Центральный круг */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '140px',
-            height: '140px',
-            background: 'linear-gradient(145deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%)',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'column',
-            zIndex: 5,
+            background: 'linear-gradient(145deg, #0F172A 0%, #1E293B 25%, #334155 50%, #475569 75%, #64748B 100%)',
+            borderRadius: '45px',
+            border: '4px solid transparent',
+            backgroundClip: 'padding-box',
             boxShadow: `
               0 0 0 2px rgba(255,255,255,0.2),
-              0 15px 35px rgba(139, 92, 246, 0.4),
-              0 0 60px rgba(139, 92, 246, 0.2),
-              inset 0 2px 0 rgba(255,255,255,0.3),
-              inset 0 -2px 0 rgba(0,0,0,0.2)
+              0 35px 70px rgba(0,0,0,0.6),
+              0 0 150px rgba(139, 92, 246, 0.2),
+              inset 0 3px 0 rgba(255,255,255,0.3),
+              inset 0 -3px 0 rgba(0,0,0,0.3)
             `,
+            overflow: 'hidden',
             '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              borderRadius: '45px',
+              padding: '4px',
+              background: 'linear-gradient(145deg, #8B5CF6, #3B82F6, #10B981, #F59E0B, #EF4444, #EC4899)',
+              mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+              maskComposite: 'xor',
+              WebkitMaskComposite: 'xor',
+              zIndex: -1
+            },
+            '&::after': {
               content: '""',
               position: 'absolute',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: '60px',
-              height: '60px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
+              width: '85%',
+              height: '85%',
+          borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 50%, transparent 70%)',
               zIndex: -1
             }
           }}
         >
+        {/* Центральный круг */}
+          <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ delay: 0.3, duration: 0.8, type: "spring", stiffness: 120 }}
+          whileHover={{ scale: 1.1, rotate: 5 }}
+        >
           <Box
             sx={{
-              width: '80px',
-              height: '80px',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '160px',
+              height: '160px',
+              background: 'linear-gradient(145deg, #8B5CF6 0%, #7C3AED 30%, #6D28D9 60%, #5B21B6 100%)',
               borderRadius: '50%',
-              background: 'linear-gradient(145deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexDirection: 'column',
-              border: '1px solid rgba(255,255,255,0.2)'
+              zIndex: 5,
+              boxShadow: `
+                0 0 0 3px rgba(255,255,255,0.3),
+                0 20px 40px rgba(139, 92, 246, 0.5),
+                0 0 80px rgba(139, 92, 246, 0.3),
+                inset 0 3px 0 rgba(255,255,255,0.4),
+                inset 0 -3px 0 rgba(0,0,0,0.3)
+              `,
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '70px',
+                height: '70px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 50%, transparent 70%)',
+                zIndex: -1
+              },
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                top: '20%',
+                left: '20%',
+                width: '30px',
+                height: '30px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%)',
+                zIndex: -1
+              }
             }}
           >
-            <Typography
-              variant="h6"
-              sx={{
-                color: 'white',
-                fontWeight: '800',
-                fontSize: '18px',
-                textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                letterSpacing: '1px'
-              }}
-            >
-              ЦЕНТР
-            </Typography>
             <Box
               sx={{
-                width: '20px',
-                height: '2px',
-                background: 'rgba(255,255,255,0.6)',
-                borderRadius: '1px',
-                mt: 0.5
+                width: '90px',
+                height: '90px',
+                borderRadius: '50%',
+                background: 'linear-gradient(145deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                border: '2px solid rgba(255,255,255,0.3)',
+                boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.1)',
+                position: 'relative',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '60%',
+                  height: '60%',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
+                  zIndex: -1
+                }
               }}
-            />
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  color: 'white',
+                  fontWeight: '900',
+                  fontSize: '20px',
+                  textShadow: '0 3px 6px rgba(0,0,0,0.4), 0 0 10px rgba(255,255,255,0.3)',
+                  letterSpacing: '2px',
+                  textAlign: 'center',
+                  lineHeight: 1.1
+                }}
+              >
+                ЦЕНТР
+              </Typography>
+              <Box
+                sx={{
+                  width: '25px',
+                  height: '3px',
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)',
+                  borderRadius: '2px',
+                  mt: 1,
+                  boxShadow: '0 0 8px rgba(255,255,255,0.5)'
+                }}
+              />
+            </Box>
           </Box>
-        </Box>
+        </motion.div>
 
         {/* Внутренний путь (1-24) */}
         {Array.from({ length: 24 }, (_, i) => i + 1).map((num, index) => {
           const angle = (index * 15) - 90; // Начинаем сверху
-          const radius = 120; // Увеличиваем радиус для избежания наложений
+          const radius = 130; // Увеличиваем радиус для избежания наложений
           const x = 50 + Math.cos(angle * Math.PI / 180) * (radius / 2);
           const y = 50 + Math.sin(angle * Math.PI / 180) * (radius / 2);
           
@@ -200,50 +255,50 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                 stiffness: 200,
                 damping: 20
               }}
-              style={{
-                position: 'absolute',
+            style={{
+              position: 'absolute',
                 top: `${y}%`,
                 left: `${x}%`,
-                width: '45px',
-                height: '35px',
-                background: 'linear-gradient(145deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%)',
-                borderRadius: '18px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transform: 'translate(-50%, -50%)',
+                width: '50px',
+                height: '40px',
+                background: 'linear-gradient(145deg, #8B5CF6 0%, #7C3AED 30%, #6D28D9 60%, #5B21B6 100%)',
+                borderRadius: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transform: 'translate(-50%, -50%)',
                 boxShadow: `
-                  0 0 0 1px rgba(255,255,255,0.2),
-                  0 4px 12px rgba(139, 92, 246, 0.3),
-                  0 0 20px rgba(139, 92, 246, 0.1),
-                  inset 0 1px 0 rgba(255,255,255,0.3),
-                  inset 0 -1px 0 rgba(0,0,0,0.2)
+                  0 0 0 2px rgba(255,255,255,0.3),
+                  0 6px 16px rgba(139, 92, 246, 0.4),
+                  0 0 25px rgba(139, 92, 246, 0.2),
+                  inset 0 2px 0 rgba(255,255,255,0.4),
+                  inset 0 -2px 0 rgba(0,0,0,0.3)
                 `,
                 zIndex: 3,
-                border: '1px solid rgba(255,255,255,0.1)'
+                border: '2px solid rgba(255,255,255,0.2)'
               }}
               onClick={() => openCellPopup({ id: num, name: `Клетка ${num}` })}
               whileHover={{ 
-                scale: 1.15,
-                rotate: 5,
+                scale: 1.2,
+                rotate: 8,
                 boxShadow: `
-                  0 0 0 2px rgba(255,255,255,0.4),
-                  0 8px 20px rgba(139, 92, 246, 0.5),
-                  0 0 30px rgba(139, 92, 246, 0.3),
-                  inset 0 1px 0 rgba(255,255,255,0.5)
+                  0 0 0 3px rgba(255,255,255,0.5),
+                  0 10px 25px rgba(139, 92, 246, 0.6),
+                  0 0 40px rgba(139, 92, 246, 0.4),
+                  inset 0 2px 0 rgba(255,255,255,0.6)
                 `
               }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Typography
-                variant="caption"
-                sx={{
-                  fontSize: '13px',
-                  fontWeight: '800',
+              whileTap={{ scale: 0.85 }}
+          >
+            <Typography
+              variant="caption"
+              sx={{
+                  fontSize: '14px',
+                  fontWeight: '900',
                   color: 'white',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.3)',
-                  letterSpacing: '0.5px'
+                  textShadow: '0 2px 4px rgba(0,0,0,0.5), 0 0 8px rgba(255,255,255,0.3)',
+                  letterSpacing: '1px'
                 }}
               >
                 {num}
@@ -282,46 +337,46 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                 position: 'absolute',
                 top: `${y}%`,
                 left: `${x}%`,
-                width: '42px',
-                height: '32px',
-                background: 'linear-gradient(145deg, #6366F1 0%, #4F46E5 50%, #3730A3 100%)',
-                borderRadius: '16px',
+                width: '48px',
+                height: '36px',
+                background: 'linear-gradient(145deg, #6366F1 0%, #4F46E5 30%, #3730A3 60%, #312E81 100%)',
+                borderRadius: '18px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
                 transform: 'translate(-50%, -50%)',
                 boxShadow: `
-                  0 0 0 1px rgba(255,255,255,0.15),
-                  0 3px 8px rgba(99, 102, 241, 0.25),
-                  0 0 15px rgba(99, 102, 241, 0.08),
-                  inset 0 1px 0 rgba(255,255,255,0.2),
-                  inset 0 -1px 0 rgba(0,0,0,0.15)
+                  0 0 0 2px rgba(255,255,255,0.25),
+                  0 5px 12px rgba(99, 102, 241, 0.35),
+                  0 0 20px rgba(99, 102, 241, 0.15),
+                  inset 0 2px 0 rgba(255,255,255,0.3),
+                  inset 0 -2px 0 rgba(0,0,0,0.2)
                 `,
                 zIndex: 3,
-                border: '1px solid rgba(255,255,255,0.08)'
+                border: '2px solid rgba(255,255,255,0.15)'
               }}
               onClick={() => openCellPopup({ id: num, name: `Клетка ${num}` })}
               whileHover={{ 
-                scale: 1.12,
-                rotate: -3,
+                scale: 1.18,
+                rotate: -5,
                 boxShadow: `
-                  0 0 0 2px rgba(255,255,255,0.3),
-                  0 6px 16px rgba(99, 102, 241, 0.4),
-                  0 0 25px rgba(99, 102, 241, 0.2),
-                  inset 0 1px 0 rgba(255,255,255,0.4)
+                  0 0 0 3px rgba(255,255,255,0.4),
+                  0 8px 20px rgba(99, 102, 241, 0.5),
+                  0 0 35px rgba(99, 102, 241, 0.3),
+                  inset 0 2px 0 rgba(255,255,255,0.5)
                 `
               }}
-              whileTap={{ scale: 0.88 }}
+              whileTap={{ scale: 0.82 }}
             >
               <Typography
                 variant="caption"
                 sx={{
-                  fontSize: '12px',
-                  fontWeight: '700',
+                  fontSize: '13px',
+                  fontWeight: '800',
                   color: 'white',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.25)',
-                  letterSpacing: '0.3px'
+                  textShadow: '0 2px 4px rgba(0,0,0,0.4), 0 0 6px rgba(255,255,255,0.2)',
+                  letterSpacing: '0.8px'
                 }}
               >
                 {num}
@@ -344,69 +399,71 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           }}
           style={{
             position: 'absolute',
-            top: '15px',
-            left: '15px',
-            width: '90px',
-            height: '70px',
-            background: 'linear-gradient(145deg, #10B981 0%, #059669 50%, #047857 100%)',
-            borderRadius: '20px',
+            top: '20px',
+            left: '20px',
+            width: '100px',
+            height: '80px',
+            background: 'linear-gradient(145deg, #10B981 0%, #059669 30%, #047857 60%, #065F46 100%)',
+            borderRadius: '25px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexDirection: 'column',
             cursor: 'pointer',
             boxShadow: `
-              0 0 0 2px rgba(255,255,255,0.2),
-              0 8px 20px rgba(16, 185, 129, 0.4),
-              0 0 30px rgba(16, 185, 129, 0.2),
-              inset 0 2px 0 rgba(255,255,255,0.3),
-              inset 0 -2px 0 rgba(0,0,0,0.2)
+              0 0 0 3px rgba(255,255,255,0.3),
+              0 12px 25px rgba(16, 185, 129, 0.5),
+              0 0 40px rgba(16, 185, 129, 0.3),
+              inset 0 3px 0 rgba(255,255,255,0.4),
+              inset 0 -3px 0 rgba(0,0,0,0.3)
             `,
             zIndex: 4,
-            border: '1px solid rgba(255,255,255,0.15)'
+            border: '2px solid rgba(255,255,255,0.2)'
           }}
           onClick={() => openCellPopup({ id: 'big-deal', name: 'Большая сделка' })}
           whileHover={{ 
-            scale: 1.08,
-            rotate: 2,
+            scale: 1.12,
+            rotate: 3,
             boxShadow: `
-              0 0 0 3px rgba(255,255,255,0.4),
-              0 12px 30px rgba(16, 185, 129, 0.6),
-              0 0 40px rgba(16, 185, 129, 0.3),
-              inset 0 2px 0 rgba(255,255,255,0.5)
+              0 0 0 4px rgba(255,255,255,0.5),
+              0 16px 35px rgba(16, 185, 129, 0.7),
+              0 0 50px rgba(16, 185, 129, 0.4),
+              inset 0 3px 0 rgba(255,255,255,0.6)
             `
           }}
-          whileTap={{ scale: 0.92 }}
+          whileTap={{ scale: 0.88 }}
         >
           <Box
             sx={{
-              width: '32px',
-              height: '32px',
+              width: '36px',
+              height: '36px',
               borderRadius: '50%',
-              background: 'rgba(255,255,255,0.2)',
+              background: 'linear-gradient(145deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              mb: 0.5
+              mb: 0.8,
+              border: '2px solid rgba(255,255,255,0.3)',
+              boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.2)'
             }}
           >
-            <Typography sx={{ fontSize: '16px' }}>💰</Typography>
+            <Typography sx={{ fontSize: '18px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>💰</Typography>
           </Box>
           <Typography
             variant="caption"
             sx={{
               color: 'white',
-              fontWeight: '800',
-              fontSize: '11px',
+              fontWeight: '900',
+              fontSize: '12px',
               textAlign: 'center',
-              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
-              letterSpacing: '0.5px',
+              textShadow: '0 2px 4px rgba(0,0,0,0.5), 0 0 8px rgba(255,255,255,0.2)',
+              letterSpacing: '0.8px',
               lineHeight: 1.2
             }}
           >
             Большая сделка
           </Typography>
-        </motion.div>
+          </motion.div>
 
         {/* Малая сделка (верхний правый) */}
         <motion.div
@@ -648,10 +705,10 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           const y = 50 + Math.sin(angle * Math.PI / 180) * radius;
           
           return (
-            <motion.div
-              key={player.id}
+          <motion.div
+            key={player.id}
               initial={{ scale: 0, opacity: 0, rotate: -180 }}
-              animate={{ 
+            animate={{ 
                 scale: currentTurn === player.socketId ? 1.3 : 1, 
                 opacity: 1,
                 rotate: 0
@@ -663,16 +720,16 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                 stiffness: 200,
                 damping: 20
               }}
-              style={{
-                position: 'absolute',
+            style={{
+              position: 'absolute',
                 top: `${y}%`,
                 left: `${x}%`,
-                transform: 'translate(-50%, -50%)',
-                zIndex: 10
-              }}
-            >
+              transform: 'translate(-50%, -50%)',
+              zIndex: 10
+            }}
+          >
               <Box
-                sx={{
+              sx={{
                   width: isMobile ? 32 : 42,
                   height: isMobile ? 32 : 42,
                   borderRadius: '50%',
@@ -710,9 +767,9 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                     fontSize: isMobile ? '16px' : '18px',
                     textShadow: '0 2px 4px rgba(0,0,0,0.6)',
                     letterSpacing: '0.5px'
-                  }}
-                >
-                  {player.username?.charAt(0).toUpperCase()}
+              }}
+            >
+              {player.username?.charAt(0).toUpperCase()}
                 </Typography>
               </Box>
               
@@ -742,7 +799,7 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                   }}
                 />
               )}
-            </motion.div>
+          </motion.div>
           );
         })}
       </Box>
@@ -844,9 +901,9 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                         fontSize: '18px',
                         textShadow: '0 1px 2px rgba(0,0,0,0.5)',
                         letterSpacing: '0.5px'
-                      }}
-                    >
-                      {player.username?.charAt(0).toUpperCase()}
+                    }}
+                  >
+                    {player.username?.charAt(0).toUpperCase()}
                     </Typography>
                   </Box>
                   
@@ -910,11 +967,11 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                     >
                       <Typography
                         variant="caption"
-                        sx={{
-                          color: 'white',
+                      sx={{
+                        color: 'white',
                           fontWeight: 'bold',
                           fontSize: '14px'
-                        }}
+                      }}
                       >
                         ✓
                       </Typography>
