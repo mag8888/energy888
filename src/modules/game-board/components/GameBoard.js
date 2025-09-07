@@ -643,7 +643,7 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
         {gamePlayers.map((player, index) => {
           // Размещение игроков по внешнему кругу, чтобы не накладывались на клетки
           const angle = (index * 360 / gamePlayers.length) - 90;
-          const radius = 45; // Увеличиваем радиус
+          const radius = 55; // Увеличиваем радиус еще больше
           const x = 50 + Math.cos(angle * Math.PI / 180) * radius;
           const y = 50 + Math.sin(angle * Math.PI / 180) * radius;
           
@@ -673,19 +673,19 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
             >
               <Box
                 sx={{
-                  width: isMobile ? 28 : 36,
-                  height: isMobile ? 28 : 36,
+                  width: isMobile ? 32 : 42,
+                  height: isMobile ? 32 : 42,
                   borderRadius: '50%',
                   background: `linear-gradient(145deg, ${player.color} 0%, ${player.color}CC 100%)`,
-                  border: '3px solid white',
+                  border: '4px solid white',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: `
-                    0 0 0 2px rgba(255,255,255,0.3),
-                    0 6px 12px rgba(0,0,0,0.4),
-                    0 0 20px ${player.color}40,
-                    inset 0 1px 0 rgba(255,255,255,0.3)
+                    0 0 0 3px rgba(255,255,255,0.4),
+                    0 8px 16px rgba(0,0,0,0.5),
+                    0 0 30px ${player.color}60,
+                    inset 0 2px 0 rgba(255,255,255,0.4)
                   `,
                   position: 'relative',
                   '&::before': {
@@ -694,10 +694,10 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    width: '60%',
-                    height: '60%',
+                    width: '70%',
+                    height: '70%',
                     borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%)',
                     zIndex: -1
                   }
                 }}
@@ -707,8 +707,8 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                   sx={{
                     color: 'white',
                     fontWeight: '800',
-                    fontSize: '14px',
-                    textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+                    fontSize: isMobile ? '16px' : '18px',
+                    textShadow: '0 2px 4px rgba(0,0,0,0.6)',
                     letterSpacing: '0.5px'
                   }}
                 >
@@ -720,23 +720,24 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
               {currentTurn === player.socketId && (
                 <motion.div
                   animate={{ 
-                    scale: [1, 1.2, 1],
-                    opacity: [0.7, 1, 0.7]
+                    scale: [1, 1.3, 1],
+                    opacity: [0.8, 1, 0.8]
                   }}
                   transition={{ 
-                    duration: 1.5,
+                    duration: 1.2,
                     repeat: Infinity,
                     ease: "easeInOut"
                   }}
                   style={{
                     position: 'absolute',
-                    top: '-8px',
-                    right: '-8px',
-                    width: '16px',
-                    height: '16px',
+                    top: '-10px',
+                    right: '-10px',
+                    width: '20px',
+                    height: '20px',
                     borderRadius: '50%',
-                    background: '#10B981',
-                    border: '2px solid white',
+                    background: 'linear-gradient(145deg, #10B981 0%, #059669 100%)',
+                    border: '3px solid white',
+                    boxShadow: '0 0 15px rgba(16, 185, 129, 0.8)',
                     zIndex: 11
                   }}
                 />
@@ -761,42 +762,35 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
             const isCurrentPlayer = player.socketId === socket?.id;
             
             return (
-              <Box
+              <motion.div
                 key={player.socketId}
-                sx={{
-                  p: 1.5,
-                  mb: 1,
-                  background: isCurrentTurn ? 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)' : 'rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
-                  border: isCurrentTurn ? '2px solid #8B5CF6' : '1px solid rgba(255,255,255,0.2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2,
-                  position: 'relative'
-                }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.3 }}
               >
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: 'white',
-                    fontWeight: 'bold',
-                    minWidth: '20px'
-                  }}
-                >
-                  {index + 1}.
-                </Typography>
-                
                 <Box
                   sx={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: '50%',
-                    background: player.color,
+                    p: 2,
+                    mb: 1.5,
+                    background: isCurrentTurn 
+                      ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(59, 130, 246, 0.2) 100%)' 
+                      : 'rgba(255,255,255,0.08)',
+                    borderRadius: '16px',
+                    border: isCurrentTurn 
+                      ? '2px solid rgba(139, 92, 246, 0.6)' 
+                      : '1px solid rgba(255,255,255,0.15)',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '2px solid white',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    gap: 2,
+                    position: 'relative',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      background: isCurrentTurn 
+                        ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(59, 130, 246, 0.3) 100%)' 
+                        : 'rgba(255,255,255,0.12)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.3)'
+                    }
                   }}
                 >
                   <Typography
@@ -804,64 +798,130 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                     sx={{
                       color: 'white',
                       fontWeight: 'bold',
-                      fontSize: '16px'
+                      minWidth: '24px',
+                      fontSize: '16px',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.5)'
                     }}
                   >
-                    {player.username?.charAt(0).toUpperCase()}
+                    {index + 1}.
                   </Typography>
-                </Box>
-                
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: 'white',
-                      fontWeight: isCurrentTurn ? 'bold' : 'normal',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      mb: 0.5
-                    }}
-                  >
-                    {player.username}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: 'rgba(255,255,255,0.7)' }}
-                  >
-                    💰 {player.balance || 0} | 📦 {player.assets?.length || 0}
-                  </Typography>
-                </Box>
-                
-                {isCurrentTurn && (
+                  
                   <Box
                     sx={{
-                      position: 'absolute',
-                      top: -5,
-                      right: -5,
-                      width: 20,
-                      height: 20,
+                      width: 48,
+                      height: 48,
                       borderRadius: '50%',
-                      background: '#EF4444',
+                      background: `linear-gradient(145deg, ${player.color} 0%, ${player.color}CC 100%)`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      border: '2px solid white'
+                      border: '3px solid white',
+                      boxShadow: `
+                        0 0 0 2px rgba(255,255,255,0.3),
+                        0 4px 8px rgba(0,0,0,0.3),
+                        0 0 15px ${player.color}40
+                      `,
+                      position: 'relative',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '60%',
+                        height: '60%',
+                        borderRadius: '50%',
+                        background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
+                        zIndex: -1
+                      }
                     }}
                   >
                     <Typography
-                      variant="caption"
+                      variant="body2"
                       sx={{
                         color: 'white',
-                        fontWeight: 'bold',
-                        fontSize: '12px'
+                        fontWeight: '800',
+                        fontSize: '18px',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+                        letterSpacing: '0.5px'
                       }}
                     >
-                      X
+                      {player.username?.charAt(0).toUpperCase()}
                     </Typography>
                   </Box>
-                )}
-              </Box>
+                  
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: 'white',
+                        fontWeight: isCurrentTurn ? '800' : '600',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        mb: 0.5,
+                        fontSize: '16px',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.5)'
+                      }}
+                    >
+                      {player.username}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{ 
+                        color: 'rgba(255,255,255,0.8)',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1
+                      }}
+                    >
+                      <span>💰 {player.balance || 0}</span>
+                      <span>📦 {player.assets?.length || 0}</span>
+                    </Typography>
+                  </Box>
+                  
+                  {isCurrentTurn && (
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.2, 1],
+                        opacity: [0.8, 1, 0.8]
+                      }}
+                      transition={{ 
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: -8,
+                        right: -8,
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        background: 'linear-gradient(145deg, #10B981 0%, #059669 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '3px solid white',
+                        boxShadow: '0 0 15px rgba(16, 185, 129, 0.8)',
+                        zIndex: 10
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: 'white',
+                          fontWeight: 'bold',
+                          fontSize: '14px'
+                        }}
+                      >
+                        ✓
+                      </Typography>
+                    </motion.div>
+                  )}
+                </Box>
+              </motion.div>
             );
           })}
         </Box>

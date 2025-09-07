@@ -6,14 +6,19 @@ export const useGameState = (roomId, playerData) => {
   roomIdRef.current = roomId;
 
   // Основное состояние игры
-  const [gamePlayers, setGamePlayers] = useState([]);
-  const [turnOrder, setTurnOrder] = useState([]);
-  const [currentTurn, setCurrentTurn] = useState(null);
+  const [gamePlayers, setGamePlayers] = useState([
+    { id: 1, username: 'Алексей', color: '#FF6B6B', socketId: 'socket1', balance: 2500, assets: [{ name: 'Дом', value: 150000 }] },
+    { id: 2, username: 'Мария', color: '#4ECDC4', socketId: 'socket2', balance: 1800, assets: [{ name: 'Акции', value: 25000 }] },
+    { id: 3, username: 'Дмитрий', color: '#45B7D1', socketId: 'socket3', balance: 3200, assets: [{ name: 'Бизнес', value: 80000 }] },
+    { id: 4, username: 'Анна', color: '#96CEB4', socketId: 'socket4', balance: 1200, assets: [] }
+  ]);
+  const [turnOrder, setTurnOrder] = useState(['socket1', 'socket2', 'socket3', 'socket4']);
+  const [currentTurn, setCurrentTurn] = useState('socket1');
   const [currentTurnIndex, setCurrentTurnIndex] = useState(0);
-  const [isHost, setIsHost] = useState(false);
+  const [isHost, setIsHost] = useState(true);
   const [hostCanRoll, setHostCanRoll] = useState(true);
-  const [gameState, setGameState] = useState('waiting');
-  const [turnTimeLeft, setTurnTimeLeft] = useState(0);
+  const [gameState, setGameState] = useState('playing');
+  const [turnTimeLeft, setTurnTimeLeft] = useState(30);
   const [isGameFinished, setIsGameFinished] = useState(false);
   const [gameEndTime, setGameEndTime] = useState(null);
 
