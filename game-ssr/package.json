@@ -1,0 +1,29 @@
+{
+  "name": "game-ssr",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p $PORT",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@mui/material": "5.15.20",
+    "@mui/icons-material": "5.15.20",
+    "@emotion/react": "11.11.3",
+    "@emotion/styled": "11.11.5",
+    "framer-motion": "11.0.22"
+  },
+  "devDependencies": {
+    "typescript": "5.5.4",
+    "@types/react": "18.3.3",
+    "@types/node": "20.14.9",
+    "eslint": "9.9.0",
+    "eslint-config-next": "14.2.5"
+  }
+}
