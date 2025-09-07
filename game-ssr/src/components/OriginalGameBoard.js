@@ -142,7 +142,7 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
         </Box>
 
         <Snackbar open={toast.open} autoHideDuration={3000} onClose={() => setToast({ ...toast, open: false })}>
-          <Alert severity={toast.severity as any}>{toast.message}</Alert>
+          <Alert severity={toast.severity || 'info'}>{toast.message}</Alert>
         </Snackbar>
 
         <CellPopup open={showCellPopup} onClose={() => setShowCellPopup(false)} cell={selectedCell} />
@@ -152,4 +152,3 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
 };
 
 export default OriginalGameBoard;
-

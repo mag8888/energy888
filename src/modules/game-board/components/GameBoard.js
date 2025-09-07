@@ -767,9 +767,9 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                     fontSize: isMobile ? '16px' : '18px',
                     textShadow: '0 2px 4px rgba(0,0,0,0.6)',
                     letterSpacing: '0.5px'
-              }}
-            >
-              {player.username?.charAt(0).toUpperCase()}
+                  }}
+                >
+                  {player.username?.charAt(0).toUpperCase()}
                 </Typography>
               </Box>
               
@@ -799,7 +799,7 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                   }}
                 />
               )}
-          </motion.div>
+            </motion.div>
           );
         })}
       </Box>
