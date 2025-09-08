@@ -58,14 +58,15 @@ export default function AuthPage() {
   const [authLoading, setAuthLoading] = useState(false);
   const createBotToken = async () => {
     try {
-      const r = await fetch('/tg/new-token');
+      const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
+      const r = await fetch(`${socketUrl}/tg/new-token`);
       const j = await r.json();
       setBotToken(j.token);
       setAuthLoading(true);
       // poll
       const t0 = Date.now();
       const iv = setInterval(async () => {
-        const p = await fetch(`/tg/poll?token=${j.token}`);
+        const p = await fetch(`${socketUrl}/tg/poll?token=${j.token}`);
         const pj = await p.json();
         if (pj?.authorized) {
           clearInterval(iv);
