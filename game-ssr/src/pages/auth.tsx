@@ -5,7 +5,7 @@ import GlassCard from '@/ui/GlassCard';
 import GradientButton from '@/ui/GradientButton';
 
 export default function AuthPage() {
-  const { user, registerEmail, loginEmail, loginTelegram } = useAuth();
+  const { user, registerEmail, loginEmail, loginTelegram, logout } = useAuth();
   const [tab, setTab] = useState(0);
   const [snackbar, setSnackbar] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
@@ -150,10 +150,8 @@ export default function AuthPage() {
                 <GradientButton href="/1game">Перейти в игру</GradientButton>
                 <GradientButton 
                   onClick={() => {
-                    if (typeof window !== 'undefined') {
-                      localStorage.removeItem('eom_user');
-                      window.location.reload();
-                    }
+                    logout();
+                    window.location.reload();
                   }}
                   sx={{ bgcolor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
                 >

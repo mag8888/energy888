@@ -14,7 +14,13 @@ class SocketStub {
     this.handlers[event] = this.handlers[event].filter(h => h !== handler);
   }
   emit(event: string, ...args: any[]) {
-    (this.handlers[event] || []).forEach(h => { try { h(...args); } catch {} });
+    (this.handlers[event] || []).forEach(h => { 
+      try { 
+        h(...args); 
+      } catch (error) {
+        console.warn('Socket handler error:', error);
+      }
+    });
   }
   get id() { return 'socket-stub-id'; }
 }
@@ -57,6 +63,16 @@ if (typeof window !== 'undefined' && url) {
     });
 } else {
   console.log('🔌 Socket.IO URL не настроен или не в браузере, используем заглушку');
+}
+
+// Обработка ошибок message port (расширения браузера)
+if (typeof window !== 'undefined') {
+  window.addEventListener('unhandledrejection', (event) => {
+    if (event.reason && event.reason.message && event.reason.message.includes('message port closed')) {
+      console.warn('Message port error suppressed:', event.reason.message);
+      event.preventDefault();
+    }
+  });
 }
 
 export default sock;
