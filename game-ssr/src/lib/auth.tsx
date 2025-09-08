@@ -49,8 +49,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    
+    // Проверяем обычную авторизацию
     const raw = localStorage.getItem(LS_USER);
-    if (raw) setUser(JSON.parse(raw));
+    if (raw) {
+      setUser(JSON.parse(raw));
+    } else {
+      // Проверяем авторизацию через Telegram
+      const tgRaw = localStorage.getItem('eom_user');
+      if (tgRaw) {
+        const tgUser = JSON.parse(tgRaw);
+        const user: User = {
+          id: tgUser.id,
+          username: tgUser.username,
+          tgId: tgUser.tgId,
+          firstName: tgUser.first_name,
+          lastName: tgUser.last_name,
+          photoUrl: tgUser.photo_url
+        };
+        setUser(user);
+        // Сохраняем в стандартном формате
+        saveUser(user);
+        // Удаляем временные данные
+        localStorage.removeItem('eom_user');
+      }
+    }
     setLoading(false);
   }, []);
 

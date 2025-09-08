@@ -90,13 +90,20 @@ export default function RoomsPage() {
           if (pj?.authorized) {
             clearInterval(iv);
             setSnack('Авторизация успешна! Входим в комнату...');
-            // Теперь входим в комнату
-            socket.emit('joinRoomMeta', { 
-              roomId: room.id, 
-              user: { id: pj.user.id, username: pj.user.username }, 
-              password: '' 
-            });
-            setTimeout(()=>{ window.location.href = `/room/${room.id}`; }, 400);
+            
+            // Сохраняем данные пользователя в localStorage для авторизации
+            const userData = {
+              id: pj.user.id,
+              username: pj.user.username,
+              first_name: pj.user.first_name,
+              last_name: pj.user.last_name,
+              photo_url: pj.user.photo_url,
+              tgId: pj.user.id
+            };
+            localStorage.setItem('eom_user', JSON.stringify(userData));
+            
+            // Обновляем страницу для применения авторизации
+            window.location.reload();
           } else if (Date.now() - t0 > 5 * 60 * 1000) {
             clearInterval(iv);
             setSnack('Время ожидания истекло');
