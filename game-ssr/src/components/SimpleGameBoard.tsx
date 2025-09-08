@@ -6,9 +6,10 @@ import BankModule from '../bank/BankModule';
 interface SimpleGameBoardProps {
   roomId: string;
   playerData: any;
+  onCellClick?: (cellNumber: number) => void;
 }
 
-const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData }) => {
+const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, onCellClick }) => {
   const renderOuterCells = () => {
     console.log('🔍 renderOuterCells called');
     const cells = [];
@@ -80,7 +81,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
               animation: 'shimmer 2s infinite'
             }
           }}
-          onClick={() => onCellClick?.(cellNumber)}
+          onClick={() => handleCellClick(cellNumber)}
         >
           {/* Иконка типа клетки */}
           <Box sx={{ 
@@ -172,7 +173,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
               animation: 'shimmer 2s infinite'
             }
           }}
-          onClick={() => onCellClick?.(cellNumber)}
+          onClick={() => handleCellClick(cellNumber)}
         >
           <Box sx={{ 
             position: 'absolute', 
@@ -261,7 +262,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
               animation: 'shimmer 2s infinite'
             }
           }}
-          onClick={() => onCellClick?.(cellNumber)}
+          onClick={() => handleCellClick(cellNumber)}
         >
           <Box sx={{ 
             position: 'absolute', 
@@ -351,7 +352,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
               animation: 'shimmer 2s infinite'
             }
           }}
-          onClick={() => onCellClick?.(cellNumber)}
+          onClick={() => handleCellClick(cellNumber)}
         >
           <Box sx={{ 
             position: 'absolute', 
@@ -688,7 +689,13 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
   const [selectedCell, setSelectedCell] = React.useState<number | null>(null);
   const handleCellClick = (num: number) => {
     setSelectedCell(num);
-    onCellClick?.(num);
+    if (typeof onCellClick === 'function') {
+      try {
+        onCellClick(num);
+      } catch (e) {
+        console.warn('onCellClick handler threw', e);
+      }
+    }
   };
 
   console.log('🎮 SimpleGameBoard rendering');
