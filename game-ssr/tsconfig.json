@@ -32,6 +32,8 @@
     "src/**/*.jsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/disabled",
+    "**/*.disabled"
   ]
 }
