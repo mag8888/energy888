@@ -2,9 +2,8 @@
   "name": "energy888-socket-server",
   "private": true,
   "version": "0.1.0",
-  "type": "module",
   "scripts": {
-    "start": "node test-server.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "cors": "2.8.5",
