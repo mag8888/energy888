@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Fragment, useRef } from 'react';
 import socket from '../lib/socket';
-import { Box, Typography, Button, Avatar, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
+import { Box, Typography, Button, Avatar, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, List, ListItem, ListItemText, Divider, LinearProgress, Paper } from '@mui/material';
 import { motion } from 'framer-motion';
 import ProfessionDetails from './ProfessionDetails';
 import MarketCardModal from './MarketCardModal';
@@ -46,6 +46,11 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
   const [bigCirclePassiveIncome] = useState(0);
   const [bigCircleBalance] = useState(0);
   const [dealDeck] = useState([]);
+  const [turnState, setTurnState] = useState('yourTurn'); // yourTurn | rolled | waitingOther
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [scale, setScale] = useState(1);
+  const [showProfession, setShowProfession] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
 
   useEffect(() => {
     setCurrentTurn(gamePlayers[currentPlayer]?.username || 'Игрок');
@@ -53,6 +58,7 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
 
   const rollDice = () => {
     if (isRolling || isMoving) return;
+    if (turnState !== 'yourTurn') return;
     setIsRolling(true);
     const val = Math.floor(Math.random() * 6) + 1;
     setTimeout(() => {
@@ -61,18 +67,63 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
       // Open a simple popup to simulate landing
       setSelectedCell({ id: val, name: 'Секция', description: 'Описание клетки' });
       setShowCellPopup(true);
+      setTurnState('rolled');
     }, 600);
   };
+
+  const passTurn = () => {
+    if (turnState !== 'rolled') return;
+    setTurnState('waitingOther');
+    // Simulate next player's turn after short delay
+    setTimeout(() => {
+      setTimeLeft(30);
+      setTurnState('yourTurn');
+    }, 1500);
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window === 'undefined') return;
+      const w = window.innerWidth;
+      if (w < 900) {
+        const s = Math.max(0.55, (w - 32) / 800);
+        setScale(s);
+      } else {
+        setScale(1);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // simple turn timer
+  useEffect(() => {
+    if (turnState === 'waitingOther') return; // pause when not our turn
+    const id = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 0) {
+          clearInterval(id);
+          // auto pass if rolled and time expired
+          if (turnState === 'rolled') passTurn();
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turnState]);
 
   return (
     <Fragment>
       <Box sx={{
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%)',
-        p: 2,
+        p: { xs: 1.5, md: 2 },
         display: 'flex',
-        flexDirection: 'column',
-        gap: 2
+        gap: 2,
+        flexDirection: { xs: 'column', md: 'row' }
       }}>
         <Box sx={{ textAlign: 'center' }}>
           <Typography variant="body2" sx={{ color: '#ff4444', fontWeight: 'bold', fontFamily: 'monospace' }}>
@@ -130,8 +181,9 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
           </Box>
         </Box>
 
-        {/* Board visual (outer square, inner ring, center, and action cards inside) */}
-        <Box sx={{ position: 'relative', width: 800, height: 800, borderRadius: 4, background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.01) 100%)', border: '2px solid rgba(139,92,246,0.3)', mx: 'auto' }}>
+        {/* Board + Right panel */}
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box sx={{ position: 'relative', width: 800, height: 800, transform: `scale(${scale})`, transformOrigin: 'top left', borderRadius: 4, background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.01) 100%)', border: '2px solid rgba(139,92,246,0.3)' }}>
           {(() => {
             const cells = [];
             const boardSize = 800;
@@ -189,10 +241,13 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
               );
             }
 
-            // Center circle
+            // Center circle with logo and $ roll button
             cells.push(
-              <Box key="center" sx={{ position: 'absolute', left: center.x - 120, top: center.y - 120, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle at 30% 30%, #A855F7, #7C3AED)', border: '3px solid rgba(255,255,255,0.25)', boxShadow: '0 25px 60px rgba(124,58,237,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', textShadow: '0 2px 6px rgba(0,0,0,0.35)' }}>🎯 ЦЕНТР</Typography>
+              <Box key="center" sx={{ position: 'absolute', left: center.x - 120, top: center.y - 120, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle at 30% 30%, #A855F7, #7C3AED)', border: '3px solid rgba(255,255,255,0.25)', boxShadow: '0 25px 60px rgba(124,58,237,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                <Typography variant="h4" sx={{ color: 'white', fontWeight: 'bold', textShadow: '0 3px 10px rgba(0,0,0,0.4)' }}>ЦЕНТР</Typography>
+                <Button onClick={rollDice} disabled={turnState !== 'yourTurn' || isRolling || isMoving} sx={{ mt: 1, background: 'linear-gradient(45deg, #22C55E, #16A34A)', color: 'white', fontWeight: 'bold', borderRadius: '999px', px: 2, py: 0.5, '&:hover': { background: 'linear-gradient(45deg, #16A34A, #15803D)' } }}>
+                  $ Бросить
+                </Button>
               </Box>
             );
 
@@ -211,13 +266,56 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
             );
 
             // Offsets tuned to sit between the outer square and inner ring
-            cells.push(card('big', 'Большая сделка', '#00BCD4', '#0097A7', -210, -210));
-            cells.push(card('small', 'Малая сделка', '#3B82F6', '#2563EB', 210, -210));
-            cells.push(card('expenses', 'Расходы', '#EF4444', '#DC2626', -210, 210));
-            cells.push(card('market', 'Рынок', '#F59E0B', '#D97706', 210, 210));
+            cells.push(card('big', 'Большая сделка', '#00BCD4', '#0097A7', -220, -140));
+            cells.push(card('small', 'Малая сделка', '#3B82F6', '#2563EB', 220, -140));
+            cells.push(card('expenses', 'Расходы', '#EF4444', '#DC2626', -220, 160));
+            cells.push(card('market', 'Рынок', '#F59E0B', '#D97706', 220, 160));
 
             return cells;
           })()}
+          </Box>
+
+          {/* Right side panel */}
+          <Box sx={{ width: { xs: '100%', md: 300 }, mt: { xs: 2, md: 0 } }}>
+            <Paper sx={{ p: 2, mb: 2, bgcolor: 'rgba(17,24,39,0.6)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <Typography sx={{ color: 'white', fontWeight: 'bold', mb: 1 }}>Игроки</Typography>
+              <List dense>
+                {gamePlayers.map((p, idx) => (
+                  <ListItem key={p.id} button onClick={() => { setSelectedPlayer(p); setShowProfession(true); }} sx={{ borderRadius: 1, mb: 0.5, bgcolor: 'rgba(148,163,184,0.1)' }}>
+                    <Avatar sx={{ width: 28, height: 28, bgcolor: p.color, mr: 1 }}>{p.username?.[0] || '?'}</Avatar>
+                    <ListItemText primaryTypographyProps={{ sx: { color: 'white', fontSize: 14 } }} primary={`${idx + 1}. ${p.username}`} secondary={p.profession?.name || 'Без профессии'} secondaryTypographyProps={{ sx: { color: 'rgba(255,255,255,0.6)' } }} />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+
+            <Paper sx={{ p: 2, mb: 2, bgcolor: 'rgba(17,24,39,0.6)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <Typography sx={{ color: 'white', fontWeight: 'bold' }}>Банк</Typography>
+              <Typography sx={{ color: '#22C55E', fontWeight: 'bold', mt: 1, fontSize: 24 }}>${playerMoney.toLocaleString()}</Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Доход: ${bigCirclePassiveIncome}/ Расходы: $0</Typography>
+            </Paper>
+
+            <Paper sx={{ p: 2, mb: 2, bgcolor: 'rgba(17,24,39,0.6)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <Typography sx={{ color: 'white', fontWeight: 'bold', mb: 1 }}>Активы</Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Пока пусто</Typography>
+            </Paper>
+
+            <Paper sx={{ p: 2, bgcolor: 'rgba(17,24,39,0.6)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <Typography sx={{ color: 'white', fontWeight: 'bold', mb: 1 }}>Активность</Typography>
+              <Button fullWidth variant="contained" onClick={() => {
+                if (turnState === 'yourTurn') rollDice();
+                else if (turnState === 'rolled') passTurn();
+              }}
+              disabled={turnState === 'waitingOther' || isRolling || isMoving}
+              sx={{ background: turnState === 'yourTurn' ? 'linear-gradient(45deg, #8B5CF6, #06B6D4)' : (turnState === 'rolled' ? 'linear-gradient(45deg, #22C55E, #16A34A)' : 'linear-gradient(45deg, #6B7280, #4B5563)') }}>
+                {turnState === 'yourTurn' ? '🎲 Бросить кубик' : turnState === 'rolled' ? '⏭️ Передать ход' : '⏳ Ожидание хода'}
+              </Button>
+              <Box sx={{ mt: 2 }}>
+                <LinearProgress variant="determinate" value={((30 - timeLeft) / 30) * 100} sx={{ height: 8, borderRadius: 1 }} />
+                <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, mt: 0.5 }}>Таймер: {timeLeft}s</Typography>
+              </Box>
+            </Paper>
+          </Box>
         </Box>
 
         <Snackbar open={toast.open} autoHideDuration={3000} onClose={() => setToast({ ...toast, open: false })}>
@@ -225,6 +323,15 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
         </Snackbar>
 
         <CellPopup open={showCellPopup} onClose={() => setShowCellPopup(false)} cell={selectedCell} />
+        <Dialog open={showProfession} onClose={() => setShowProfession(false)} fullWidth maxWidth="sm">
+          <DialogTitle>Профессия игрока</DialogTitle>
+          <DialogContent>
+            <ProfessionDetails profession={selectedPlayer?.profession} />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowProfession(false)}>Закрыть</Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Fragment>
   );
