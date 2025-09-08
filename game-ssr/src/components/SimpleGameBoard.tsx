@@ -2,6 +2,9 @@ import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { BOARD_SIZE, OUTER_PADDING, OUTER_CELL, OUTER_STEPS, INNER_RING_RADIUS, INNER_CELL, ACTION_CARD_OFFSETS } from '../styles/boardLayout';
 import BankModule from '../bank/BankModule';
+import { PlayerTurnSystem } from './PlayerTurnSystem';
+import { ActivityButton } from './ActivityButton';
+import { PROFESSIONS } from '../data/professions';
 
 interface SimpleGameBoardProps {
   roomId: string;
@@ -1020,6 +1023,30 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
   const [diceValue, setDiceValue] = React.useState<number | null>(null);
   const [isDiceRolling, setIsDiceRolling] = React.useState<boolean>(false);
   
+  // Состояние игроков и очередности
+  const [players, setPlayers] = React.useState([
+    {
+      id: 'player1',
+      name: 'Игрок 1',
+      profession: PROFESSIONS[0], // Предприниматель
+      color: '#4CAF50',
+      isActive: true,
+      position: 0,
+      balance: 3000
+    },
+    {
+      id: 'player2', 
+      name: 'Игрок 2',
+      profession: PROFESSIONS[1], // Программист
+      color: '#2196F3',
+      isActive: false,
+      position: 0,
+      balance: 3000
+    }
+  ]);
+  const [currentPlayerId, setCurrentPlayerId] = React.useState('player1');
+  const [canRollDice, setCanRollDice] = React.useState(true);
+  
   const handleCellClick = (num: number) => {
     setSelectedCell(num);
     setSelectedInnerCell(null); // Сброс выбора малого круга
@@ -1038,10 +1065,11 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
   };
 
   const rollDice = () => {
-    if (isDiceRolling) return;
+    if (isDiceRolling || !canRollDice) return;
     
     setIsDiceRolling(true);
     setDiceValue(null);
+    setCanRollDice(false); // После броска нельзя бросать снова
     
     // Анимация кубика
     const rollDuration = 2000; // 2 секунды
@@ -1067,6 +1095,29 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
     };
     
     requestAnimationFrame(animateDice);
+  };
+
+  const handlePlayerClick = (playerId: string) => {
+    console.log(`Игрок ${playerId} выбран`);
+  };
+
+  const handlePassTurn = () => {
+    // Передача хода следующему игроку
+    const currentIndex = players.findIndex(p => p.id === currentPlayerId);
+    const nextIndex = (currentIndex + 1) % players.length;
+    const nextPlayerId = players[nextIndex].id;
+    
+    setCurrentPlayerId(nextPlayerId);
+    setCanRollDice(true);
+    setDiceValue(null);
+    
+    console.log(`Ход передан игроку ${nextPlayerId}`);
+  };
+
+  const getActivityStatus = () => {
+    if (isDiceRolling) return 'waiting';
+    if (canRollDice) return 'can-roll';
+    return 'pass-turn';
   };
 
   console.log('🎮 SimpleGameBoard rendering');
@@ -1108,68 +1159,6 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
       }}>
         🎮 SimpleGameBoard LOADED
       </Box>
-      {/* Top Bank Panel */}
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        p: 2,
-        background: 'rgba(0, 0, 0, 0.3)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-      }}>
-        {/* Bank Module */}
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2
-        }}>
-          <Box sx={{
-            background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-            borderRadius: '12px',
-            p: 2,
-            minWidth: '120px',
-            textAlign: 'center',
-            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-            cursor: 'pointer',
-            transition: 'transform 0.2s ease',
-            '&:hover': {
-              transform: 'scale(1.05)'
-            }
-          }}>
-            <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
-              БАНК
-            </Typography>
-            <Typography variant="h4" sx={{ color: 'white', fontWeight: 'bold' }}>
-              ${playerData.balance?.toLocaleString('en-US') || '3,000'}
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* Players Info */}
-        <Box sx={{
-          display: 'flex',
-          gap: 2
-        }}>
-          <Box sx={{
-            background: 'linear-gradient(135deg, #FF5722 0%, #E64A19 100%)',
-            borderRadius: '12px',
-            p: 2,
-            minWidth: '120px',
-            textAlign: 'center',
-            boxShadow: '0 4px 12px rgba(255, 87, 34, 0.3)'
-          }}>
-            <Typography variant="body2" sx={{ color: 'white', opacity: 0.9 }}>
-              Игрок
-            </Typography>
-            <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
-              {playerData.username}
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'white', opacity: 0.8 }}>
-              ${playerData.balance?.toLocaleString('en-US') || '3,000'}
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
 
       {/* Main Game Area */}
       <Box sx={{
@@ -1191,102 +1180,175 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
             border: '2px solid rgba(139,92,246,0.3)' 
           }}>
             {/* DEBUG: Visual indicator */}
-            <Box sx={{
-              position: 'absolute',
-              left: 10,
-              top: 10,
-              background: 'red',
-              color: 'white',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              fontSize: '12px',
-              zIndex: 1000
-            }}>
-              DEBUG: Cells should be here
-            </Box>
             
             {renderOuterCellsClean()}
             {renderInnerRing()}
             {renderActionCards()}
             {renderPlayerTokens()}
             
-            {/* Center circle */}
-            <Box sx={{ 
-              position: 'absolute', 
-              left: BOARD_SIZE / 2 - 120, 
-              top: BOARD_SIZE / 2 - 120, 
-              width: 240, 
-              height: 240, 
-              borderRadius: '50%', 
-              background: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 50%, #60A5FA 100%)', 
-              boxShadow: '0 8px 32px rgba(30, 64, 175, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              flexDirection: 'column',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%)',
-                boxShadow: '0 12px 40px rgba(30, 64, 175, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
-                transform: 'translateY(-2px)'
-              }
-            }} onClick={rollDice}>
-              {/* Golden $ Symbol */}
-              <Typography variant="h1" sx={{ 
-                color: '#FFD700', 
-                fontWeight: 'bold',
-                textShadow: '0 3px 6px rgba(0,0,0,0.5)',
-                fontSize: '4rem',
-                lineHeight: 1,
-                mb: 2
-              }}>
-                $
-              </Typography>
-              
-              {/* Dice Display */}
-              <Box sx={{
-                width: 60,
-                height: 60,
-                borderRadius: '12px',
-                background: isDiceRolling 
-                  ? 'linear-gradient(135deg, #FF6B6B, #FF8E8E)' 
-                  : 'linear-gradient(135deg, #2C3E50, #34495E)',
+            {/* Center Golden Logo */}
+            <Box
+              sx={{
+                position: 'absolute',
+                left: BOARD_SIZE / 2 - 80,
+                top: BOARD_SIZE / 2 - 80,
+                width: '160px',
+                height: '160px',
+                background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)',
+                borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                animation: isDiceRolling ? 'diceRoll 0.1s infinite' : 'none',
-                '@keyframes diceRoll': {
-                  '0%': { transform: 'rotate(0deg)' },
-                  '25%': { transform: 'rotate(90deg)' },
-                  '50%': { transform: 'rotate(180deg)' },
-                  '75%': { transform: 'rotate(270deg)' },
-                  '100%': { transform: 'rotate(360deg)' }
+                boxShadow: '0 8px 32px rgba(255, 215, 0, 0.4), 0 0 0 4px rgba(255, 215, 0, 0.2)',
+                overflow: 'hidden',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  boxShadow: '0 12px 40px rgba(255, 215, 0, 0.6), 0 0 0 6px rgba(255, 215, 0, 0.3)'
                 }
-              }}>
-                <Typography variant="h4" sx={{ 
-                  color: '#fff', 
-                  fontWeight: 'bold',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.5)'
-                }}>
+              }}
+              onClick={rollDice}
+            >
+              {/* Внутренний круг с градиентом */}
+              <Box
+                sx={{
+                  width: '140px',
+                  height: '140px',
+                  background: 'radial-gradient(circle, #000000 0%, #1a1a1a 100%)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative'
+                }}
+              >
+                {/* Центральный результат броска кубика */}
+                <Typography
+                  sx={{
+                    fontSize: '48px',
+                    fontWeight: 'bold',
+                    color: '#FFD700',
+                    textShadow: '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 165, 0, 0.6)',
+                    zIndex: 3,
+                    position: 'relative',
+                    animation: isDiceRolling ? 'diceRoll 0.1s infinite' : 'none',
+                    '@keyframes diceRoll': {
+                      '0%': { transform: 'rotate(0deg) scale(1)' },
+                      '25%': { transform: 'rotate(90deg) scale(1.1)' },
+                      '50%': { transform: 'rotate(180deg) scale(0.9)' },
+                      '75%': { transform: 'rotate(270deg) scale(1.1)' },
+                      '100%': { transform: 'rotate(360deg) scale(1)' }
+                    }
+                  }}
+                >
                   {diceValue || '?'}
                 </Typography>
+                
+                {/* Энергетические линии */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    borderRadius: '50%',
+                    background: 'conic-gradient(from 0deg, transparent 0deg, rgba(255, 215, 0, 0.3) 45deg, transparent 90deg, rgba(255, 165, 0, 0.3) 135deg, transparent 180deg, rgba(255, 140, 0, 0.3) 225deg, transparent 270deg, rgba(255, 215, 0, 0.3) 315deg, transparent 360deg)',
+                    animation: 'rotate 4s linear infinite',
+                    '@keyframes rotate': {
+                      '0%': { transform: 'rotate(0deg)' },
+                      '100%': { transform: 'rotate(360deg)' }
+                    }
+                  }}
+                />
+                
+                {/* Дополнительные светящиеся точки */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%'
+                  }}
+                >
+                  {[0, 60, 120, 180, 240, 300].map((angle, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        position: 'absolute',
+                        width: '6px',
+                        height: '6px',
+                        background: '#FFD700',
+                        borderRadius: '50%',
+                        top: '50%',
+                        left: '50%',
+                        transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-50px)`,
+                        boxShadow: '0 0 10px rgba(255, 215, 0, 0.8)',
+                        animation: `pulse ${2 + index * 0.3}s ease-in-out infinite`,
+                        '@keyframes pulse': {
+                          '0%, 100%': { opacity: 0.6, transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-50px) scale(1)` },
+                          '50%': { opacity: 1, transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-50px) scale(1.2)` }
+                        }
+                      }}
+                    />
+                  ))}
+                </Box>
               </Box>
               
-              {/* Click hint */}
-              <Typography variant="caption" sx={{ 
-                color: '#E0E7FF', 
-                fontWeight: 'bold',
-                textShadow: '0 1px 2px rgba(0,0,0,0.3)',
-                mt: 1,
-                opacity: 0.9
-              }}>
-                {isDiceRolling ? 'Крутится...' : 'Нажмите для броска'}
-              </Typography>
+              {/* Внешние монеты */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%'
+                }}
+              >
+                {[45, 135, 225, 315].map((angle, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      position: 'absolute',
+                      width: '24px',
+                      height: '24px',
+                      background: 'radial-gradient(circle, #FFD700 0%, #FFA500 100%)',
+                      borderRadius: '50%',
+                      top: '50%',
+                      left: '50%',
+                      transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-70px)`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(255, 215, 0, 0.6)',
+                      border: '2px solid #FFD700'
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        color: '#000000'
+                      }}
+                    >
+                      $
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
             </Box>
           </Box>
         </Box>
+
+        {/* Система игроков и очередности */}
+        <PlayerTurnSystem
+          players={players}
+          currentPlayerId={currentPlayerId}
+          onPlayerClick={handlePlayerClick}
+          onTurnComplete={handlePassTurn}
+          canRollDice={canRollDice}
+        />
+
 
         {/* Stylish popup for cell details */}
         {selectedCell !== null && (
@@ -1443,22 +1505,40 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
             <Button 
               variant="contained" 
               fullWidth 
+              onClick={getActivityStatus() === 'can-roll' ? rollDice : handlePassTurn}
+              disabled={isDiceRolling || getActivityStatus() === 'waiting'}
               sx={{ 
-                background: 'linear-gradient(45deg, #22C55E, #16A34A)',
+                background: getActivityStatus() === 'can-roll' 
+                  ? 'linear-gradient(45deg, #22C55E, #16A34A)'
+                  : getActivityStatus() === 'pass-turn'
+                  ? 'linear-gradient(45deg, #F59E0B, #D97706)'
+                  : 'linear-gradient(45deg, #6B7280, #4B5563)',
                 color: 'white',
                 fontWeight: 'bold',
                 py: 1.5,
                 fontSize: '16px',
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #16A34A, #15803D)',
+                  background: getActivityStatus() === 'can-roll' 
+                    ? 'linear-gradient(45deg, #16A34A, #15803D)'
+                    : getActivityStatus() === 'pass-turn'
+                    ? 'linear-gradient(45deg, #D97706, #B45309)'
+                    : 'linear-gradient(45deg, #4B5563, #374151)',
                   transform: 'translateY(-2px)'
+                },
+                '&:disabled': {
+                  background: 'linear-gradient(45deg, #6B7280, #4B5563)',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  cursor: 'not-allowed',
+                  transform: 'none'
                 }
               }}
             >
-              🎲 БРОСИТЬ
+              {getActivityStatus() === 'can-roll' && '🎲 БРОСИТЬ КУБИК'}
+              {getActivityStatus() === 'pass-turn' && '➡️ ПЕРЕДАТЬ ХОД'}
+              {getActivityStatus() === 'waiting' && '⏳ ОЖИДАНИЕ ХОДА'}
             </Button>
             <Typography variant="body2" sx={{ color: 'white', opacity: 0.8, mt: 1 }}>
-              Последний бросок: 6
+              {diceValue ? `Последний бросок: ${diceValue}` : 'Готов к броску'}
             </Typography>
           </Box>
 
