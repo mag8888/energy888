@@ -58,6 +58,7 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
   const [dealChoice, setDealChoice] = useState(null); // 'small'|'big'
   const [currentDealCard, setCurrentDealCard] = useState(null);
   const [discardPile, setDiscardPile] = useState([]);
+  const [charityOpen, setCharityOpen] = useState(false);
 
   const smallDeck = useRef([
     { id: 's1', name: 'Акции TechCo', cost: 1000, income: 50 },

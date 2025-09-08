@@ -17,6 +17,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <Head>
         <meta name="viewport" content="initial-scale=1, width=device-width" />
         <title>Energy of Money — 1game</title>
+        <link rel="icon" href="/favicon.svg" />
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
