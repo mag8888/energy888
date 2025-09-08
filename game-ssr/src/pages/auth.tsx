@@ -23,23 +23,43 @@ export default function AuthPage() {
     localStorage.setItem('eom_auth_tab', String(tab));
   }, [tab]);
 
-  // Простая авторизация через кнопку
-  const handleSimpleTelegramLogin = async () => {
+  // Генерация ссылки для входа через бота
+  const [botToken, setBotToken] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
+  
+  const createBotToken = async () => {
     try {
-      // Создаем простого пользователя с случайным ID
-      const randomId = Math.floor(Math.random() * 1000000);
-      const userData = {
-        id: randomId,
-        username: `user_${randomId}`,
-        first_name: 'Telegram',
-        last_name: 'User',
-        photo_url: null
-      };
+      const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
+      const r = await fetch(`${socketUrl}/tg/new-token`);
+      const j = await r.json();
+      setBotToken(j.token);
+      setAuthLoading(true);
       
-      await loginTelegram(userData);
-      setSnackbar('Вход выполнен успешно!');
+      // Ожидаем авторизации через бота
+      const t0 = Date.now();
+      const iv = setInterval(async () => {
+        const p = await fetch(`${socketUrl}/tg/poll?token=${j.token}`);
+        const pj = await p.json();
+        if (pj?.authorized) {
+          clearInterval(iv);
+          setAuthLoading(false);
+          await loginTelegram({ 
+            id: pj.user.id, 
+            username: pj.user.username, 
+            first_name: pj.user.first_name, 
+            last_name: pj.user.last_name, 
+            photo_url: pj.user.photo_url 
+          });
+          setSnackbar('Вход через бота выполнен!');
+        } else if (Date.now() - t0 > 5 * 60 * 1000) {
+          clearInterval(iv);
+          setAuthLoading(false);
+          setBotToken(null);
+          setSnackbar('Время ожидания истекло');
+        }
+      }, 2000);
     } catch (e: any) {
-      setSnackbar(e?.message || 'Ошибка входа');
+      setSnackbar(e?.message || 'Ошибка создания ссылки');
     }
   };
 
@@ -95,14 +115,31 @@ export default function AuthPage() {
           {tab === 1 && (
             <Box sx={{ textAlign: 'center' }}>
               <Typography sx={{ color: 'rgba(255,255,255,0.75)', mb: 3 }}>
-                Простой вход в игру
+                Вход через Telegram бота
               </Typography>
-              <GradientButton onClick={handleSimpleTelegramLogin} sx={{ mb: 2 }}>
-                🚀 Войти в игру
-              </GradientButton>
-              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>
-                Нажмите кнопку выше для быстрого входа
-              </Typography>
+              
+              {!botToken ? (
+                <GradientButton onClick={createBotToken} sx={{ mb: 2 }}>
+                  🔗 Сгенерировать ссылку входа
+                </GradientButton>
+              ) : (
+                <Box>
+                  <GradientButton 
+                    href={`https://t.me/${botName}?start=login_${botToken}`} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    sx={{ mb: 2 }}
+                  >
+                    🤖 Открыть @{botName}
+                  </GradientButton>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, mb: 1 }}>
+                    {authLoading ? '⏳ Ожидание подтверждения в боте...' : 'Нажмите "Старт" в боте для входа'}
+                  </Typography>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>
+                    Ссылка действительна 5 минут
+                  </Typography>
+                </Box>
+              )}
             </Box>
           )}
 

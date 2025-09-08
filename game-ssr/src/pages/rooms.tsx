@@ -56,12 +56,58 @@ export default function RoomsPage() {
     setSnack('Комната создана');
   };
 
-  const doJoin = (room:any) => {
-    if (!user) { setSnack('Сначала авторизуйтесь'); return; }
+  const doJoin = async (room:any) => {
+    if (!user) { 
+      // Если пользователь не авторизован, предлагаем авторизацию через Telegram
+      await handleTelegramAuth(room);
+      return; 
+    }
     if (room.hasPassword) { setJoinRoomId(room.id); return; }
     socket.emit('joinRoomMeta', { roomId: room.id, user: { id: user.id, username: user.username }, password: '' });
     setSnack('Подключаемся к комнате...');
     setTimeout(()=>{ window.location.href = `/room/${room.id}`; }, 400);
+  };
+
+  // Функция авторизации через Telegram бота
+  const handleTelegramAuth = async (room: any) => {
+    try {
+      const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
+      const r = await fetch(`${socketUrl}/tg/new-token`);
+      const j = await r.json();
+      
+      if (j.ok) {
+        const botUrl = `https://t.me/energy_money_bot?start=login_${j.token}`;
+        setSnack('Открываем Telegram для авторизации...');
+        
+        // Открываем бота в новом окне
+        window.open(botUrl, '_blank');
+        
+        // Ожидаем авторизации
+        const t0 = Date.now();
+        const iv = setInterval(async () => {
+          const p = await fetch(`${socketUrl}/tg/poll?token=${j.token}`);
+          const pj = await p.json();
+          if (pj?.authorized) {
+            clearInterval(iv);
+            setSnack('Авторизация успешна! Входим в комнату...');
+            // Теперь входим в комнату
+            socket.emit('joinRoomMeta', { 
+              roomId: room.id, 
+              user: { id: pj.user.id, username: pj.user.username }, 
+              password: '' 
+            });
+            setTimeout(()=>{ window.location.href = `/room/${room.id}`; }, 400);
+          } else if (Date.now() - t0 > 5 * 60 * 1000) {
+            clearInterval(iv);
+            setSnack('Время ожидания истекло');
+          }
+        }, 2000);
+      } else {
+        setSnack('Ошибка создания токена авторизации');
+      }
+    } catch (e: any) {
+      setSnack('Ошибка авторизации: ' + (e?.message || 'Неизвестная ошибка'));
+    }
   };
 
   const doJoinWithPwd = () => {
@@ -99,7 +145,9 @@ export default function RoomsPage() {
                     <Chip size="small" label={`Таймер: ${r.timing}с`} />
                   </Stack>
                 </Box>
-                <GradientButton onClick={()=>doJoin(r)}>Войти</GradientButton>
+                <GradientButton onClick={()=>doJoin(r)}>
+                  {user ? 'Войти' : '🤖 Начать игру'}
+                </GradientButton>
               </Stack>
             </GlassCard>
           </Grid>
