@@ -1,15 +1,5 @@
 services:
   - type: web
-    name: energy-of-money-1game
-    env: node
-    plan: free
-    rootDir: game-ssr
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
-    envVars:
-      - key: NODE_VERSION
-        value: 18
-  - type: web
     name: energy888-socket
     env: node
     plan: free
