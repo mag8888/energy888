@@ -6,7 +6,7 @@ import ProfessionDetails from './ProfessionDetails';
 import MarketCardModal from './MarketCardModal';
 import ExpenseCardModal from './ExpenseCardModal';
 import BreakModal from './BreakModal';
-import BankModule from './BankModule';
+import BankModule from '../bank/BankModule';
 import CellPopup from './CellPopup';
 import { MarketDeckManager, checkPlayerHasMatchingAsset } from '../data/marketCards';
 import { ExpenseDeckManager } from '../data/expenseCards';
@@ -45,6 +45,7 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
   const [isOnBigCircle] = useState(true);
   const [bigCirclePassiveIncome] = useState(0);
   const [bigCircleBalance] = useState(0);
+  const [playerCredit, setPlayerCredit] = useState(0);
   const [dealDeck] = useState([]);
   const [turnState, setTurnState] = useState('yourTurn'); // yourTurn | rolled | waitingOther
   const [timeLeft, setTimeLeft] = useState(30);
@@ -289,11 +290,18 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
               </List>
             </Paper>
 
-            <Paper sx={{ p: 2, mb: 2, bgcolor: 'rgba(17,24,39,0.6)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <Typography sx={{ color: 'white', fontWeight: 'bold' }}>Банк</Typography>
-              <Typography sx={{ color: '#22C55E', fontWeight: 'bold', mt: 1, fontSize: 24 }}>${playerMoney.toLocaleString()}</Typography>
-              <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Доход: ${bigCirclePassiveIncome}/ Расходы: $0</Typography>
-            </Paper>
+            <BankModule
+              playerData={{ ...playerData, balance: playerMoney }}
+              gamePlayers={gamePlayers}
+              socket={socket}
+              bankBalance={playerMoney}
+              playerCredit={playerCredit}
+              getMaxCredit={() => 10000}
+              getCashFlow={() => 0}
+              setShowCreditModal={() => {}}
+              roomId={roomId}
+              onBankBalanceChange={(nb) => setPlayerMoney(nb)}
+            />
 
             <Paper sx={{ p: 2, mb: 2, bgcolor: 'rgba(17,24,39,0.6)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <Typography sx={{ color: 'white', fontWeight: 'bold', mb: 1 }}>Активы</Typography>
