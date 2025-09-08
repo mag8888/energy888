@@ -130,15 +130,94 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
           </Box>
         </Box>
 
-        {/* Board visual (placeholder square with cells) */}
+        {/* Board visual (outer square, inner ring, center, and action cards inside) */}
         <Box sx={{ position: 'relative', width: 800, height: 800, borderRadius: 4, background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.01) 100%)', border: '2px solid rgba(139,92,246,0.3)', mx: 'auto' }}>
-          <Box sx={{ position: 'absolute', top: 50, left: 50, width: 700, height: 700, border: '2px dashed rgba(139,92,246,0.6)'}} />
-          {/* Simple ring of sample cells */}
-          {Array.from({ length: 24 }).map((_, i) => (
-            <Box key={i} sx={{ position: 'absolute', top: 60 + (i<6?0:i<12?((i-6)*110):i<18?660:((23-i)*110)), left: 60 + (i<6?(i*110):i<12?660:i<18?((17-i)*110):0), width: 100, height: 100, bgcolor: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.4)', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 12 }}>
-              Клетка {i+1}
-            </Box>
-          ))}
+          {(() => {
+            const cells = [];
+            const boardSize = 800;
+            const squareLeft = 50; // outer square inside the board
+            const squareTop = 50;
+            const squareSize = 700;
+            const cell = 48; // size of outer small cells
+            const step = (squareSize - cell) / 12;
+
+            // TOP row (13)
+            for (let i = 0; i <= 12; i++) {
+              cells.push(
+                <Box key={`t-${i}`} sx={{ position: 'absolute', left: squareLeft + i * step, top: squareTop, width: cell, height: cell, background: 'linear-gradient(180deg, #21C1D6 0%, #1AA1B4 100%)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', boxShadow: '0 3px 10px rgba(6,182,212,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#04233B', fontWeight: 'bold', fontSize: 12 }}>
+                  {i + 1}
+                </Box>
+              );
+            }
+            // RIGHT column (12 without corners)
+            for (let i = 1; i <= 12; i++) {
+              cells.push(
+                <Box key={`r-${i}`} sx={{ position: 'absolute', left: squareLeft + squareSize - cell, top: squareTop + i * step, width: cell, height: cell, background: 'linear-gradient(180deg, #21C1D6 0%, #1AA1B4 100%)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', boxShadow: '0 3px 10px rgba(6,182,212,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#04233B', fontWeight: 'bold', fontSize: 12 }}>
+                  {13 + i}
+                </Box>
+              );
+            }
+            // BOTTOM row (13)
+            for (let i = 0; i <= 12; i++) {
+              cells.push(
+                <Box key={`b-${i}`} sx={{ position: 'absolute', left: squareLeft + (12 - i) * step, top: squareTop + squareSize - cell, width: cell, height: cell, background: 'linear-gradient(180deg, #21C1D6 0%, #1AA1B4 100%)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', boxShadow: '0 3px 10px rgba(6,182,212,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#04233B', fontWeight: 'bold', fontSize: 12 }}>
+                  {26 + i}
+                </Box>
+              );
+            }
+            // LEFT column (12 without corners)
+            for (let i = 1; i <= 12; i++) {
+              cells.push(
+                <Box key={`l-${i}`} sx={{ position: 'absolute', left: squareLeft, top: squareTop + (12 - i) * step, width: cell, height: cell, background: 'linear-gradient(180deg, #21C1D6 0%, #1AA1B4 100%)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', boxShadow: '0 3px 10px rgba(6,182,212,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#04233B', fontWeight: 'bold', fontSize: 12 }}>
+                  {39 + i}
+                </Box>
+              );
+            }
+
+            // Inner ring of 24 purple cells
+            const center = { x: boardSize / 2, y: boardSize / 2 };
+            const ringRadius = 225; // distance from center
+            const innerCell = 68;
+            for (let k = 0; k < 24; k++) {
+              const angle = (Math.PI * 2 * k) / 24 - Math.PI / 2; // start at top
+              const x = center.x + Math.cos(angle) * ringRadius - innerCell / 2;
+              const y = center.y + Math.sin(angle) * ringRadius - innerCell / 2;
+              cells.push(
+                <Box key={`inner-${k}`} sx={{ position: 'absolute', left: x, top: y, width: innerCell, height: innerCell, background: 'linear-gradient(180deg, #9B5CF6 0%, #7C3AED 100%)', border: '2px solid rgba(255,255,255,0.2)', borderRadius: '16px', boxShadow: '0 12px 30px rgba(124,58,237,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
+                  {k + 1}
+                </Box>
+              );
+            }
+
+            // Center circle
+            cells.push(
+              <Box key="center" sx={{ position: 'absolute', left: center.x - 120, top: center.y - 120, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle at 30% 30%, #A855F7, #7C3AED)', border: '3px solid rgba(255,255,255,0.25)', boxShadow: '0 25px 60px rgba(124,58,237,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', textShadow: '0 2px 6px rgba(0,0,0,0.35)' }}>🎯 ЦЕНТР</Typography>
+              </Box>
+            );
+
+            // Four action cards placed between outer square and inner ring
+            const card = (key, label, colorFrom, colorTo, dx, dy) => (
+              <motion.div key={key} initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}
+                style={{ position: 'absolute', left: center.x + dx, top: center.y + dy, transform: 'translate(-50%, -50%)' }}>
+                <Box sx={{ width: 110, height: 130, background: `linear-gradient(135deg, ${colorFrom} 0%, ${colorTo} 100%)`, borderRadius: '18px', border: '2px solid rgba(255,255,255,0.35)', boxShadow: `0 12px 38px ${colorFrom}55, 0 0 20px rgba(239, 68, 68, 0.2)`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                  <Typography variant="h4" sx={{ color: 'white', mb: 1, fontSize: '24px' }}>💠</Typography>
+                  <Typography variant="caption" sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '12px', lineHeight: 1.2 }}>
+                    {label}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'white', fontSize: '10px', mt: 0.5, opacity: 0.9 }}>0 карт</Typography>
+                </Box>
+              </motion.div>
+            );
+
+            // Offsets tuned to sit between the outer square and inner ring
+            cells.push(card('big', 'Большая сделка', '#00BCD4', '#0097A7', -210, -210));
+            cells.push(card('small', 'Малая сделка', '#3B82F6', '#2563EB', 210, -210));
+            cells.push(card('expenses', 'Расходы', '#EF4444', '#DC2626', -210, 210));
+            cells.push(card('market', 'Рынок', '#F59E0B', '#D97706', 210, 210));
+
+            return cells;
+          })()}
         </Box>
 
         <Snackbar open={toast.open} autoHideDuration={3000} onClose={() => setToast({ ...toast, open: false })}>

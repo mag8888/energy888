@@ -80,22 +80,22 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
         transition={{ duration: 1, type: "spring", stiffness: 80 }}
         whileHover={{ scale: 1.02 }}
       >
-      <Box
-        sx={{
-          position: 'relative',
-            width: isMobile ? '420px' : '720px',
-            height: isMobile ? '420px' : '720px',
-          margin: '0 auto',
-            background: 'linear-gradient(145deg, #0F172A 0%, #1E293B 25%, #334155 50%, #475569 75%, #64748B 100%)',
-            borderRadius: '45px',
-            border: '4px solid transparent',
+        <Box
+          sx={{
+            position: 'relative',
+            width: isMobile ? '450px' : '750px',
+            height: isMobile ? '450px' : '750px',
+            margin: '0 auto',
+            background: 'linear-gradient(145deg, #0A0E1A 0%, #1A1F2E 20%, #2D3748 40%, #4A5568 60%, #718096 80%, #A0AEC0 100%)',
+            borderRadius: '50px',
+            border: '5px solid transparent',
             backgroundClip: 'padding-box',
             boxShadow: `
-              0 0 0 2px rgba(255,255,255,0.2),
-              0 35px 70px rgba(0,0,0,0.6),
-              0 0 150px rgba(139, 92, 246, 0.2),
-              inset 0 3px 0 rgba(255,255,255,0.3),
-              inset 0 -3px 0 rgba(0,0,0,0.3)
+              0 0 0 3px rgba(255,255,255,0.25),
+              0 40px 80px rgba(0,0,0,0.7),
+              0 0 200px rgba(139, 92, 246, 0.25),
+              inset 0 4px 0 rgba(255,255,255,0.4),
+              inset 0 -4px 0 rgba(0,0,0,0.4)
             `,
             overflow: 'hidden',
             '&::before': {
@@ -105,9 +105,9 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
               left: 0,
               right: 0,
               bottom: 0,
-              borderRadius: '45px',
-              padding: '4px',
-              background: 'linear-gradient(145deg, #8B5CF6, #3B82F6, #10B981, #F59E0B, #EF4444, #EC4899)',
+              borderRadius: '50px',
+              padding: '5px',
+              background: 'linear-gradient(145deg, #8B5CF6, #3B82F6, #10B981, #F59E0B, #EF4444, #EC4899, #8B5CF6)',
               mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
               maskComposite: 'xor',
               WebkitMaskComposite: 'xor',
@@ -119,10 +119,10 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: '85%',
-              height: '85%',
-          borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 50%, transparent 70%)',
+              width: '90%',
+              height: '90%',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, rgba(59, 130, 246, 0.15) 30%, rgba(16, 185, 129, 0.1) 60%, transparent 80%)',
               zIndex: -1
             }
           }}
@@ -140,9 +140,9 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: '160px',
-              height: '160px',
-              background: 'linear-gradient(145deg, #8B5CF6 0%, #7C3AED 30%, #6D28D9 60%, #5B21B6 100%)',
+              width: '180px',
+              height: '180px',
+              background: 'linear-gradient(145deg, #8B5CF6 0%, #7C3AED 25%, #6D28D9 50%, #5B21B6 75%, #4C1D95 100%)',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
@@ -150,11 +150,11 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
               flexDirection: 'column',
               zIndex: 5,
               boxShadow: `
-                0 0 0 3px rgba(255,255,255,0.3),
-                0 20px 40px rgba(139, 92, 246, 0.5),
-                0 0 80px rgba(139, 92, 246, 0.3),
-                inset 0 3px 0 rgba(255,255,255,0.4),
-                inset 0 -3px 0 rgba(0,0,0,0.3)
+                0 0 0 4px rgba(255,255,255,0.4),
+                0 25px 50px rgba(139, 92, 246, 0.6),
+                0 0 100px rgba(139, 92, 246, 0.4),
+                inset 0 4px 0 rgba(255,255,255,0.5),
+                inset 0 -4px 0 rgba(0,0,0,0.4)
               `,
               '&::before': {
                 content: '""',
@@ -162,37 +162,37 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: '70px',
-                height: '70px',
+                width: '80px',
+                height: '80px',
                 borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 50%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 50%, transparent 70%)',
                 zIndex: -1
               },
               '&::after': {
                 content: '""',
                 position: 'absolute',
-                top: '20%',
-                left: '20%',
-                width: '30px',
-                height: '30px',
+                top: '15%',
+                left: '15%',
+                width: '35px',
+                height: '35px',
                 borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(255,255,255,0.7) 0%, transparent 70%)',
                 zIndex: -1
               }
             }}
           >
             <Box
               sx={{
-                width: '90px',
-                height: '90px',
+                width: '100px',
+                height: '100px',
                 borderRadius: '50%',
-                background: 'linear-gradient(145deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 100%)',
+                background: 'linear-gradient(145deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.08) 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexDirection: 'column',
-                border: '2px solid rgba(255,255,255,0.3)',
-                boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.1)',
+                border: '3px solid rgba(255,255,255,0.4)',
+                boxShadow: 'inset 0 3px 6px rgba(255,255,255,0.3), inset 0 -3px 6px rgba(0,0,0,0.2)',
                 position: 'relative',
                 '&::before': {
                   content: '""',
@@ -200,46 +200,47 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  width: '60%',
-                  height: '60%',
+                  width: '70%',
+                  height: '70%',
                   borderRadius: '50%',
-                  background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
+                  background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%)',
                   zIndex: -1
                 }
               }}
             >
               <Typography
-                variant="h6"
+                variant="h5"
                 sx={{
                   color: 'white',
                   fontWeight: '900',
-                  fontSize: '20px',
-                  textShadow: '0 3px 6px rgba(0,0,0,0.4), 0 0 10px rgba(255,255,255,0.3)',
-                  letterSpacing: '2px',
+                  fontSize: '22px',
+                  textShadow: '0 4px 8px rgba(0,0,0,0.6), 0 0 15px rgba(255,255,255,0.4)',
+                  letterSpacing: '3px',
                   textAlign: 'center',
-                  lineHeight: 1.1
+                  lineHeight: 1.1,
+                  fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
                 }}
               >
                 ЦЕНТР
               </Typography>
               <Box
                 sx={{
-                  width: '25px',
-                  height: '3px',
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)',
+                  width: '30px',
+                  height: '4px',
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%)',
                   borderRadius: '2px',
-                  mt: 1,
-                  boxShadow: '0 0 8px rgba(255,255,255,0.5)'
+                  mt: 1.5,
+                  boxShadow: '0 0 12px rgba(255,255,255,0.6)'
                 }}
               />
             </Box>
           </Box>
         </motion.div>
 
-        {/* Внутренний путь (1-24) */}
+        {/* Внутренний круг (1-24) */}
         {Array.from({ length: 24 }, (_, i) => i + 1).map((num, index) => {
           const angle = (index * 15) - 90; // Начинаем сверху
-          const radius = 130; // Увеличиваем радиус для избежания наложений
+          const radius = 100; // Радиус для внутреннего круга
           const x = 50 + Math.cos(angle * Math.PI / 180) * (radius / 2);
           const y = 50 + Math.sin(angle * Math.PI / 180) * (radius / 2);
           
@@ -255,28 +256,28 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                 stiffness: 200,
                 damping: 20
               }}
-            style={{
-              position: 'absolute',
+              style={{
+                position: 'absolute',
                 top: `${y}%`,
                 left: `${x}%`,
-                width: '50px',
-                height: '40px',
-                background: 'linear-gradient(145deg, #8B5CF6 0%, #7C3AED 30%, #6D28D9 60%, #5B21B6 100%)',
-                borderRadius: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transform: 'translate(-50%, -50%)',
+                width: '55px',
+                height: '45px',
+                background: 'linear-gradient(145deg, #8B5CF6 0%, #7C3AED 25%, #6D28D9 50%, #5B21B6 75%, #4C1D95 100%)',
+                borderRadius: '22px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transform: 'translate(-50%, -50%)',
                 boxShadow: `
-                  0 0 0 2px rgba(255,255,255,0.3),
-                  0 6px 16px rgba(139, 92, 246, 0.4),
-                  0 0 25px rgba(139, 92, 246, 0.2),
-                  inset 0 2px 0 rgba(255,255,255,0.4),
-                  inset 0 -2px 0 rgba(0,0,0,0.3)
+                  0 0 0 3px rgba(255,255,255,0.4),
+                  0 8px 20px rgba(139, 92, 246, 0.5),
+                  0 0 30px rgba(139, 92, 246, 0.3),
+                  inset 0 3px 0 rgba(255,255,255,0.5),
+                  inset 0 -3px 0 rgba(0,0,0,0.4)
                 `,
                 zIndex: 3,
-                border: '2px solid rgba(255,255,255,0.2)'
+                border: '3px solid rgba(255,255,255,0.3)'
               }}
               onClick={() => openCellPopup({ id: num, name: `Клетка ${num}` })}
               whileHover={{ 
@@ -291,14 +292,15 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
               }}
               whileTap={{ scale: 0.85 }}
           >
-            <Typography
-              variant="caption"
-              sx={{
-                  fontSize: '14px',
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: '16px',
                   fontWeight: '900',
                   color: 'white',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.5), 0 0 8px rgba(255,255,255,0.3)',
-                  letterSpacing: '1px'
+                  textShadow: '0 3px 6px rgba(0,0,0,0.7), 0 0 12px rgba(255,255,255,0.4)',
+                  letterSpacing: '1.5px',
+                  fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
                 }}
               >
                 {num}
@@ -307,18 +309,23 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           );
         })}
 
-        {/* Внешний путь (29-49) */}
-        {Array.from({ length: 21 }, (_, i) => i + 29).map((num, index) => {
+        {/* Квадрат по периметру (1-52) */}
+        {Array.from({ length: 52 }, (_, i) => i + 1).map((num, index) => {
           let x, y;
-          if (index < 10) { // Нижняя часть (29-38)
-            x = 15 + (index * 7);
-            y = 90;
-          } else if (index < 19) { // Левая часть (39-47)
-            x = 10;
-            y = 80 - ((index - 10) * 7);
-          } else { // Верхняя часть (48-49)
-            x = 15 + ((index - 19) * 7);
-            y = 10;
+          const sideLength = 13; // Количество клеток на каждой стороне
+          
+          if (index < sideLength) { // Верхняя сторона (1-13)
+            x = 5 + (index * 6.5);
+            y = 5;
+          } else if (index < sideLength * 2) { // Правая сторона (14-26)
+            x = 85;
+            y = 5 + ((index - sideLength) * 6.5);
+          } else if (index < sideLength * 3) { // Нижняя сторона (27-39)
+            x = 85 - ((index - sideLength * 2) * 6.5);
+            y = 85;
+          } else { // Левая сторона (40-52)
+            x = 5;
+            y = 85 - ((index - sideLength * 3) * 6.5);
           }
           
           return (
@@ -337,10 +344,10 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                 position: 'absolute',
                 top: `${y}%`,
                 left: `${x}%`,
-                width: '48px',
-                height: '36px',
-                background: 'linear-gradient(145deg, #6366F1 0%, #4F46E5 30%, #3730A3 60%, #312E81 100%)',
-                borderRadius: '18px',
+                width: '40px',
+                height: '30px',
+                background: 'linear-gradient(145deg, #00BCD4 0%, #0097A7 30%, #006064 60%, #004D40 100%)',
+                borderRadius: '8px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -348,35 +355,35 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                 transform: 'translate(-50%, -50%)',
                 boxShadow: `
                   0 0 0 2px rgba(255,255,255,0.25),
-                  0 5px 12px rgba(99, 102, 241, 0.35),
-                  0 0 20px rgba(99, 102, 241, 0.15),
-                  inset 0 2px 0 rgba(255,255,255,0.3),
-                  inset 0 -2px 0 rgba(0,0,0,0.2)
+                  0 4px 8px rgba(0, 188, 212, 0.35),
+                  0 0 15px rgba(0, 188, 212, 0.15),
+                  inset 0 1px 0 rgba(255,255,255,0.3),
+                  inset 0 -1px 0 rgba(0,0,0,0.2)
                 `,
                 zIndex: 3,
-                border: '2px solid rgba(255,255,255,0.15)'
+                border: '1px solid rgba(255,255,255,0.15)'
               }}
               onClick={() => openCellPopup({ id: num, name: `Клетка ${num}` })}
               whileHover={{ 
-                scale: 1.18,
-                rotate: -5,
+                scale: 1.15,
+                rotate: 2,
                 boxShadow: `
                   0 0 0 3px rgba(255,255,255,0.4),
-                  0 8px 20px rgba(99, 102, 241, 0.5),
-                  0 0 35px rgba(99, 102, 241, 0.3),
-                  inset 0 2px 0 rgba(255,255,255,0.5)
+                  0 6px 15px rgba(0, 188, 212, 0.5),
+                  0 0 25px rgba(0, 188, 212, 0.3),
+                  inset 0 1px 0 rgba(255,255,255,0.5)
                 `
               }}
-              whileTap={{ scale: 0.82 }}
+              whileTap={{ scale: 0.85 }}
             >
               <Typography
                 variant="caption"
                 sx={{
-                  fontSize: '13px',
+                  fontSize: '11px',
                   fontWeight: '800',
                   color: 'white',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.4), 0 0 6px rgba(255,255,255,0.2)',
-                  letterSpacing: '0.8px'
+                  textShadow: '0 1px 3px rgba(0,0,0,0.5), 0 0 4px rgba(255,255,255,0.2)',
+                  letterSpacing: '0.5px'
                 }}
               >
                 {num}
@@ -455,14 +462,14 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
               color: 'white',
               fontWeight: '900',
               fontSize: '12px',
-              textAlign: 'center',
+                textAlign: 'center',
               textShadow: '0 2px 4px rgba(0,0,0,0.5), 0 0 8px rgba(255,255,255,0.2)',
               letterSpacing: '0.8px',
               lineHeight: 1.2
-            }}
-          >
+              }}
+            >
             Большая сделка
-          </Typography>
+            </Typography>
           </motion.div>
 
         {/* Малая сделка (верхний правый) */}
@@ -767,9 +774,9 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                     fontSize: isMobile ? '16px' : '18px',
                     textShadow: '0 2px 4px rgba(0,0,0,0.6)',
                     letterSpacing: '0.5px'
-                  }}
-                >
-                  {player.username?.charAt(0).toUpperCase()}
+              }}
+            >
+              {player.username?.charAt(0).toUpperCase()}
                 </Typography>
               </Box>
               
@@ -799,21 +806,22 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                   }}
                 />
               )}
-            </motion.div>
+          </motion.div>
           );
         })}
       </Box>
+      </motion.div>
     );
   };
 
   // Рендер панели игроков
   const renderPlayersPanel = () => {
     return (
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2, color: 'white', fontWeight: 'bold' }}>
-          Очередность игроков
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="h6" sx={{ mb: 1.5, color: 'white', fontWeight: 'bold', fontSize: '16px' }}>
+          Игроки
         </Typography>
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 2 }}>
           {gamePlayers.map((player, index) => {
             const isCurrentTurn = currentTurn === player.socketId;
             const isCurrentPlayer = player.socketId === socket?.id;
@@ -827,26 +835,26 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
               >
                 <Box
                   sx={{
-                    p: 2,
-                    mb: 1.5,
+                    p: 1.5,
+                    mb: 1,
                     background: isCurrentTurn 
                       ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(59, 130, 246, 0.2) 100%)' 
                       : 'rgba(255,255,255,0.08)',
-                    borderRadius: '16px',
+                    borderRadius: '12px',
                     border: isCurrentTurn 
                       ? '2px solid rgba(139, 92, 246, 0.6)' 
                       : '1px solid rgba(255,255,255,0.15)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 2,
+                    gap: 1.5,
                     position: 'relative',
                     transition: 'all 0.3s ease',
                     '&:hover': {
                       background: isCurrentTurn 
                         ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(59, 130, 246, 0.3) 100%)' 
                         : 'rgba(255,255,255,0.12)',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.3)'
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
                     }
                   }}
                 >
@@ -855,8 +863,8 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                     sx={{
                       color: 'white',
                       fontWeight: 'bold',
-                      minWidth: '24px',
-                      fontSize: '16px',
+                      minWidth: '16px',
+                      fontSize: '12px',
                       textShadow: '0 1px 2px rgba(0,0,0,0.5)'
                     }}
                   >
@@ -865,32 +873,20 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                   
                   <Box
                     sx={{
-                      width: 48,
-                      height: 48,
+                      width: 32,
+                      height: 32,
                       borderRadius: '50%',
                       background: `linear-gradient(145deg, ${player.color} 0%, ${player.color}CC 100%)`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      border: '3px solid white',
+                      border: '2px solid white',
                       boxShadow: `
-                        0 0 0 2px rgba(255,255,255,0.3),
-                        0 4px 8px rgba(0,0,0,0.3),
-                        0 0 15px ${player.color}40
+                        0 0 0 1px rgba(255,255,255,0.3),
+                        0 2px 4px rgba(0,0,0,0.3),
+                        0 0 8px ${player.color}40
                       `,
-                      position: 'relative',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '60%',
-                        height: '60%',
-                        borderRadius: '50%',
-                        background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
-                        zIndex: -1
-                      }
+                      position: 'relative'
                     }}
                   >
                     <Typography
@@ -898,26 +894,26 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                       sx={{
                         color: 'white',
                         fontWeight: '800',
-                        fontSize: '18px',
+                        fontSize: '14px',
                         textShadow: '0 1px 2px rgba(0,0,0,0.5)',
                         letterSpacing: '0.5px'
-                    }}
-                  >
-                    {player.username?.charAt(0).toUpperCase()}
+                      }}
+                    >
+                      {player.username?.charAt(0).toUpperCase()}
                     </Typography>
                   </Box>
                   
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography
-                      variant="body1"
+                      variant="body2"
                       sx={{
                         color: 'white',
                         fontWeight: isCurrentTurn ? '800' : '600',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
-                        mb: 0.5,
-                        fontSize: '16px',
+                        mb: 0.25,
+                        fontSize: '14px',
                         textShadow: '0 1px 2px rgba(0,0,0,0.5)'
                       }}
                     >
@@ -927,10 +923,10 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                       variant="caption"
                       sx={{ 
                         color: 'rgba(255,255,255,0.8)',
-                        fontSize: '12px',
+                        fontSize: '10px',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 1
+                        gap: 0.5
                       }}
                     >
                       <span>💰 {player.balance || 0}</span>
@@ -951,27 +947,27 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                       }}
                       style={{
                         position: 'absolute',
-                        top: -8,
-                        right: -8,
-                        width: 24,
-                        height: 24,
+                        top: -4,
+                        right: -4,
+                        width: 16,
+                        height: 16,
                         borderRadius: '50%',
                         background: 'linear-gradient(145deg, #10B981 0%, #059669 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        border: '3px solid white',
-                        boxShadow: '0 0 15px rgba(16, 185, 129, 0.8)',
+                        border: '2px solid white',
+                        boxShadow: '0 0 8px rgba(16, 185, 129, 0.8)',
                         zIndex: 10
                       }}
                     >
                       <Typography
                         variant="caption"
-                      sx={{
-                        color: 'white',
+                        sx={{
+                          color: 'white',
                           fontWeight: 'bold',
-                          fontSize: '14px'
-                      }}
+                          fontSize: '10px'
+                        }}
                       >
                         ✓
                       </Typography>
@@ -1225,86 +1221,95 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
         </Box>
 
         {/* Основной контент */}
-        <Grid container spacing={3}>
-          {/* Левая панель - управление и информация */}
-          <Grid item xs={12} md={4}>
-            {renderBankSection()}
-            {renderAssetsSection()}
-            {renderControlPanel()}
-            {renderTurnTimer()}
-          </Grid>
-
+        <Grid container spacing={2}>
           {/* Центральная панель - игровое поле */}
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
               {renderGameBoard()}
             </Box>
           </Grid>
 
-          {/* Правая панель - игроки и текущий игрок */}
+          {/* Правая панель - все элементы управления */}
           <Grid item xs={12} md={4}>
-            {renderPlayersPanel()}
-            {currentPlayer && (
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="h6" sx={{ mb: 2, color: 'white', fontWeight: 'bold' }}>
-                  Текущий игрок
-                </Typography>
-                <Box
-                  sx={{
-                    p: 2,
-                    background: 'rgba(255,255,255,0.1)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(255,255,255,0.2)'
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                    <Avatar
-                      sx={{
-                        width: 48,
-                        height: 48,
-                        bgcolor: currentPlayer.color
-                      }}
-                    >
-                      {currentPlayer.username?.charAt(0).toUpperCase()}
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
-                        {currentPlayer.username}
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-                        Баланс: {currentPlayerBalance} 💰
-                      </Typography>
-                    </Box>
-                  </Box>
-                  
-                  <Typography variant="body2" sx={{ color: 'white', mb: 1 }}>
-                    Активы: {currentPlayerAssets.length}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {/* Банк */}
+              {renderBankSection()}
+              
+              {/* Активы */}
+              {renderAssetsSection()}
+              
+              {/* Управление */}
+              {renderControlPanel()}
+              
+              {/* Таймер */}
+              {renderTurnTimer()}
+              
+              {/* Игроки */}
+              {renderPlayersPanel()}
+              
+              {/* Текущий игрок */}
+              {currentPlayer && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="h6" sx={{ mb: 2, color: 'white', fontWeight: 'bold' }}>
+                    Текущий игрок
                   </Typography>
-                  
-                  {currentPlayerAssets.length > 0 && (
-                    <Box sx={{ mt: 1 }}>
-                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-                        Последние активы:
-                      </Typography>
-                      {currentPlayerAssets.slice(-3).map((asset, index) => (
-                        <Chip
-                          key={index}
-                          label={asset.name || asset.type}
-                          size="small"
-                          sx={{
-                            mr: 0.5,
-                            mb: 0.5,
-                            bgcolor: 'rgba(255,255,255,0.2)',
-                            color: 'white',
-                            fontSize: '10px'
-                          }}
-                        />
-                      ))}
+                  <Box
+                    sx={{
+                      p: 2,
+                      background: 'rgba(255,255,255,0.1)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255,255,255,0.2)'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                      <Avatar
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          bgcolor: currentPlayer.color
+                        }}
+                      >
+                        {currentPlayer.username?.charAt(0).toUpperCase()}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="body1" sx={{ color: 'white', fontWeight: 'bold' }}>
+                          {currentPlayer.username}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                          Баланс: {currentPlayerBalance} 💰
+                        </Typography>
+                      </Box>
                     </Box>
-                  )}
+                    
+                    <Typography variant="caption" sx={{ color: 'white', mb: 1 }}>
+                      Активы: {currentPlayerAssets.length}
+                    </Typography>
+                    
+                    {currentPlayerAssets.length > 0 && (
+                      <Box sx={{ mt: 1 }}>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                          Последние активы:
+                        </Typography>
+                        {currentPlayerAssets.slice(-3).map((asset, index) => (
+                          <Chip
+                            key={index}
+                            label={asset.name || asset.type}
+                            size="small"
+                            sx={{
+                              mr: 0.5,
+                              mb: 0.5,
+                              bgcolor: 'rgba(255,255,255,0.2)',
+                              color: 'white',
+                              fontSize: '10px'
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    )}
+                  </Box>
                 </Box>
-              </Box>
-            )}
+              )}
+            </Box>
           </Grid>
         </Grid>
 
