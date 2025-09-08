@@ -41,6 +41,33 @@ export default function AuthPage() {
     return () => { mount && (mount.innerHTML = ''); };
   }, [tab, bot, loginTelegram]);
 
+  // Deep-link auth via bot: obtain token and poll
+  const [botToken, setBotToken] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
+  const createBotToken = async () => {
+    try {
+      const r = await fetch('/tg/new-token');
+      const j = await r.json();
+      setBotToken(j.token);
+      setAuthLoading(true);
+      // poll
+      const t0 = Date.now();
+      const iv = setInterval(async () => {
+        const p = await fetch(`/tg/poll?token=${j.token}`);
+        const pj = await p.json();
+        if (pj?.authorized) {
+          clearInterval(iv);
+          setAuthLoading(false);
+          await loginTelegram({ id: pj.user.id, username: pj.user.username, first_name: pj.user.first_name, last_name: pj.user.last_name, photo_url: pj.user.photo_url });
+          setSnackbar('Вход через бота выполнен');
+        }
+        if (Date.now() - t0 > 600000) { clearInterval(iv); setAuthLoading(false); }
+      }, 1500);
+    } catch (e: any) {
+      setSnackbar(e?.message || 'Не удалось создать токен');
+    }
+  };
+
   return (
     <Box sx={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: { xs: 1.5, md: 4 }, gap: 3, flexDirection: 'column' }}>
       {/* Profile welcome panel */}
@@ -92,8 +119,15 @@ export default function AuthPage() {
           {tab === 1 && (
             <Box sx={{ textAlign: 'center' }}>
               <Box id="tg-mount" />
-              <Typography sx={{ color: 'rgba(255,255,255,0.6)', mt: 2 }}>Или откройте бота и нажмите «Играть»:</Typography>
-              <GradientButton href={`https://t.me/${bot}`} target="_blank" rel="noreferrer" sx={{ mt: 1 }}>Открыть бота</GradientButton>
+              <Typography sx={{ color: 'rgba(255,255,255,0.75)', mt: 3, mb: 1 }}>Или войдите через бота</Typography>
+              {!botToken ? (
+                <GradientButton onClick={createBotToken}>Сгенерировать ссылку входа</GradientButton>
+              ) : (
+                <>
+                  <GradientButton href={`https://t.me/${bot}?start=login_${botToken}`} target="_blank" rel="noreferrer">Открыть @${bot}</GradientButton>
+                  <Typography sx={{ color:'rgba(255,255,255,0.6)', mt: 1 }}>{authLoading ? 'Ожидание подтверждения в боте…' : 'Нажмите «Старт» в боте, чтобы завершить вход.'}</Typography>
+                </>
+              )}
             </Box>
           )}
 

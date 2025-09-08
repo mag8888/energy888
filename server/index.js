@@ -9,7 +9,36 @@ dotenv.config();
 const app = express();
 const FRONT_ORIGIN = process.env.FRONT_ORIGIN || '*';
 app.use(cors({ origin: FRONT_ORIGIN === '*' ? true : FRONT_ORIGIN }));
+app.use(express.json());
 app.get('/', (_req, res) => res.json({ ok: true, name: 'energy888-socket-server' }));
+// Telegram bot deep-link flow
+const tgSessions = new Map(); // token -> { createdAt, authorized, user }
+app.get('/tg/new-token', (_req, res) => {
+  const token = `t_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
+  tgSessions.set(token, { createdAt: Date.now(), authorized: false, user: null });
+  res.json({ ok: true, token });
+});
+app.post('/tg/bot-auth', (req, res) => {
+  const botToken = process.env.BOT_TOKEN;
+  const hdr = req.headers['x-bot-token'];
+  if (!botToken || hdr !== botToken) {
+    return res.status(401).json({ ok: false, error: 'Unauthorized' });
+  }
+  const { token, id, username, first_name, last_name, photo_url } = req.body || {};
+  const sess = tgSessions.get(token);
+  if (!sess) return res.status(400).json({ ok: false, error: 'Invalid token' });
+  sess.authorized = true;
+  sess.user = { id, username, first_name, last_name, photo_url };
+  tgSessions.set(token, sess);
+  res.json({ ok: true });
+});
+app.get('/tg/poll', (req, res) => {
+  const { token } = req.query;
+  const sess = tgSessions.get(token);
+  if (!sess) return res.json({ ok: false, authorized: false });
+  if (Date.now() - sess.createdAt > 10 * 60 * 1000) { tgSessions.delete(token); return res.json({ ok: false, authorized: false, expired: true }); }
+  res.json({ ok: true, authorized: !!sess.authorized, user: sess.user });
+});
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: FRONT_ORIGIN === '*' ? true : FRONT_ORIGIN, methods: ['GET', 'POST'] } });

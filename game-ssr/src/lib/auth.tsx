@@ -5,6 +5,9 @@ export type User = {
   username: string;
   email?: string;
   tgId?: number;
+  photoUrl?: string;
+  firstName?: string;
+  lastName?: string;
 };
 
 type AuthCtx = {
@@ -83,7 +86,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // WARNING: для продакшена нужно серверное подтверждение hash.
     const tgId = Number(payload?.id || payload?.user?.id);
     const username = payload?.username || payload?.user?.username || 'TG User';
-    const u: User = { id: `tg_${tgId || genId('tg')}`, username, tgId } as User;
+    const photoUrl = payload?.photo_url || payload?.photoUrl || payload?.user?.photo_url;
+    const firstName = payload?.first_name || payload?.user?.first_name;
+    const lastName = payload?.last_name || payload?.user?.last_name;
+    const u: User = { id: `tg_${tgId || genId('tg')}`, username, tgId, photoUrl, firstName, lastName } as User;
     saveUser(u);
   };
 
@@ -94,4 +100,3 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useAuth() { return useContext(Ctx); }
-
