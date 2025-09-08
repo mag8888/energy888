@@ -4,13 +4,15 @@ import socket from '@/lib/socket';
 import GlassCard from '@/ui/GlassCard';
 import GradientButton from '@/ui/GradientButton';
 import { useAuth } from '@/lib/auth';
+import { getFastTrackDreams } from '@/data/fastTrackCells';
 
 export default function RoomsPage() {
   const { user } = useAuth();
   const [rooms, setRooms] = useState<any[]>([]);
   const [openCreate, setOpenCreate] = useState(false);
   const [snack, setSnack] = useState<string|null>(null);
-  const [createForm, setCreateForm] = useState({ name: '', maxPlayers: 6, timing: 120, password: '', assignAll: false });
+  const [createForm, setCreateForm] = useState({ name: '', maxPlayers: 6, timing: 120, password: '', assignAll: false, dreamId: '' });
+  const dreams = getFastTrackDreams();
   const [joinPwd, setJoinPwd] = useState('');
   const [joinRoomId, setJoinRoomId] = useState<string | null>(null);
 
@@ -29,6 +31,7 @@ export default function RoomsPage() {
       creatorId: user.id,
       creatorUsername: user.username,
       creatorProfession: { name: 'Программист', salary: 6000, totalExpenses: 2500 },
+      creatorDream: dreams.find(d=>d.id===createForm.dreamId) || null,
       assignProfessionToAll: createForm.assignAll,
       maxPlayers: Number(createForm.maxPlayers),
       password: createForm.password || null,
@@ -94,6 +97,11 @@ export default function RoomsPage() {
             <TextField label="Макс. игроков" type="number" value={createForm.maxPlayers} onChange={e=>setCreateForm({...createForm, maxPlayers: Number(e.target.value)})} />
             <TextField label="Таймер (сек)" type="number" value={createForm.timing} onChange={e=>setCreateForm({...createForm, timing: Number(e.target.value)})} />
             <TextField label="Пароль (необязательно)" value={createForm.password} onChange={e=>setCreateForm({...createForm, password: e.target.value})} />
+            <TextField select label="Мечта создателя (из Большого круга)" value={createForm.dreamId} onChange={e=>setCreateForm({...createForm, dreamId: String(e.target.value)})}>
+              {dreams.map(d => (
+                <MenuItem key={d.id} value={d.id}>{d.name} — ${d.cost.toLocaleString()}</MenuItem>
+              ))}
+            </TextField>
           </Box>
         </DialogContent>
         <DialogActions>
@@ -120,4 +128,3 @@ export default function RoomsPage() {
     </Box>
   );
 }
-

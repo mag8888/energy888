@@ -55,6 +55,7 @@ io.on('connection', (socket) => {
       creatorId: payload.creatorId || socket.id,
       creatorUsername: payload.creatorUsername || 'Игрок',
       creatorProfession: payload.creatorProfession || null,
+      creatorDream: payload.creatorDream || null,
       assignProfessionToAll: !!payload.assignProfessionToAll,
       maxPlayers: Number(payload.maxPlayers || 6),
       password: payload.password || null,
