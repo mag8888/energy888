@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material';
 import { useAuth } from '../lib/auth';
 
 // Disable SSR for the heavy interactive board initially to avoid window/document usage errors.
-const RefactoredGameBoard = dynamic(() => import('../components/RefactoredGameBoard'), { ssr: false });
+const OriginalGameBoard = dynamic(() => import('../components/OriginalGameBoard'), { ssr: false });
 
 export default function OneGamePage() {
   const { user } = useAuth();
@@ -29,7 +29,7 @@ export default function OneGamePage() {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#0F172A' }}>
-      <RefactoredGameBoard 
+      <OriginalGameBoard 
         roomId="demo-room" 
         playerData={playerData}
       />
