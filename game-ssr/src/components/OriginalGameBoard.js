@@ -11,6 +11,8 @@ import CellPopup from './CellPopup';
 import { MarketDeckManager, checkPlayerHasMatchingAsset } from '../data/marketCards';
 import { ExpenseDeckManager } from '../data/expenseCards';
 import { CELL_CONFIG } from '../data/gameCells';
+import useTurnState from '../lib/useTurnState';
+import { BOARD_SIZE, OUTER_PADDING, OUTER_CELL, OUTER_STEPS, INNER_RING_RADIUS, INNER_CELL, ACTION_CARD_OFFSETS } from '../styles/boardLayout';
 import { PLAYER_COLORS, assignPlayerColor, getColorByIndex, getContrastTextColor } from '../styles/playerColors';
 
 // This is a trimmed version to render the layout and preserve visuals.
@@ -37,9 +39,7 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
   const [currentTurn, setCurrentTurn] = useState(gamePlayers[0]?.username || 'Игрок');
   const [playerMoney, setPlayerMoney] = useState(playerData?.profession?.balance ?? 3000);
   const [toast, setToast] = useState({ open: false, message: '', severity: 'info' });
-  const [isRolling, setIsRolling] = useState(false);
-  const [isMoving, setIsMoving] = useState(false);
-  const [diceValue, setDiceValue] = useState(1);
+  const { state: turnState, timeLeft, isRolling, isMoving, dice: diceValue, roll: rollDice, pass: passTurn } = useTurnState(30);
   const [showCellPopup, setShowCellPopup] = useState(false);
   const [selectedCell, setSelectedCell] = useState(null);
   const [isOnBigCircle] = useState(true);
@@ -47,40 +47,11 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
   const [bigCircleBalance] = useState(0);
   const [playerCredit, setPlayerCredit] = useState(0);
   const [dealDeck] = useState([]);
-  const [turnState, setTurnState] = useState('yourTurn'); // yourTurn | rolled | waitingOther
-  const [timeLeft, setTimeLeft] = useState(30);
   const [scale, setScale] = useState(1);
   const [showProfession, setShowProfession] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
-  useEffect(() => {
-    setCurrentTurn(gamePlayers[currentPlayer]?.username || 'Игрок');
-  }, [currentPlayer, gamePlayers]);
-
-  const rollDice = () => {
-    if (isRolling || isMoving) return;
-    if (turnState !== 'yourTurn') return;
-    setIsRolling(true);
-    const val = Math.floor(Math.random() * 6) + 1;
-    setTimeout(() => {
-      setDiceValue(val);
-      setIsRolling(false);
-      // Open a simple popup to simulate landing
-      setSelectedCell({ id: val, name: 'Секция', description: 'Описание клетки' });
-      setShowCellPopup(true);
-      setTurnState('rolled');
-    }, 600);
-  };
-
-  const passTurn = () => {
-    if (turnState !== 'rolled') return;
-    setTurnState('waitingOther');
-    // Simulate next player's turn after short delay
-    setTimeout(() => {
-      setTimeLeft(30);
-      setTurnState('yourTurn');
-    }, 1500);
-  };
+  useEffect(() => { setCurrentTurn(gamePlayers[currentPlayer]?.username || 'Игрок'); }, [currentPlayer, gamePlayers]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -98,23 +69,13 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // simple turn timer
+  // open cell popup when rolled
   useEffect(() => {
-    if (turnState === 'waitingOther') return; // pause when not our turn
-    const id = setInterval(() => {
-      setTimeLeft((t) => {
-        if (t <= 0) {
-          clearInterval(id);
-          // auto pass if rolled and time expired
-          if (turnState === 'rolled') passTurn();
-          return 0;
-        }
-        return t - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [turnState]);
+    if (turnState === 'rolled') {
+      setSelectedCell({ id: diceValue, name: 'Секция', description: 'Описание клетки' });
+      setShowCellPopup(true);
+    }
+  }, [turnState, diceValue]);
 
   return (
     <Fragment>
@@ -126,49 +87,6 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
         gap: 2,
         flexDirection: { xs: 'column', md: 'row' }
       }}>
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="body2" sx={{ color: '#ff4444', fontWeight: 'bold', fontFamily: 'monospace' }}>
-            🐛 DEBUG: OriginalGameBoard (standalone, visuals preserved)
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: gamePlayers[0]?.color || '#8B5CF6' }}>
-              {gamePlayers[0]?.username?.charAt(0) || '?'}
-            </Avatar>
-            <Box>
-              <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
-                {gamePlayers[0]?.username || 'Игрок'}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                {gamePlayers[0]?.profession?.name || 'Без профессии'}
-              </Typography>
-              {currentTurn && (
-                <Typography variant="body2" sx={{ color: '#10B981', fontWeight: 'bold' }}>
-                  🎲 {currentTurn === gamePlayers[0]?.username ? 'Ваш ход!' : `Ход: ${currentTurn}`}
-                </Typography>
-              )}
-              <Typography variant="body2" sx={{ color: '#22C55E', fontWeight: 'bold' }}>
-                🎯 Большой круг
-              </Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 'auto' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="h6" sx={{ color: 'white' }}>Кубик:</Typography>
-              <Box sx={{ width: 40, height: 40, bgcolor: 'rgba(255,255,255,0.15)', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
-                {diceValue}
-              </Box>
-            </Box>
-            <Button variant="contained" onClick={rollDice} disabled={isRolling || isMoving} sx={{
-              background: isRolling || isMoving ? 'linear-gradient(45deg, #9CA3AF, #6B7280)' : 'linear-gradient(45deg, #8B5CF6, #06B6D4)'
-            }}>
-              {isRolling ? 'Бросаю...' : isMoving ? 'Фишка движется...' : 'Бросить кубик'}
-            </Button>
-          </Box>
-        </Box>
 
         {/* Big circle info */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, p: 2, background: 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.2))', borderRadius: 2, border: '1px solid rgba(34,197,94,0.3)' }}>
@@ -184,15 +102,15 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
 
         {/* Board + Right panel */}
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Box sx={{ position: 'relative', width: 800, height: 800, transform: `scale(${scale})`, transformOrigin: 'top left', borderRadius: 4, background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.01) 100%)', border: '2px solid rgba(139,92,246,0.3)' }}>
+          <Box sx={{ position: 'relative', width: BOARD_SIZE, height: BOARD_SIZE, transform: `scale(${scale})`, transformOrigin: 'top left', borderRadius: 4, background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.01) 100%)', border: '2px solid rgba(139,92,246,0.3)' }}>
           {(() => {
             const cells = [];
-            const boardSize = 800;
-            const squareLeft = 50; // outer square inside the board
-            const squareTop = 50;
-            const squareSize = 700;
-            const cell = 48; // size of outer small cells
-            const step = (squareSize - cell) / 12;
+            const boardSize = BOARD_SIZE;
+            const squareLeft = OUTER_PADDING; // outer square inside the board
+            const squareTop = OUTER_PADDING;
+            const squareSize = BOARD_SIZE - OUTER_PADDING * 2;
+            const cell = OUTER_CELL; // size of outer small cells
+            const step = (squareSize - cell) / OUTER_STEPS;
 
             // TOP row (13)
             for (let i = 0; i <= 12; i++) {
@@ -229,8 +147,8 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
 
             // Inner ring of 24 purple cells
             const center = { x: boardSize / 2, y: boardSize / 2 };
-            const ringRadius = 225; // distance from center
-            const innerCell = 68;
+            const ringRadius = INNER_RING_RADIUS; // distance from center
+            const innerCell = INNER_CELL;
             for (let k = 0; k < 24; k++) {
               const angle = (Math.PI * 2 * k) / 24 - Math.PI / 2; // start at top
               const x = center.x + Math.cos(angle) * ringRadius - innerCell / 2;
@@ -267,10 +185,10 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
             );
 
             // Offsets tuned to sit between the outer square and inner ring
-            cells.push(card('big', 'Большая сделка', '#00BCD4', '#0097A7', -220, -140));
-            cells.push(card('small', 'Малая сделка', '#3B82F6', '#2563EB', 220, -140));
-            cells.push(card('expenses', 'Расходы', '#EF4444', '#DC2626', -220, 160));
-            cells.push(card('market', 'Рынок', '#F59E0B', '#D97706', 220, 160));
+            cells.push(card('big', 'Большая сделка', '#00BCD4', '#0097A7', ACTION_CARD_OFFSETS.big.dx, ACTION_CARD_OFFSETS.big.dy));
+            cells.push(card('small', 'Малая сделка', '#3B82F6', '#2563EB', ACTION_CARD_OFFSETS.small.dx, ACTION_CARD_OFFSETS.small.dy));
+            cells.push(card('expenses', 'Расходы', '#EF4444', '#DC2626', ACTION_CARD_OFFSETS.expenses.dx, ACTION_CARD_OFFSETS.expenses.dy));
+            cells.push(card('market', 'Рынок', '#F59E0B', '#D97706', ACTION_CARD_OFFSETS.market.dx, ACTION_CARD_OFFSETS.market.dy));
 
             return cells;
           })()}
@@ -340,6 +258,10 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
             <Button onClick={() => setShowProfession(false)}>Закрыть</Button>
           </DialogActions>
         </Dialog>
+        {/* Debug footer in one line at page bottom */}
+        <Box sx={{ mt: 2, p: 1, color: 'rgba(255,255,255,0.65)', fontFamily: 'monospace', fontSize: 12, borderTop: '1px dashed rgba(255,255,255,0.15)' }}>
+          DEBUG: OriginalGameBoard standalone | dice: {diceValue} | state: {turnState} | time: {timeLeft}s
+        </Box>
       </Box>
     </Fragment>
   );
