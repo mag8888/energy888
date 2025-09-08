@@ -62,6 +62,7 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
   const [serverTimeLeft, setServerTimeLeft] = useState(null);
   const [serverCurrentPlayer, setServerCurrentPlayer] = useState('');
   const [roomTiming, setRoomTiming] = useState(120);
+  const [dreamPurchased] = useState(false);
   const myName = playerData?.username;
 
   const smallDeck = useRef([
