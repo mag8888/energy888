@@ -10,6 +10,18 @@ export default function AuthPage() {
   const [snackbar, setSnackbar] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const bot = process.env.NEXT_PUBLIC_TELEGRAM_BOT || 'energy_m_bot';
+  const botName = (bot || '').replace(/^@/, '');
+
+  // remember chosen method
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const saved = localStorage.getItem('eom_auth_tab');
+    if (saved) setTab(Number(saved));
+  }, []);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('eom_auth_tab', String(tab));
+  }, [tab]);
 
   useEffect(() => {
     // Telegram login widget loader
@@ -32,7 +44,7 @@ export default function AuthPage() {
     const s = document.createElement('script');
     s.src = 'https://telegram.org/js/telegram-widget.js?22';
     s.async = true;
-    s.setAttribute('data-telegram-login', bot);
+    s.setAttribute('data-telegram-login', botName);
     s.setAttribute('data-size', 'large');
     s.setAttribute('data-onauth', 'onTelegramAuth(user)');
     s.setAttribute('data-request-access', 'write');
@@ -124,7 +136,7 @@ export default function AuthPage() {
                 <GradientButton onClick={createBotToken}>Сгенерировать ссылку входа</GradientButton>
               ) : (
                 <>
-                  <GradientButton href={`https://t.me/${bot}?start=login_${botToken}`} target="_blank" rel="noreferrer">Открыть @${bot}</GradientButton>
+                  <GradientButton href={`https://t.me/${botName}?start=login_${botToken}`} target="_blank" rel="noreferrer">Открыть @{botName}</GradientButton>
                   <Typography sx={{ color:'rgba(255,255,255,0.6)', mt: 1 }}>{authLoading ? 'Ожидание подтверждения в боте…' : 'Нажмите «Старт» в боте, чтобы завершить вход.'}</Typography>
                 </>
               )}

@@ -16,6 +16,7 @@ export default function FooterBar() {
       <Stack direction="row" spacing={1}>
         <Link href="/1game" passHref legacyBehavior><Button size="small" variant="outlined">1game</Button></Link>
         <Link href="/rooms" passHref legacyBehavior><Button size="small" variant="outlined">Rooms</Button></Link>
+        <Link href="/hall-of-fame" passHref legacyBehavior><Button size="small" variant="outlined">Hall of Fame</Button></Link>
         <Link href="/auth" passHref legacyBehavior><Button size="small" variant="outlined">Auth</Button></Link>
         <Link href="/" passHref legacyBehavior><Button size="small" variant="outlined">Home</Button></Link>
       </Stack>

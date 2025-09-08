@@ -59,6 +59,10 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
   const [currentDealCard, setCurrentDealCard] = useState(null);
   const [discardPile, setDiscardPile] = useState([]);
   const [charityOpen, setCharityOpen] = useState(false);
+  const [serverTimeLeft, setServerTimeLeft] = useState(null);
+  const [serverCurrentPlayer, setServerCurrentPlayer] = useState('');
+  const [roomTiming, setRoomTiming] = useState(120);
+  const myName = playerData?.username;
 
   const smallDeck = useRef([
     { id: 's1', name: 'Акции TechCo', cost: 1000, income: 50 },
@@ -97,6 +101,26 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
       }
     } catch {}
   }, [roomId, playerData?.id, playerData?.username]);
+
+  // Load timing from lobby if available
+  useEffect(() => {
+    try {
+      const t = Number(localStorage.getItem('room_timing') || '120');
+      if (!Number.isNaN(t)) setRoomTiming(t);
+    } catch {}
+  }, []);
+
+  // Sync with server turn events
+  useEffect(() => {
+    const onTurn = (data) => {
+      setServerCurrentPlayer(data?.currentPlayer?.username || '');
+      setServerTimeLeft(data?.turnTimeLeft ?? roomTiming);
+    };
+    const onTimer = (data) => setServerTimeLeft(data?.timeLeft ?? null);
+    socket.on('playerTurnChanged', onTurn);
+    socket.on('turnTimerSynced', onTimer);
+    return () => { socket.off('playerTurnChanged', onTurn); socket.off('turnTimerSynced', onTimer); };
+  }, [roomTiming]);
 
   // Open cell popup and handle landing rules
   useEffect(() => {
@@ -205,6 +229,38 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
     setDiscardPile(prev=>[card, ...prev]);
     setCurrentDealCard(null);
   };
+
+  // periodic stats sync to server
+  useEffect(() => {
+    const iv = setInterval(() => {
+      try {
+        const passive = assets.reduce((s,a)=>s+(a.income||0),0);
+        const businessCount = assets.filter(a=> (a.income||0) > 0).length;
+        socket.emit('updatePlayerStats', {
+          roomId: roomId,
+          username: playerData?.username,
+          stats: {
+            isOnBigCircle: isOnBigCircle,
+            passiveIncome: passive,
+            balance: playerMoney,
+            businessCount,
+            dreamPurchased,
+            baselinePassiveIncome: 0
+          }
+        });
+      } catch {}
+    }, 5000);
+    return () => clearInterval(iv);
+  }, [assets, playerMoney, dreamPurchased, isOnBigCircle]);
+
+  useEffect(() => {
+    const onGameOver = (payload) => {
+      setToast({ open: true, severity: 'success', message: 'Игра завершена! Смотрите итоги в консоли.' });
+      console.log('🏁 Результаты игры:', payload);
+    };
+    socket.on('gameOver', onGameOver);
+    return () => socket.off('gameOver', onGameOver);
+  }, []);
 
   return (
     <Fragment>
@@ -365,16 +421,17 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
             <Paper sx={{ p: 2, bgcolor: 'rgba(17,24,39,0.6)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <Typography sx={{ color: 'white', fontWeight: 'bold', mb: 1 }}>Активность</Typography>
               <Button fullWidth variant="contained" onClick={() => {
-                if (turnState === 'yourTurn') rollDice();
-                else if (turnState === 'rolled' && canPass) passTurn();
+                const isMyServerTurn = serverCurrentPlayer ? (serverCurrentPlayer === myName) : true;
+                if (turnState === 'yourTurn' && isMyServerTurn) rollDice();
+                else if (turnState === 'rolled' && canPass && isMyServerTurn) { passTurn(); try { socket.emit('passTurn', { roomId }); } catch {} }
               }}
-              disabled={turnState === 'waitingOther' || isRolling || isMoving || (turnState==='rolled' && !canPass)}
+              disabled={turnState === 'waitingOther' || isRolling || isMoving || (turnState==='rolled' && !canPass) || (serverCurrentPlayer && serverCurrentPlayer !== myName)}
               sx={{ background: turnState === 'yourTurn' ? 'linear-gradient(45deg, #8B5CF6, #06B6D4)' : (turnState === 'rolled' ? 'linear-gradient(45deg, #22C55E, #16A34A)' : 'linear-gradient(45deg, #6B7280, #4B5563)') }}>
                 {turnState === 'yourTurn' ? '🎲 Бросить кубик' : turnState === 'rolled' ? (canPass ? '⏭️ Передать ход' : '⏳ Ждите...') : '⏳ Ожидание хода'}
               </Button>
               <Box sx={{ mt: 2 }}>
-                <LinearProgress variant="determinate" value={((120 - timeLeft) / 120) * 100} sx={{ height: 8, borderRadius: 1, '& .MuiLinearProgress-bar': { backgroundColor: timeLeft>60 ? '#22C55E' : (timeLeft>20 ? '#EAB308' : '#EF4444') } }} />
-                <Typography sx={{ color: timeLeft>60 ? '#22C55E' : (timeLeft>20 ? '#EAB308' : '#EF4444'), fontSize: 12, mt: 0.5 }}>Таймер: {timeLeft}s</Typography>
+                <LinearProgress variant="determinate" value={serverTimeLeft!=null ? ((roomTiming - serverTimeLeft) / roomTiming) * 100 : ((120 - timeLeft) / 120) * 100} sx={{ height: 8, borderRadius: 1, '& .MuiLinearProgress-bar': { backgroundColor: (serverTimeLeft!=null ? serverTimeLeft : timeLeft)>60 ? '#22C55E' : ((serverTimeLeft!=null ? serverTimeLeft : timeLeft)>20 ? '#EAB308' : '#EF4444') } }} />
+                <Typography sx={{ color: (serverTimeLeft!=null ? serverTimeLeft : timeLeft)>60 ? '#22C55E' : ((serverTimeLeft!=null ? serverTimeLeft : timeLeft)>20 ? '#EAB308' : '#EF4444'), fontSize: 12, mt: 0.5 }}>Таймер: {serverTimeLeft!=null ? serverTimeLeft : timeLeft}s</Typography>
               </Box>
             </Paper>
           </Box>
@@ -390,7 +447,6 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
           <DialogContent>
             <ProfessionDetails profession={selectedPlayer?.profession} />
           </DialogContent>
-  const [position, setPosition] = useState(0); // 0..23
           <DialogActions>
             <Button onClick={() => setShowProfession(false)}>Закрыть</Button>
           </DialogActions>

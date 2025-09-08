@@ -12,7 +12,7 @@ export default function RoomsPage() {
   const [rooms, setRooms] = useState<any[]>([]);
   const [openCreate, setOpenCreate] = useState(false);
   const [snack, setSnack] = useState<string|null>(null);
-  const [createForm, setCreateForm] = useState({ name: '', maxPlayers: 2, timing: 120, password: '', assignAll: true, dreamId: '', professionId: 'entrepreneur' });
+  const [createForm, setCreateForm] = useState({ name: '', maxPlayers: 2, timing: 120, gameDurationSec: 10800, password: '', assignAll: true, dreamId: '', professionId: 'entrepreneur' });
   const dreams = getFastTrackDreams();
   const prof = getProfession(createForm.professionId);
   const [joinPwd, setJoinPwd] = useState('');
@@ -37,7 +37,8 @@ export default function RoomsPage() {
       assignProfessionToAll: !!createForm.assignAll,
       maxPlayers: Number(createForm.maxPlayers),
       password: createForm.password || null,
-      timing: Number(createForm.timing)
+      timing: Number(createForm.timing),
+      gameDurationSec: Number(createForm.gameDurationSec)
     });
     setOpenCreate(false);
     setSnack('Комната создана');
@@ -48,11 +49,14 @@ export default function RoomsPage() {
     if (room.hasPassword) { setJoinRoomId(room.id); return; }
     socket.emit('joinRoomMeta', { roomId: room.id, user: { id: user.id, username: user.username }, password: '' });
     setSnack('Подключаемся к комнате...');
+    setTimeout(()=>{ window.location.href = `/room/${room.id}`; }, 400);
   };
 
   const doJoinWithPwd = () => {
     socket.emit('joinRoomMeta', { roomId: joinRoomId, user: { id: user?.id, username: user?.username }, password: joinPwd });
+    const rid = joinRoomId;
     setJoinRoomId(null); setJoinPwd('');
+    setTimeout(()=>{ if (rid) window.location.href = `/room/${rid}`; }, 400);
   };
 
   return (
@@ -99,8 +103,16 @@ export default function RoomsPage() {
               <Box sx={{ display: 'grid', gap: 1.2 }}>
                 <TextField label="Название" value={createForm.name} onChange={e=>setCreateForm({...createForm, name: e.target.value})} fullWidth />
                 <TextField label="Макс. игроков" type="number" value={createForm.maxPlayers} onChange={e=>setCreateForm({...createForm, maxPlayers: Number(e.target.value)})} fullWidth />
-                <TextField label="Таймер (сек)" type="number" value={createForm.timing} onChange={e=>setCreateForm({...createForm, timing: Number(e.target.value)})} fullWidth />
+                <TextField label="Таймер хода (сек)" type="number" value={createForm.timing} onChange={e=>setCreateForm({...createForm, timing: Number(e.target.value)})} fullWidth />
                 <TextField label="Пароль (необязательно)" value={createForm.password} onChange={e=>setCreateForm({...createForm, password: e.target.value})} fullWidth />
+                <TextField select label="Длительность игры" value={createForm.gameDurationSec} onChange={e=>setCreateForm({...createForm, gameDurationSec: Number(e.target.value)})} fullWidth>
+                  <MenuItem value={1800}>30 минут</MenuItem>
+                  <MenuItem value={3600}>1 час</MenuItem>
+                  <MenuItem value={7200}>2 часа</MenuItem>
+                  <MenuItem value={10800}>3 часа</MenuItem>
+                  <MenuItem value={14400}>4 часа</MenuItem>
+                  <MenuItem value={18000}>5 часов</MenuItem>
+                </TextField>
                 <TextField select label="Мечта создателя (Большой круг)" value={createForm.dreamId} onChange={e=>setCreateForm({...createForm, dreamId: String(e.target.value)})} fullWidth>
                   {dreams.map(d => (
                     <MenuItem key={d.id} value={d.id}>{d.name} — ${d.cost.toLocaleString()}</MenuItem>
