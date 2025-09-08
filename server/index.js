@@ -8,8 +8,42 @@ dotenv.config();
 
 const app = express();
 const FRONT_ORIGIN = process.env.FRONT_ORIGIN || '*';
-app.use(cors({ origin: FRONT_ORIGIN === '*' ? true : FRONT_ORIGIN }));
+
+// CORS configuration for production
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'https://energy-of-money-1game.onrender.com',
+      'http://localhost:3000',
+      'http://localhost:3001'
+    ];
+    
+    if (FRONT_ORIGIN === '*' || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Bot-Token']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// Handle preflight requests
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Bot-Token');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
+
 app.get('/', (_req, res) => res.json({ ok: true, name: 'energy888-socket-server' }));
 // Telegram bot deep-link flow
 const tgSessions = new Map(); // token -> { createdAt, authorized, user }
@@ -67,7 +101,17 @@ app.get('/hall-of-fame', (_req, res) => {
 });
 
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: FRONT_ORIGIN === '*' ? true : FRONT_ORIGIN, methods: ['GET', 'POST'] } });
+const io = new Server(server, { 
+  cors: { 
+    origin: [
+      'https://energy-of-money-1game.onrender.com',
+      'http://localhost:3000',
+      'http://localhost:3001'
+    ],
+    methods: ['GET', 'POST'],
+    credentials: true
+  } 
+});
 
 // In-memory rooms and state
 // room: { id, name, creatorId, creatorUsername, creatorProfession, assignProfessionToAll, maxPlayers, password, timing, createdAt, players: Map<username, player>, started, order, currentIndex, turnEndAt, gameDurationSec, gameEndAt, deleteAfterAt }
