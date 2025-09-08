@@ -1,9 +1,6 @@
-import dynamic from 'next/dynamic';
 import { Box, Typography } from '@mui/material';
 import { useAuth } from '../lib/auth';
-
-// Disable SSR for the heavy interactive board initially to avoid window/document usage errors.
-const SimpleGameBoard = dynamic(() => import('../components/SimpleGameBoard'), { ssr: false });
+import SimpleGameBoard from '../components/SimpleGameBoard';
 
 export default function OneGamePage() {
   const { user } = useAuth();
