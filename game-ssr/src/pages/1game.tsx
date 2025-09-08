@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material';
 import { useAuth } from '../lib/auth';
 
 // Disable SSR for the heavy interactive board initially to avoid window/document usage errors.
-const OriginalGameBoard = dynamic(() => import('../components/OriginalGameBoard'), { ssr: false });
+const SimpleGameBoard = dynamic(() => import('../components/SimpleGameBoard'), { ssr: false });
 
 export default function OneGamePage() {
   const { user } = useAuth();
@@ -29,7 +29,13 @@ export default function OneGamePage() {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#0F172A' }}>
-      <OriginalGameBoard 
+      <Typography variant="h4" sx={{ color: 'white', p: 2 }}>
+        Тест: Игровое поле загружается...
+      </Typography>
+      <Typography variant="body1" sx={{ color: 'white', p: 2 }}>
+        Пользователь: {playerData.username}
+      </Typography>
+      <SimpleGameBoard 
         roomId="demo-room" 
         playerData={playerData}
       />
