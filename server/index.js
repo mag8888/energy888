@@ -32,6 +32,22 @@ app.post('/tg/bot-auth', (req, res) => {
   tgSessions.set(token, sess);
   res.json({ ok: true });
 });
+
+// Эндпоинт для авторизации через бота
+app.post('/tg/authorize', (req, res) => {
+  const botToken = process.env.BOT_TOKEN;
+  const hdr = req.headers['authorization'];
+  if (!botToken || hdr !== `Bearer ${botToken}`) {
+    return res.status(401).json({ ok: false, error: 'Unauthorized' });
+  }
+  const { token, id, username, first_name, last_name, photo_url } = req.body || {};
+  const sess = tgSessions.get(token);
+  if (!sess) return res.status(400).json({ ok: false, error: 'Invalid token' });
+  sess.authorized = true;
+  sess.user = { id, username, first_name, last_name, photo_url };
+  tgSessions.set(token, sess);
+  res.json({ ok: true });
+});
 app.get('/tg/poll', (req, res) => {
   const { token } = req.query;
   const sess = tgSessions.get(token);
@@ -198,19 +214,65 @@ io.on('connection', (socket) => {
   });
 
   // Pass turn (only current player)
-  socket.on('passTurn', ({ roomId }) => {
+  socket.on('passTurn', ({ roomId, playerId }) => {
     const room = rooms.get(roomId);
     if (!room || !room.started) return;
     const currentName = room.order[room.currentIndex];
-    const player = Array.from(room.players.values()).find(x => x.socketId === socket.id);
+    const player = Array.from(room.players.values()).find(x => x.id === playerId);
     if (!player || player.username !== currentName) return; // not your turn
     const timing = Number(room.timing || 120);
     room.currentIndex = (room.currentIndex + 1) % room.order.length;
     room.turnEndAt = Date.now() + timing * 1000;
-    io.to(roomId).emit('playerTurnChanged', {
-      currentPlayer: { username: room.order[room.currentIndex] },
+    
+    // Отправляем обновленное состояние игры
+    io.to(roomId).emit('gameState', {
+      players: Array.from(room.players.values()),
+      currentPlayerId: room.order[room.currentIndex],
+      gameStarted: room.started,
+      turnState: 'waiting'
+    });
+    
+    io.to(roomId).emit('turnPassed', {
+      nextPlayerId: room.order[room.currentIndex],
       currentPlayerIndex: room.currentIndex,
       turnTimeLeft: timing
+    });
+  });
+
+  // Roll dice
+  socket.on('rollDice', ({ roomId, playerId, value }) => {
+    const room = rooms.get(roomId);
+    if (!room || !room.started) return;
+    const currentName = room.order[room.currentIndex];
+    const player = Array.from(room.players.values()).find(x => x.id === playerId);
+    if (!player || player.username !== currentName) return; // not your turn
+    
+    // Отправляем результат всем игрокам
+    io.to(roomId).emit('diceRolled', {
+      playerId,
+      value,
+      playerName: player.username
+    });
+    
+    // Обновляем состояние игры
+    io.to(roomId).emit('gameState', {
+      players: Array.from(room.players.values()),
+      currentPlayerId: playerId,
+      gameStarted: room.started,
+      turnState: 'rolled'
+    });
+  });
+
+  // Get game state
+  socket.on('getGameState', ({ roomId }) => {
+    const room = rooms.get(roomId);
+    if (!room) return;
+    
+    socket.emit('gameState', {
+      players: Array.from(room.players.values()),
+      currentPlayerId: room.started ? room.order[room.currentIndex] : null,
+      gameStarted: room.started,
+      turnState: room.started ? 'waiting' : 'waiting'
     });
   });
 

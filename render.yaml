@@ -9,6 +9,10 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 18
+      - key: NEXT_PUBLIC_SOCKET_URL
+        value: https://energy888-socket.onrender.com
+      - key: NEXT_PUBLIC_TELEGRAM_BOT
+        value: 8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI
   - type: web
     name: energy888-socket
     env: node
@@ -21,3 +25,21 @@ services:
         value: 18
       - key: NODE_ENV
         value: production
+      - key: BOT_TOKEN
+        value: 8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI
+      - key: FRONT_ORIGIN
+        value: https://energy-of-money-1game.onrender.com
+  - type: web
+    name: energy888-telegram-bot
+    env: node
+    plan: free
+    rootDir: botEnergy
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: BOT_TOKEN
+        value: 8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI
+      - key: SOCKET_URL
+        value: https://energy888-socket.onrender.com
