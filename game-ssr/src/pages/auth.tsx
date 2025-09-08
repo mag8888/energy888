@@ -96,17 +96,16 @@ export default function AuthPage() {
           {tab === 0 && (
             <Box>
               <Typography sx={{ color: 'rgba(255,255,255,0.9)', mb: 1 }}>Регистрация</Typography>
-              <Box sx={{ display: 'grid', gap: 12, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <TextField label="Имя" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} fullWidth />
                 <TextField label="Email" value={form.email} onChange={e=>setForm({...form, email: e.target.value})} fullWidth />
                 <TextField label="Пароль" type="password" value={form.password} onChange={e=>setForm({...form, password: e.target.value})} fullWidth />
                 <GradientButton onClick={async ()=>{ try{ await registerEmail(form.name, form.email, form.password); setSnackbar('Регистрация успешна'); }catch(e:any){ setSnackbar(e.message||'Ошибка'); } }}>Создать аккаунт</GradientButton>
               </Box>
-              <Typography sx={{ color: 'rgba(255,255,255,0.6)', mt: 2, mb: 1 }}>Вход</Typography>
-              <Box sx={{ display: 'grid', gap: 12, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
+              <Typography sx={{ color: 'rgba(255,255,255,0.6)', mt: 3, mb: 1 }}>Вход</Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <TextField label="Email" value={form.email} onChange={e=>setForm({...form, email: e.target.value})} fullWidth />
                 <TextField label="Пароль" type="password" value={form.password} onChange={e=>setForm({...form, password: e.target.value})} fullWidth />
-                <Box />
                 <GradientButton variant="contained" onClick={async ()=>{ try{ await loginEmail(form.email, form.password); setSnackbar('Вход выполнен'); }catch(e:any){ setSnackbar(e.message||'Ошибка'); } }}>Войти</GradientButton>
               </Box>
             </Box>
