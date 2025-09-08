@@ -201,7 +201,7 @@ const BankModule = ({
               textShadow: '0 0 10px rgba(16, 185, 129, 0.3)',
               mb: 0.5
             }}>
-              ${(currentBalance ?? 0).toLocaleString()}
+              ${(currentBalance ?? 0).toLocaleString('en-US')}
             </Typography>
             <Typography variant="body2" sx={{ 
               color: 'rgba(255, 255, 255, 0.9)',
@@ -231,7 +231,7 @@ const BankModule = ({
                 </Typography>
               </Box>
               <Typography variant="body2" sx={{ color: '#10B981', fontWeight: 'bold', fontSize: '0.8rem' }}>
-                ${(financialInfo.salary ?? 0).toLocaleString()}
+                ${(financialInfo.salary ?? 0).toLocaleString('en-US')}
               </Typography>
             </Box>
             
@@ -247,7 +247,7 @@ const BankModule = ({
                 </Typography>
               </Box>
               <Typography variant="body2" sx={{ color: '#EF4444', fontWeight: 'bold', fontSize: '0.8rem' }}>
-                ${(financialInfo.totalExpenses ?? 0).toLocaleString()}
+                ${(financialInfo.totalExpenses ?? 0).toLocaleString('en-US')}
               </Typography>
             </Box>
             
@@ -263,7 +263,7 @@ const BankModule = ({
                 </Typography>
               </Box>
               <Typography variant="body2" sx={{ color: '#EAB308', fontWeight: 'bold', fontSize: '0.8rem' }}>
-                ${(getCashFlow() ?? 0).toLocaleString()}/мес
+                ${(getCashFlow() ?? 0).toLocaleString('en-US')}/мес
               </Typography>
             </Box>
           </Box>
@@ -287,7 +287,7 @@ const BankModule = ({
                 fontWeight: 'bold', 
                 fontSize: '0.8rem' 
               }}>
-                ${(playerCredit ?? 0).toLocaleString()}
+                ${(playerCredit ?? 0).toLocaleString('en-US')}
               </Typography>
             </Box>
             
@@ -296,7 +296,7 @@ const BankModule = ({
                 Макс. кредит:
               </Typography>
               <Typography variant="body2" sx={{ color: '#8B5CF6', fontWeight: 'bold', fontSize: '0.8rem' }}>
-                ${(getMaxCredit() ?? 0).toLocaleString()}
+                ${(getMaxCredit() ?? 0).toLocaleString('en-US')}
               </Typography>
             </Box>
             

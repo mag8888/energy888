@@ -115,7 +115,7 @@ export default function RoomsPage() {
                 </TextField>
                 <TextField select label="Мечта создателя (Большой круг)" value={createForm.dreamId} onChange={e=>setCreateForm({...createForm, dreamId: String(e.target.value)})} fullWidth>
                   {dreams.map(d => (
-                    <MenuItem key={d.id} value={d.id}>{d.name} — ${d.cost.toLocaleString()}</MenuItem>
+                    <MenuItem key={d.id} value={d.id}>{d.name} — ${d.cost.toLocaleString('en-US')}</MenuItem>
                   ))}
                 </TextField>
                 <TextField select label="Профессия" value={createForm.professionId} onChange={e=>setCreateForm({...createForm, professionId: String(e.target.value)})} fullWidth>
@@ -131,23 +131,23 @@ export default function RoomsPage() {
               <Paper sx={{ p: 2, background: '#fff', borderRadius: 2 }}>
                 <Typography variant="h6" sx={{ fontWeight: 800 }}>{prof.name}</Typography>
                 <Grid container spacing={1} sx={{ mt: 1 }}>
-                  <Grid item xs={6}><Box sx={{ p: 1, bgcolor: '#E6FFF3', borderRadius: 1, textAlign: 'center', fontWeight: 700, color: '#10B981' }}>${prof.salary.toLocaleString()}<Typography variant="caption" display="block">Зарплата</Typography></Box></Grid>
-                  <Grid item xs={6}><Box sx={{ p: 1, bgcolor: '#FFECEC', borderRadius: 1, textAlign: 'center', fontWeight: 700, color: '#EF4444' }}>${prof.totalExpenses.toLocaleString()}<Typography variant="caption" display="block">Расходы</Typography></Box></Grid>
-                  <Grid item xs={12}><Box sx={{ p: 1, border: '2px solid #16a34a', borderRadius: 1, textAlign: 'center', fontWeight: 700, color: '#16a34a' }}>${prof.cashFlow.toLocaleString()}<Typography variant="caption" display="block">Денежный поток</Typography></Box></Grid>
+                  <Grid item xs={6}><Box sx={{ p: 1, bgcolor: '#E6FFF3', borderRadius: 1, textAlign: 'center', fontWeight: 700, color: '#10B981' }}>${prof.salary.toLocaleString('en-US')}<Typography variant="caption" display="block">Зарплата</Typography></Box></Grid>
+                  <Grid item xs={6}><Box sx={{ p: 1, bgcolor: '#FFECEC', borderRadius: 1, textAlign: 'center', fontWeight: 700, color: '#EF4444' }}>${prof.totalExpenses.toLocaleString('en-US')}<Typography variant="caption" display="block">Расходы</Typography></Box></Grid>
+                  <Grid item xs={12}><Box sx={{ p: 1, border: '2px solid #16a34a', borderRadius: 1, textAlign: 'center', fontWeight: 700, color: '#16a34a' }}>${prof.cashFlow.toLocaleString('en-US')}<Typography variant="caption" display="block">Денежный поток</Typography></Box></Grid>
                 </Grid>
                 {prof.taxes || prof.otherExpenses ? (
                   <Box sx={{ mt: 1.5, color: '#374151' }}>
-                    {prof.taxes ? <Typography variant="body2">Налоги: ${prof.taxes.toLocaleString()}</Typography> : null}
-                    {prof.otherExpenses ? <Typography variant="body2">Прочие расходы: ${prof.otherExpenses.toLocaleString()}</Typography> : null}
+                    {prof.taxes ? <Typography variant="body2">Налоги: ${prof.taxes.toLocaleString('en-US')}</Typography> : null}
+                    {prof.otherExpenses ? <Typography variant="body2">Прочие расходы: ${prof.otherExpenses.toLocaleString('en-US')}</Typography> : null}
                   </Box>
                 ) : null}
                 {prof.credits?.length ? (
                   <Box sx={{ mt: 1.5 }}>
                     {prof.credits.map((c, i) => (
-                      <Typography key={i} variant="body2">{c.name}: ${c.monthly.toLocaleString()} <span style={{ color: '#6b7280' }}>(${c.principal.toLocaleString()} тело)</span></Typography>
+                      <Typography key={i} variant="body2">{c.name}: ${c.monthly.toLocaleString('en-US')} <span style={{ color: '#6b7280' }}>(${c.principal.toLocaleString('en-US')} тело)</span></Typography>
                     ))}
                     <Divider sx={{ my: 1 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>Итого тело кредитов: ${prof.creditsTotalPrincipal.toLocaleString()}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>Итого тело кредитов: ${prof.creditsTotalPrincipal.toLocaleString('en-US')}</Typography>
                   </Box>
                 ) : null}
                 <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>

@@ -145,7 +145,7 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
     if (cell.type === 'payday') {
       const salary = playerData?.profession?.salary ?? 0;
       setPlayerMoney(prev => prev + salary);
-      setToast({ open: true, severity: 'success', message: `💰 PAYDAY: +$${salary.toLocaleString()}` });
+      setToast({ open: true, severity: 'success', message: `💰 PAYDAY: +$${salary.toLocaleString('en-US')}` });
       return;
     }
     if (cell.type === 'child') {
@@ -167,7 +167,7 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
     if (cell.type === 'doodad') {
       const amount = Math.floor(100 + Math.random()*3900);
       setPlayerMoney(prev => Math.max(0, prev - amount));
-      setToast({ open: true, severity: 'warning', message: `🧾 Всякая всячина: -$${amount.toLocaleString()}` });
+      setToast({ open: true, severity: 'warning', message: `🧾 Всякая всячина: -$${amount.toLocaleString('en-US')}` });
       return;
     }
     if (cell.type === 'market') {
@@ -184,7 +184,7 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
       const loss = Math.round((playerData?.profession?.totalExpenses ?? 0) * 1);
       const amount = Math.max(loss, Math.floor(salary/2));
       setPlayerMoney(prev => Math.max(0, prev - amount));
-      setToast({ open: true, severity: 'error', message: `⚫ Потеря: -$${amount.toLocaleString()}` });
+      setToast({ open: true, severity: 'error', message: `⚫ Потеря: -$${amount.toLocaleString('en-US')}` });
       return;
     }
     // Default popup
@@ -457,12 +457,12 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
           <DialogTitle>Благотворительность</DialogTitle>
           <DialogContent>
             {(()=>{ const amount = Math.floor((playerData?.profession?.salary ?? 0 + assets.reduce((s,a)=>s+(a.income||0),0))*0.1); return (
-              <Typography>Пожертвовать 10% от дохода: ${amount.toLocaleString()}</Typography>
+              <Typography>Пожертвовать 10% от дохода: ${amount.toLocaleString('en-US')}</Typography>
             );})()}
           </DialogContent>
           <DialogActions>
             <Button onClick={()=>setCharityOpen(false)}>Отмена</Button>
-            <Button variant="contained" onClick={()=>{ const amount = Math.floor((playerData?.profession?.salary ?? 0 + assets.reduce((s,a)=>s+(a.income||0),0))*0.1); setPlayerMoney(p=>Math.max(0,p-amount)); setToast({open:true,severity:'info',message:`❤️ Благотворительность: -$${amount.toLocaleString()}`}); setCharityOpen(false); }}>Пожертвовать</Button>
+            <Button variant="contained" onClick={()=>{ const amount = Math.floor((playerData?.profession?.salary ?? 0 + assets.reduce((s,a)=>s+(a.income||0),0))*0.1); setPlayerMoney(p=>Math.max(0,p-amount)); setToast({open:true,severity:'info',message:`❤️ Благотворительность: -$${amount.toLocaleString('en-US')}`}); setCharityOpen(false); }}>Пожертвовать</Button>
           </DialogActions>
         </Dialog>
         {/* Deal dialogs */}
@@ -476,7 +476,7 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
         <Dialog open={!!currentDealCard} onClose={()=>{ cancelDeal(currentDealCard); }}>
           <DialogTitle>{currentDealCard?.name}</DialogTitle>
           <DialogContent>
-            <Typography sx={{ color: 'rgba(255,255,255,0.8)' }}>Цена: ${currentDealCard?.cost?.toLocaleString()} | Доход: ${currentDealCard?.income?.toLocaleString()}/мес</Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.8)' }}>Цена: ${currentDealCard?.cost?.toLocaleString('en-US')} | Доход: ${currentDealCard?.income?.toLocaleString('en-US')}/мес</Typography>
           </DialogContent>
           <DialogActions>
             <Button onClick={()=>cancelDeal(currentDealCard)}>Отмена</Button>

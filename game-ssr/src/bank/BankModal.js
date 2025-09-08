@@ -202,7 +202,7 @@ const BankModal = ({
     });
     
     if (amount > actualBalance) {
-      setError(`Недостаточно средств на счету. Доступно: $${actualBalance.toLocaleString()}`);
+      setError(`Недостаточно средств на счету. Доступно: $${actualBalance.toLocaleString('en-US')}`);
       return;
     }
 
@@ -454,7 +454,7 @@ const BankModal = ({
         saveTransactionHistory(updatedHistory);
       }
 
-      setSuccess(`Получен перевод $${data.amount.toLocaleString()} от ${data.fromPlayer}!`);
+      setSuccess(`Получен перевод $${data.amount.toLocaleString('en-US')} от ${data.fromPlayer}!`);
     };
 
     // Подписываемся на события
@@ -521,7 +521,7 @@ const BankModal = ({
   const displayBalance = useMemo(() => {
     const currentPlayer = getCurrentPlayer ? getCurrentPlayer() : null;
     const actualBalance = currentPlayer?.balance !== undefined ? currentPlayer.balance : (bankBalance || 0);
-    return actualBalance.toLocaleString();
+    return actualBalance.toLocaleString('en-US');
   }, [getCurrentPlayer, bankBalance]);
 
   if (!isOpen || !isInitialized) return null;
@@ -780,7 +780,7 @@ const BankModal = ({
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Сумма переводов:</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#10B981' }}>
-                      ${totalTransferAmount.toLocaleString()}
+                      ${totalTransferAmount.toLocaleString('en-US')}
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
