@@ -29,7 +29,7 @@ export default function RoomsPage() {
     if (!user) { setSnack('Сначала авторизуйтесь'); return; }
     socket.emit('createRoom', {
       id: undefined,
-      name: createForm.name || `Комната ${Math.floor(Math.random()*1000)}`,
+      name: createForm.name || `Комната ${user?.username || 'Игрока'}`,
       creatorId: user.id,
       creatorUsername: user.username,
       creatorProfession: prof,
@@ -101,7 +101,13 @@ export default function RoomsPage() {
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <Box sx={{ display: 'grid', gap: 1.2 }}>
-                <TextField label="Название" value={createForm.name} onChange={e=>setCreateForm({...createForm, name: e.target.value})} fullWidth />
+                <TextField 
+                  label="Название" 
+                  value={createForm.name} 
+                  onChange={e=>setCreateForm({...createForm, name: e.target.value})} 
+                  placeholder={`Комната ${user?.username || 'Игрока'}`}
+                  fullWidth 
+                />
                 <TextField label="Макс. игроков" type="number" value={createForm.maxPlayers} onChange={e=>setCreateForm({...createForm, maxPlayers: Number(e.target.value)})} fullWidth />
                 <TextField label="Таймер хода (сек)" type="number" value={createForm.timing} onChange={e=>setCreateForm({...createForm, timing: Number(e.target.value)})} fullWidth />
                 <TextField label="Пароль (необязательно)" value={createForm.password} onChange={e=>setCreateForm({...createForm, password: e.target.value})} fullWidth />

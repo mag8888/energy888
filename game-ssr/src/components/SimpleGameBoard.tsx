@@ -5,6 +5,8 @@ import BankModule from '../bank/BankModule';
 import { PlayerTurnSystem } from './PlayerTurnSystem';
 import { ActivityButton } from './ActivityButton';
 import { PROFESSIONS } from '../data/professions';
+import socket from '../lib/socket';
+import { useAuth } from '../lib/auth';
 
 interface SimpleGameBoardProps {
   roomId: string;
@@ -13,6 +15,7 @@ interface SimpleGameBoardProps {
 }
 
 const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, onCellClick }) => {
+  const { user } = useAuth();
   const renderOuterCells = () => {
     console.log('🔍 renderOuterCells called');
     const cells = [];
@@ -1023,29 +1026,78 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
   const [diceValue, setDiceValue] = React.useState<number | null>(null);
   const [isDiceRolling, setIsDiceRolling] = React.useState<boolean>(false);
   
-  // Состояние игроков и очередности
-  const [players, setPlayers] = React.useState([
-    {
-      id: 'player1',
-      name: 'Игрок 1',
-      profession: PROFESSIONS[0], // Предприниматель
-      color: '#4CAF50',
-      isActive: true,
-      position: 0,
-      balance: 3000
-    },
-    {
-      id: 'player2', 
-      name: 'Игрок 2',
-      profession: PROFESSIONS[1], // Программист
-      color: '#2196F3',
-      isActive: false,
-      position: 0,
-      balance: 3000
-    }
-  ]);
-  const [currentPlayerId, setCurrentPlayerId] = React.useState('player1');
-  const [canRollDice, setCanRollDice] = React.useState(true);
+  // Состояние игры
+  const [gameState, setGameState] = React.useState({
+    players: [],
+    currentPlayerId: null,
+    gameStarted: false,
+    turnState: 'waiting' // waiting, rolling, moving, passed
+  });
+  const [players, setPlayers] = React.useState([]);
+  const [currentPlayerId, setCurrentPlayerId] = React.useState(null);
+  const [canRollDice, setCanRollDice] = React.useState(false);
+  const [isMyTurn, setIsMyTurn] = React.useState(false);
+
+  // Socket.io подключение и события
+  React.useEffect(() => {
+    if (!roomId || !user) return;
+
+    // Подключаемся к комнате
+    socket.emit('joinRoom', { roomId, user });
+
+    // Обработчики событий
+    const handleGameState = (state: any) => {
+      console.log('🎮 Получено состояние игры:', state);
+      setGameState(state);
+      setPlayers(state.players || []);
+      setCurrentPlayerId(state.currentPlayerId);
+      setIsMyTurn(state.currentPlayerId === user?.id);
+      setCanRollDice(state.currentPlayerId === user?.id && state.turnState === 'waiting');
+    };
+
+    const handlePlayerJoined = (player: any) => {
+      console.log('👤 Игрок присоединился:', player);
+      setPlayers(prev => [...prev.filter(p => p.id !== player.id), player]);
+    };
+
+    const handlePlayerLeft = (playerId: string) => {
+      console.log('👋 Игрок покинул:', playerId);
+      setPlayers(prev => prev.filter(p => p.id !== playerId));
+    };
+
+    const handleDiceRolled = (data: any) => {
+      console.log('🎲 Кубик брошен:', data);
+      setDiceValue(data.value);
+      setIsDiceRolling(false);
+      setCanRollDice(false);
+    };
+
+    const handleTurnPassed = (data: any) => {
+      console.log('➡️ Ход передан:', data);
+      setCurrentPlayerId(data.nextPlayerId);
+      setIsMyTurn(data.nextPlayerId === user?.id);
+      setCanRollDice(data.nextPlayerId === user?.id);
+      setDiceValue(null);
+    };
+
+    // Подписываемся на события
+    socket.on('gameState', handleGameState);
+    socket.on('playerJoined', handlePlayerJoined);
+    socket.on('playerLeft', handlePlayerLeft);
+    socket.on('diceRolled', handleDiceRolled);
+    socket.on('turnPassed', handleTurnPassed);
+
+    // Запрашиваем текущее состояние
+    socket.emit('getGameState', { roomId });
+
+    return () => {
+      socket.off('gameState', handleGameState);
+      socket.off('playerJoined', handlePlayerJoined);
+      socket.off('playerLeft', handlePlayerLeft);
+      socket.off('diceRolled', handleDiceRolled);
+      socket.off('turnPassed', handleTurnPassed);
+    };
+  }, [roomId, user]);
   
   const handleCellClick = (num: number) => {
     setSelectedCell(num);
@@ -1065,11 +1117,12 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
   };
 
   const rollDice = () => {
-    if (isDiceRolling || !canRollDice) return;
+    if (isDiceRolling || !canRollDice || !isMyTurn) return;
     
+    console.log('🎲 Начинаем бросок кубика');
     setIsDiceRolling(true);
     setDiceValue(null);
-    setCanRollDice(false); // После броска нельзя бросать снова
+    setCanRollDice(false);
     
     // Анимация кубика
     const rollDuration = 2000; // 2 секунды
@@ -1089,7 +1142,13 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
         setDiceValue(finalValue);
         setIsDiceRolling(false);
         
-        // Здесь можно добавить логику движения игроков
+        // Отправляем результат на сервер
+        socket.emit('rollDice', { 
+          roomId, 
+          playerId: user?.id, 
+          value: finalValue 
+        });
+        
         console.log(`🎲 Выпало: ${finalValue}`);
       }
     };
@@ -1102,22 +1161,23 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
   };
 
   const handlePassTurn = () => {
-    // Передача хода следующему игроку
-    const currentIndex = players.findIndex(p => p.id === currentPlayerId);
-    const nextIndex = (currentIndex + 1) % players.length;
-    const nextPlayerId = players[nextIndex].id;
+    if (!isMyTurn || !user) return;
     
-    setCurrentPlayerId(nextPlayerId);
-    setCanRollDice(true);
-    setDiceValue(null);
+    console.log('➡️ Передаем ход следующему игроку');
     
-    console.log(`Ход передан игроку ${nextPlayerId}`);
+    // Отправляем событие на сервер
+    socket.emit('passTurn', { 
+      roomId, 
+      playerId: user.id 
+    });
   };
 
   const getActivityStatus = () => {
     if (isDiceRolling) return 'waiting';
-    if (canRollDice) return 'can-roll';
-    return 'pass-turn';
+    if (!isMyTurn) return 'waiting';
+    if (canRollDice && !diceValue) return 'can-roll';
+    if (diceValue && isMyTurn) return 'pass-turn';
+    return 'waiting';
   };
 
   console.log('🎮 SimpleGameBoard rendering');
