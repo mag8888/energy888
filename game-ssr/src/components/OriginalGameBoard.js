@@ -11,6 +11,7 @@ import CellPopup from './CellPopup';
 import { MarketDeckManager, checkPlayerHasMatchingAsset } from '../data/marketCards';
 import { ExpenseDeckManager } from '../data/expenseCards';
 import { CELL_CONFIG } from '../data/gameCells';
+import { RAT_RACE_CELLS, getRatCell } from '../data/ratRaceCells';
 import useTurnState from '../lib/useTurnState';
 import { BOARD_SIZE, OUTER_PADDING, OUTER_CELL, OUTER_STEPS, INNER_RING_RADIUS, INNER_CELL, ACTION_CARD_OFFSETS } from '../styles/boardLayout';
 import { PLAYER_COLORS, assignPlayerColor, getColorByIndex, getContrastTextColor } from '../styles/playerColors';
@@ -99,7 +100,9 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
   // Open cell popup and handle landing rules
   useEffect(() => {
     if (turnState === 'rolled') {
-      handleLanding(diceValue);
+      const newPos = (position + diceValue) % 24;
+      setPosition(newPos);
+      handleLanding(newPos);
     }
   }, [turnState, diceValue]);
 
@@ -112,19 +115,18 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
   };
 
   const handleLanding = (cellId) => {
-    // Payday cells: 6,14,22
-    if ([6,14,22].includes(cellId)) {
+    const cell = getRatCell(cellId);
+    if (cell.type === 'payday') {
       const salary = playerData?.profession?.salary ?? 0;
       setPlayerMoney(prev => prev + salary);
       setToast({ open: true, severity: 'success', message: `💰 PAYDAY: +$${salary.toLocaleString()}` });
       return;
     }
-    // Child: choose 12
-    if (cellId === 12) {
+    if (cell.type === 'child') {
       const childDice = Math.floor(Math.random()*6)+1;
       if (childDice <= 4) {
         setChildrenCount(c=>c+1);
-        setMonthlyChildExpense(e=>e+400); // базово +$400/мес
+        setMonthlyChildExpense(e=>e+500); // по описанию $500/мес
         setPlayerMoney(prev => prev + 5000);
         setToast({ open: true, severity: 'success', message: `👶 Ребёнок родился! +$5,000 (кубик ${childDice})` });
       } else {
@@ -132,13 +134,35 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
       }
       return;
     }
-    // Opportunities on odd cells
-    if ([1,3,5,7,9,11,13,15,17,19,21,23].includes(cellId)) {
+    if (cell.type === 'opportunity') {
       setDealDialogOpen(true);
       return;
     }
+    if (cell.type === 'doodad') {
+      const amount = Math.floor(100 + Math.random()*3900);
+      setPlayerMoney(prev => Math.max(0, prev - amount));
+      setToast({ open: true, severity: 'warning', message: `🧾 Всякая всячина: -$${amount.toLocaleString()}` });
+      return;
+    }
+    if (cell.type === 'market') {
+      // простой stub события рынка
+      setToast({ open: true, severity: 'info', message: '🏪 Рынок: изменения цен активов' });
+      return;
+    }
+    if (cell.type === 'charity') {
+      setCharityOpen(true);
+      return;
+    }
+    if (cell.type === 'loss') {
+      const salary = playerData?.profession?.salary ?? 0;
+      const loss = Math.round((playerData?.profession?.totalExpenses ?? 0) * 1);
+      const amount = Math.max(loss, Math.floor(salary/2));
+      setPlayerMoney(prev => Math.max(0, prev - amount));
+      setToast({ open: true, severity: 'error', message: `⚫ Потеря: -$${amount.toLocaleString()}` });
+      return;
+    }
     // Default popup
-    setSelectedCell({ id: cellId, name: `Клетка ${cellId}`, description: 'Стандартная клетка' });
+    setSelectedCell({ id: cellId, name: cell?.name || `Клетка ${cellId}`, description: cell?.type });
     setShowCellPopup(true);
   };
 
@@ -257,8 +281,9 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
               const angle = (Math.PI * 2 * k) / 24 - Math.PI / 2; // start at top
               const x = center.x + Math.cos(angle) * ringRadius - innerCell / 2;
               const y = center.y + Math.sin(angle) * ringRadius - innerCell / 2;
+              const info = getRatCell(k);
               cells.push(
-                <Box key={`inner-${k}`} sx={{ position: 'absolute', left: x, top: y, width: innerCell, height: innerCell, background: 'linear-gradient(180deg, #9B5CF6 0%, #7C3AED 100%)', border: '2px solid rgba(255,255,255,0.2)', borderRadius: '16px', boxShadow: '0 12px 30px rgba(124,58,237,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
+                <Box key={`inner-${k}`} sx={{ position: 'absolute', left: x, top: y, width: innerCell, height: innerCell, background: info.type==='loss' ? '#111' : info.color, border: '2px solid rgba(255,255,255,0.25)', borderRadius: '16px', boxShadow: '0 12px 30px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: info.type==='loss' ? '#fff' : '#fff', fontWeight: 'bold', fontSize: 14 }}>
                   {k + 1}
                 </Box>
               );
@@ -272,6 +297,14 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
                   $ Бросить
                 </Button>
               </Box>
+            );
+
+            // Player token
+            const posAngle = (Math.PI * 2 * position) / 24 - Math.PI / 2;
+            const px = center.x + Math.cos(posAngle) * ringRadius - 12;
+            const py = center.y + Math.sin(posAngle) * ringRadius - 12;
+            cells.push(
+              <Box key="token" sx={{ position: 'absolute', left: px, top: py, width: 24, height: 24, background: gamePlayers[0]?.color || '#FF5722', border: '2px solid #fff', borderRadius: '50%', boxShadow: '0 0 10px rgba(255,255,255,0.5)' }} />
             );
 
             // Four action cards placed between outer square and inner ring
@@ -362,8 +395,22 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
           <DialogContent>
             <ProfessionDetails profession={selectedPlayer?.profession} />
           </DialogContent>
+  const [position, setPosition] = useState(0); // 0..23
           <DialogActions>
             <Button onClick={() => setShowProfession(false)}>Закрыть</Button>
+          </DialogActions>
+        </Dialog>
+        {/* Charity dialog */}
+        <Dialog open={!!charityOpen} onClose={()=>setCharityOpen(false)}>
+          <DialogTitle>Благотворительность</DialogTitle>
+          <DialogContent>
+            {(()=>{ const amount = Math.floor((playerData?.profession?.salary ?? 0 + assets.reduce((s,a)=>s+(a.income||0),0))*0.1); return (
+              <Typography>Пожертвовать 10% от дохода: ${amount.toLocaleString()}</Typography>
+            );})()}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={()=>setCharityOpen(false)}>Отмена</Button>
+            <Button variant="contained" onClick={()=>{ const amount = Math.floor((playerData?.profession?.salary ?? 0 + assets.reduce((s,a)=>s+(a.income||0),0))*0.1); setPlayerMoney(p=>Math.max(0,p-amount)); setToast({open:true,severity:'info',message:`❤️ Благотворительность: -$${amount.toLocaleString()}`}); setCharityOpen(false); }}>Пожертвовать</Button>
           </DialogActions>
         </Dialog>
         {/* Deal dialogs */}

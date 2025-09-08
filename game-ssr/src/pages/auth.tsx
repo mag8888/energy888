@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Button, Card, CardContent, Tab, Tabs, TextField, Typography, Alert, Snackbar } from '@mui/material';
+import { Avatar, Box, Button, Card, CardContent, Tab, Tabs, TextField, Typography, Alert, Snackbar, Stack } from '@mui/material';
 import { useAuth } from '@/lib/auth';
+import GlassCard from '@/ui/GlassCard';
+import GradientButton from '@/ui/GradientButton';
 
 export default function AuthPage() {
   const { user, registerEmail, loginEmail, loginTelegram } = useAuth();
@@ -40,31 +42,49 @@ export default function AuthPage() {
   }, [tab, bot, loginTelegram]);
 
   return (
-    <Box sx={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
-      <Card sx={{ maxWidth: 560, width: '100%', background: 'linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,41,59,0.9))', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3 }}>
-        <CardContent>
-          <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', mb: 1 }}>Вход / Регистрация</Typography>
-          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', mb: 2 }}>Выберите способ авторизации. После входа вам назначим User ID и используем его в игре.</Typography>
-          <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
-            <Tab label="Email" />
-            <Tab label="Telegram" />
-          </Tabs>
+    <Box sx={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: { xs: 1.5, md: 4 }, gap: 3, flexDirection: 'column' }}>
+      {/* Profile welcome panel */}
+      {user && (
+        <GlassCard sx={{ maxWidth: 960, width: '100%', p: 2.5 }}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Avatar sx={{ width: 48, height: 48, background: 'linear-gradient(135deg,#06B6D4,#8B5CF6,#EC4899)', color: '#fff' }}>{user.username?.[0]?.toUpperCase()||'U'}</Avatar>
+              <Box>
+                <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 20 }}>{user.username}</Typography>
+                <Typography sx={{ color: 'rgba(255,255,255,0.75)' }}>Добро пожаловать в игру!</Typography>
+              </Box>
+            </Stack>
+            <Stack direction={{ xs:'column', sm:'row' }} spacing={1}>
+              <Button href="/1game" variant="outlined" sx={{ borderColor:'rgba(255,255,255,0.2)', color:'#fff' }}>Перейти в игру</Button>
+              <Button onClick={()=>location.reload()} variant="outlined" sx={{ borderColor:'rgba(255,255,255,0.2)', color:'#fff' }}>Обновить</Button>
+            </Stack>
+          </Stack>
+        </GlassCard>
+      )}
+
+      <GlassCard sx={{ maxWidth: 960, width: '100%' }}>
+        <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', mb: 1 }}>Вход / Регистрация</Typography>
+        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', mb: 2 }}>Выберите способ авторизации. После входа вам назначим User ID и используем его в игре.</Typography>
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
+          <Tab label="Email" />
+          <Tab label="Telegram" />
+        </Tabs>
 
           {tab === 0 && (
             <Box>
               <Typography sx={{ color: 'rgba(255,255,255,0.9)', mb: 1 }}>Регистрация</Typography>
-              <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: '1fr 1fr' }}>
+              <Box sx={{ display: 'grid', gap: 12, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
                 <TextField label="Имя" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} fullWidth />
                 <TextField label="Email" value={form.email} onChange={e=>setForm({...form, email: e.target.value})} fullWidth />
                 <TextField label="Пароль" type="password" value={form.password} onChange={e=>setForm({...form, password: e.target.value})} fullWidth />
-                <Button variant="contained" onClick={async ()=>{ try{ await registerEmail(form.name, form.email, form.password); setSnackbar('Регистрация успешна'); }catch(e:any){ setSnackbar(e.message||'Ошибка'); } }}>Зарегистрироваться</Button>
+                <GradientButton onClick={async ()=>{ try{ await registerEmail(form.name, form.email, form.password); setSnackbar('Регистрация успешна'); }catch(e:any){ setSnackbar(e.message||'Ошибка'); } }}>Создать аккаунт</GradientButton>
               </Box>
               <Typography sx={{ color: 'rgba(255,255,255,0.6)', mt: 2, mb: 1 }}>Вход</Typography>
-              <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: '1fr 1fr' }}>
+              <Box sx={{ display: 'grid', gap: 12, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
                 <TextField label="Email" value={form.email} onChange={e=>setForm({...form, email: e.target.value})} fullWidth />
                 <TextField label="Пароль" type="password" value={form.password} onChange={e=>setForm({...form, password: e.target.value})} fullWidth />
                 <Box />
-                <Button variant="outlined" onClick={async ()=>{ try{ await loginEmail(form.email, form.password); setSnackbar('Вход выполнен'); }catch(e:any){ setSnackbar(e.message||'Ошибка'); } }}>Войти</Button>
+                <GradientButton variant="contained" onClick={async ()=>{ try{ await loginEmail(form.email, form.password); setSnackbar('Вход выполнен'); }catch(e:any){ setSnackbar(e.message||'Ошибка'); } }}>Войти</GradientButton>
               </Box>
             </Box>
           )}
@@ -73,18 +93,17 @@ export default function AuthPage() {
             <Box sx={{ textAlign: 'center' }}>
               <Box id="tg-mount" />
               <Typography sx={{ color: 'rgba(255,255,255,0.6)', mt: 2 }}>Или откройте бота и нажмите «Играть»:</Typography>
-              <Button href={`https://t.me/${bot}`} target="_blank" rel="noreferrer" variant="outlined" sx={{ mt: 1 }}>Открыть бота</Button>
+              <GradientButton href={`https://t.me/${bot}`} target="_blank" rel="noreferrer" sx={{ mt: 1 }}>Открыть бота</GradientButton>
             </Box>
           )}
 
           {user && (
-            <Box sx={{ mt: 3, p: 2, border: '1px solid rgba(34,197,94,0.4)', borderRadius: 2, background: 'rgba(34,197,94,0.08)' }}>
+            <GlassCard sx={{ mt: 3, p: 2 }}>
               <Typography sx={{ color: '#22C55E' }}>В системе как: <b>{user.username}</b> (ID: {user.id})</Typography>
-              <Button href="/1game" variant="contained" sx={{ mt: 1 }}>Перейти в игру</Button>
-            </Box>
+              <GradientButton href="/1game" sx={{ mt: 1 }}>Перейти в игру</GradientButton>
+            </GlassCard>
           )}
-        </CardContent>
-      </Card>
+      </GlassCard>
       <Snackbar open={!!snackbar} autoHideDuration={2500} onClose={()=>setSnackbar(null)}>
         <Alert severity="info">{snackbar}</Alert>
       </Snackbar>
