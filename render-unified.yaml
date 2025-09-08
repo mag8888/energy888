@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: energy888-unified-server
+    env: node
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && node unified-server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BOT_TOKEN
+        value: 8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI
+      - key: PORT
+        value: 10000
+    healthCheckPath: /health
+    autoDeploy: true
+    branch: main

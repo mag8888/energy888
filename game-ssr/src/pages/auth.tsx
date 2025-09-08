@@ -66,7 +66,7 @@ export default function AuthPage() {
   
   const createBotToken = async () => {
     try {
-      const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-socket.onrender.com';
+      const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-unified-server.onrender.com';
       
       console.log('🔌 Попытка подключения к серверу:', socketUrl);
       

@@ -83,7 +83,7 @@ class SocketStub {
 const sock: any = new SocketStub();
 
 declare const process: any;
-const url = typeof window !== 'undefined' ? (process?.env?.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-socket.onrender.com') : undefined;
+const url = typeof window !== 'undefined' ? (process?.env?.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-unified-server.onrender.com') : undefined;
 
 // Lazy upgrade to real socket in browser
 if (typeof window !== 'undefined' && url) {

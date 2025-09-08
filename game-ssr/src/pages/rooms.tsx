@@ -76,7 +76,7 @@ export default function RoomsPage() {
       const j = await r.json();
       
       if (j.ok) {
-        const botUrl = `https://t.me/energy_money_bot?start=login_${j.token}`;
+        const botUrl = `https://t.me/energy_m_bot?start=login_${j.token}`;
         setSnack('Открываем Telegram для авторизации...');
         
         // Открываем бота в новом окне
