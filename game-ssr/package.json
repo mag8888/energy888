@@ -10,21 +10,19 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@emotion/react": "11.11.3",
+    "@emotion/react": "^11.7.1",
     "@emotion/styled": "11.11.5",
     "@mui/icons-material": "5.15.20",
     "@mui/material": "5.15.20",
-    "framer-motion": "11.0.22",
-    "next": "^14.2.32",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "socket.io-client": "4.7.5"
+    "framer-motion": "^11.3.12",
+    "next": "14.2.32",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
-    "@types/node": "20.14.9",
-    "@types/react": "18.3.3",
-    "eslint": "8.57.0",
-    "eslint-config-next": "14.2.5",
-    "typescript": "5.5.4"
+    "@types/node": "^22.9.0",
+    "@types/react": "^18.3.12",
+    "typescript": "^5.7.2"
   }
 }
