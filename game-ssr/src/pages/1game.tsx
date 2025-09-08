@@ -1,6 +1,23 @@
 import { Box, Typography } from '@mui/material';
 import { useAuth } from '../lib/auth';
-import SimpleGameBoard from '../components/SimpleGameBoard';
+import dynamic from 'next/dynamic';
+
+// Динамический импорт без SSR для предотвращения ошибок серверного рендеринга
+const SimpleGameBoard = dynamic(() => import('../components/SimpleGameBoard'), {
+  ssr: false,
+  loading: () => (
+    <Box sx={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#fff'
+    }}>
+      <Typography variant="h4">Загрузка игрового поля...</Typography>
+    </Box>
+  )
+});
 
 export default function OneGamePage() {
   const { user } = useAuth();

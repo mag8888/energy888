@@ -1044,6 +1044,22 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
 
   console.log('🎮 SimpleGameBoard rendering');
   
+  // Проверка на клиентскую сторону для предотвращения ошибок SSR
+  if (typeof window === 'undefined') {
+    return (
+      <Box sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#fff'
+      }}>
+        <Typography variant="h4">Загрузка игрового поля...</Typography>
+      </Box>
+    );
+  }
+  
   return (
     <Box sx={{
       minHeight: '100vh',
