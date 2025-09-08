@@ -61,7 +61,6 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
             background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
             borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            position: 'relative',
             overflow: 'hidden',
             cursor: 'pointer',
             transition: 'all 0.3s ease',
@@ -154,7 +153,6 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
             background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
             borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            position: 'relative',
             overflow: 'hidden',
             cursor: 'pointer',
             transition: 'all 0.3s ease',
@@ -244,7 +242,6 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
             background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
             borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            position: 'relative',
             overflow: 'hidden',
             cursor: 'pointer',
             transition: 'all 0.3s ease',
@@ -334,7 +331,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
             background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
             borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            position: 'relative',
+            // removed duplicate position key to satisfy TS literal rules
             overflow: 'hidden',
             cursor: 'pointer',
             transition: 'all 0.3s ease',
@@ -755,7 +752,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
       <Box sx={{ display: 'flex', gap: 2 }}>
         <Box sx={{ position: 'relative' }}>
           <Box sx={{ 
-            position: 'relative', 
+            // removed duplicate position key to satisfy TS literal rules
             width: BOARD_SIZE, 
             height: BOARD_SIZE, 
             borderRadius: 4, 
