@@ -46,7 +46,13 @@ export const useGameLogic = () => {
         onLoss(lossAmount);
         break;
       default:
-        onDefault(cell);
+        onDefault({
+          id: cellId,
+          name: cell.name || `Клетка ${cellId}`,
+          type: cell.type || 'default',
+          color: cell.color,
+          description: cell.description
+        });
     }
   }, []);
 

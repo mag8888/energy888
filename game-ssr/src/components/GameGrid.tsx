@@ -2,12 +2,20 @@ import React, { memo, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { BOARD_SIZE, OUTER_PADDING, OUTER_CELL, OUTER_STEPS, INNER_RING_RADIUS, INNER_CELL, ACTION_CARD_OFFSETS } from '../styles/boardLayout';
 
+// Helper function - should be imported from data
+const getRatCell = (id: number) => ({
+  id,
+  name: `Клетка ${id + 1}`,
+  type: 'default' as string,
+  color: '#8B5CF6'
+});
+
 interface GameGridProps {
   scale: number;
   onCellClick?: (cellId: number) => void;
 }
 
-const GameGrid: React.FC<GameGridProps> = memo(({ scale, onCellClick }) => {
+const GameGrid: React.FC<GameGridProps> = ({ scale, onCellClick }) => {
   const renderOuterCells = useMemo(() => {
     const cells = [];
     const boardSize = BOARD_SIZE;
@@ -162,14 +170,14 @@ const GameGrid: React.FC<GameGridProps> = memo(({ scale, onCellClick }) => {
             top: y, 
             width: innerCell, 
             height: innerCell, 
-            background: info.type === 'loss' ? '#111' : info.color, 
+            background: (info.type as string) === 'loss' ? '#111' : info.color, 
             border: '2px solid rgba(255,255,255,0.25)', 
             borderRadius: '16px', 
             boxShadow: '0 12px 30px rgba(0,0,0,0.25)', 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center', 
-            color: info.type === 'loss' ? '#fff' : '#fff', 
+            color: (info.type as string) === 'loss' ? '#fff' : '#fff', 
             fontWeight: 'bold', 
             fontSize: 14,
             cursor: 'pointer'
@@ -235,22 +243,12 @@ const GameGrid: React.FC<GameGridProps> = memo(({ scale, onCellClick }) => {
       background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.01) 100%)', 
       border: '2px solid rgba(139,92,246,0.3)' 
     }}>
-      {renderOuterCells()}
-      {renderInnerRing()}
-      {renderActionCards()}
+      {renderOuterCells}
+      {renderInnerRing}
+      {renderActionCards}
     </Box>
   );
 };
-
-// Helper function - should be imported from data
-const getRatCell = (id: number) => ({
-  id,
-  name: `Клетка ${id + 1}`,
-  type: 'default' as const,
-  color: '#8B5CF6'
-});
-
-});
 
 GameGrid.displayName = 'GameGrid';
 
