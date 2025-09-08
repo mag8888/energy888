@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Avatar, Box, Button, Card, CardContent, Tab, Tabs, TextField, Typography, Alert, Snackbar, Stack } from '@mui/material';
+import { useRouter } from 'next/router';
 import { useAuth } from '@/lib/auth';
 import GlassCard from '@/ui/GlassCard';
 import GradientButton from '@/ui/GradientButton';
 
 export default function AuthPage() {
+  const router = useRouter();
   const { user, registerEmail, loginEmail, loginTelegram, logout } = useAuth();
   const [tab, setTab] = useState(0);
   const [snackbar, setSnackbar] = useState<string | null>(null);
@@ -23,6 +25,41 @@ export default function AuthPage() {
     localStorage.setItem('eom_auth_tab', String(tab));
   }, [tab]);
 
+  // Функции для обработки успешной авторизации
+  const handleSuccessfulAuth = (message: string) => {
+    setSnackbar(message);
+    setTimeout(() => {
+      router.push('/rooms');
+    }, 1500);
+  };
+
+  const handleRegister = async () => {
+    try {
+      await registerEmail(form.name, form.email, form.password);
+      handleSuccessfulAuth('Регистрация успешна! Переходим в лобби...');
+    } catch (e: any) {
+      setSnackbar(e.message || 'Ошибка');
+    }
+  };
+
+  const handleLogin = async () => {
+    try {
+      await loginEmail(form.email, form.password);
+      handleSuccessfulAuth('Вход выполнен! Переходим в лобби...');
+    } catch (e: any) {
+      setSnackbar(e.message || 'Ошибка');
+    }
+  };
+
+  const handleTelegramLogin = async (userData: any) => {
+    try {
+      await loginTelegram(userData);
+      handleSuccessfulAuth('Вход через Telegram выполнен! Переходим в лобби...');
+    } catch (e: any) {
+      setSnackbar(e.message || 'Ошибка');
+    }
+  };
+
   // Генерация ссылки для входа через бота
   const [botToken, setBotToken] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
@@ -30,7 +67,20 @@ export default function AuthPage() {
   const createBotToken = async () => {
     try {
       const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-socket.onrender.com';
-      const r = await fetch(`${socketUrl}/tg/new-token`);
+      
+      // Пробуем подключиться к серверу
+      const r = await fetch(`${socketUrl}/tg/new-token`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors'
+      });
+      
+      if (!r.ok) {
+        throw new Error(`Server error: ${r.status}`);
+      }
+      
       const j = await r.json();
       setBotToken(j.token);
       setAuthLoading(true);
@@ -38,28 +88,56 @@ export default function AuthPage() {
       // Ожидаем авторизации через бота
       const t0 = Date.now();
       const iv = setInterval(async () => {
-        const p = await fetch(`${socketUrl}/tg/poll?token=${j.token}`);
-        const pj = await p.json();
-        if (pj?.authorized) {
-          clearInterval(iv);
-          setAuthLoading(false);
-          await loginTelegram({ 
-            id: pj.user.id, 
-            username: pj.user.username, 
-            first_name: pj.user.first_name, 
-            last_name: pj.user.last_name, 
-            photo_url: pj.user.photo_url 
+        try {
+          const p = await fetch(`${socketUrl}/tg/poll?token=${j.token}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            mode: 'cors'
           });
-          setSnackbar('Вход через бота выполнен!');
-        } else if (Date.now() - t0 > 5 * 60 * 1000) {
+          
+          if (!p.ok) {
+            throw new Error(`Poll error: ${p.status}`);
+          }
+          
+          const pj = await p.json();
+          if (pj?.authorized) {
+            clearInterval(iv);
+            setAuthLoading(false);
+            await handleTelegramLogin({ 
+              id: pj.user.id, 
+              username: pj.user.username, 
+              first_name: pj.user.first_name, 
+              last_name: pj.user.last_name, 
+              photo_url: pj.user.photo_url 
+            });
+          } else if (Date.now() - t0 > 5 * 60 * 1000) {
+            clearInterval(iv);
+            setAuthLoading(false);
+            setBotToken(null);
+            setSnackbar('Время ожидания истекло');
+          }
+        } catch (pollError) {
+          console.warn('Poll error:', pollError);
           clearInterval(iv);
           setAuthLoading(false);
           setBotToken(null);
-          setSnackbar('Время ожидания истекло');
+          setSnackbar('Ошибка подключения к серверу');
         }
       }, 2000);
     } catch (e: any) {
-      setSnackbar(e?.message || 'Ошибка создания ссылки');
+      console.warn('Server connection failed, using fallback:', e);
+      
+      // Fallback: создаем демо-токен для тестирования
+      const demoToken = `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setBotToken(demoToken);
+      setSnackbar('Сервер недоступен. Используется демо-режим. Нажмите "Войти" для тестирования.');
+      
+      // Показываем кнопку для демо-входа
+      setTimeout(() => {
+        setAuthLoading(false);
+      }, 1000);
     }
   };
 
@@ -100,13 +178,13 @@ export default function AuthPage() {
                 <TextField label="Имя" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} fullWidth />
                 <TextField label="Email" value={form.email} onChange={e=>setForm({...form, email: e.target.value})} fullWidth />
                 <TextField label="Пароль" type="password" value={form.password} onChange={e=>setForm({...form, password: e.target.value})} fullWidth />
-                <GradientButton onClick={async ()=>{ try{ await registerEmail(form.name, form.email, form.password); setSnackbar('Регистрация успешна'); }catch(e:any){ setSnackbar(e.message||'Ошибка'); } }}>Создать аккаунт</GradientButton>
+                <GradientButton onClick={handleRegister}>Создать аккаунт</GradientButton>
               </Box>
               <Typography sx={{ color: 'rgba(255,255,255,0.6)', mt: 3, mb: 1 }}>Вход</Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <TextField label="Email" value={form.email} onChange={e=>setForm({...form, email: e.target.value})} fullWidth />
                 <TextField label="Пароль" type="password" value={form.password} onChange={e=>setForm({...form, password: e.target.value})} fullWidth />
-                <GradientButton variant="contained" onClick={async ()=>{ try{ await loginEmail(form.email, form.password); setSnackbar('Вход выполнен'); }catch(e:any){ setSnackbar(e.message||'Ошибка'); } }}>Войти</GradientButton>
+                <GradientButton variant="contained" onClick={handleLogin}>Войти</GradientButton>
               </Box>
             </Box>
           )}
@@ -118,9 +196,33 @@ export default function AuthPage() {
               </Typography>
               
               {!botToken ? (
-                <GradientButton onClick={createBotToken} sx={{ mb: 2 }}>
-                  🔗 Сгенерировать ссылку входа
-                </GradientButton>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+                  <GradientButton onClick={createBotToken} sx={{ mb: 1 }}>
+                    🔗 Сгенерировать ссылку входа
+                  </GradientButton>
+                  <GradientButton 
+                    onClick={async () => {
+                      // Демо-вход через Telegram
+                      const demoUser = {
+                        id: Math.floor(Math.random() * 1000000),
+                        username: `demo_user_${Math.floor(Math.random() * 1000)}`,
+                        first_name: 'Demo',
+                        last_name: 'User',
+                        photo_url: null
+                      };
+                      await handleTelegramLogin(demoUser);
+                    }}
+                    sx={{ 
+                      bgcolor: 'rgba(34, 197, 94, 0.1)', 
+                      border: '1px solid rgba(34, 197, 94, 0.3)',
+                      '&:hover': {
+                        bgcolor: 'rgba(34, 197, 94, 0.2)',
+                      }
+                    }}
+                  >
+                    🎮 Демо-вход (без бота)
+                  </GradientButton>
+                </Box>
               ) : (
                 <Box>
                   <GradientButton 
