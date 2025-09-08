@@ -638,9 +638,9 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
 
     let idx = 1;
 
-    const make = (num: number, left: number, top: number) => {
-      const typeIcon = getCellType(num);
-      const baseColor = getCellColor(num);
+    const make = (num: number, left: number, top: number, opts?: { icon?: string; color?: string }) => {
+      const typeIcon = opts?.icon ?? getCellType(num);
+      const baseColor = opts?.color ?? getCellColor(num);
       const isBusiness = typeIcon === '💼';
       const owned = Array.isArray(playerData?.ownedBusinessCells) && playerData.ownedBusinessCells.includes(num);
       const playerColor = playerData?.color || '#3B82F6';
@@ -676,8 +676,14 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
     for (let i = 0; i < 14; i++) cells.push(make(idx++, left0 + i * step, top0));
     // right 15..26 (shifted down by 1 cell to avoid corner)
     for (let i = 0; i < 12; i++) cells.push(make(idx++, rightX, top0 + (i + 1) * step));
-    // bottom 27..40 (right->left)
-    for (let i = 0; i < 14; i++) cells.push(make(idx++, left0 + (13 - i) * step, bottomY));
+    // bottom 27..40 (right->left) — TEMP: varied tones and icons for demo
+    const demoIcons = ['💼','🎯','💰','⚠️','🎗️','🧭','🏦','🛒','🧮','🏆','🚀','🏝️','🧩','🔧'];
+    const demoTones = ['#10B981','#3B82F6','#F59E0B','#EF4444','#8B5CF6','#06B6D4','#22C55E','#EC4899','#0EA5E9','#F97316','#14B8A6','#84CC16','#FB7185','#A855F7'];
+    for (let i = 0; i < 14; i++) {
+      const overrideIcon = demoIcons[i % demoIcons.length];
+      const overrideColor = demoTones[i % demoTones.length];
+      cells.push(make(idx++, left0 + (13 - i) * step, bottomY, { icon: overrideIcon, color: overrideColor }));
+    }
     // left 41..52 (bottom->top, also exclude corners)
     for (let i = 0; i < 12; i++) cells.push(make(idx++, left0, top0 + (12 - i) * step));
 
