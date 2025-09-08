@@ -60,8 +60,8 @@ bot_status=$?
 check_server "Game App" "https://energy888.onrender.com" "200"
 game_status=$?
 
-# Проверка Minimal Server (если уже создан)
-check_server "Minimal Server" "https://energy888-minimal-server.onrender.com" "200"
+# Проверка Socket Server (если уже создан)
+check_server "Socket Server" "https://energy888-socket-server.onrender.com" "200"
 unified_status=$?
 
 echo ""
@@ -73,10 +73,10 @@ if [ $bot_status -eq 0 ]; then
     check_api "Bot Health" "https://botenergy-7to1.onrender.com/health" "OK"
 fi
 
-# Проверка Minimal Server API (если доступен)
+# Проверка Socket Server API (если доступен)
 if [ $unified_status -eq 0 ]; then
-    check_api "Minimal Health" "https://energy888-minimal-server.onrender.com/health" "ok"
-    check_api "Minimal Token" "https://energy888-minimal-server.onrender.com/tg/new-token" "token"
+    check_api "Socket Health" "https://energy888-socket-server.onrender.com/health" "ok"
+    check_api "Socket Token" "https://energy888-socket-server.onrender.com/tg/new-token" "token"
 fi
 
 echo ""
@@ -96,25 +96,25 @@ else
 fi
 
 if [ $unified_status -eq 0 ]; then
-    echo -e "🔧 Minimal Server: ${GREEN}✅ Работает${NC}"
+    echo -e "🔧 Socket Server: ${GREEN}✅ Работает${NC}"
 else
-    echo -e "🔧 Minimal Server: ${YELLOW}⏳ Нужно создать${NC}"
+    echo -e "🔧 Socket Server: ${YELLOW}⏳ Нужно создать${NC}"
 fi
 
 echo ""
 echo "📝 Следующие шаги:"
 
 if [ $unified_status -ne 0 ]; then
-    echo "1. Создайте Minimal Server на Render.com"
-    echo "   - Name: energy888-minimal-server"
+    echo "1. Создайте Socket Server на Render.com"
+    echo "   - Name: energy888-socket-server"
     echo "   - Build: cd server && npm install"
-    echo "   - Start: cd server && node minimal-server.js"
+    echo "   - Start: cd server && node socket-server.js"
     echo "   - Env: NODE_ENV=production, PORT=10000"
 fi
 
 if [ $game_status -eq 0 ] && [ $unified_status -eq 0 ]; then
     echo "2. Обновите Game App с новыми переменными:"
-    echo "   - NEXT_PUBLIC_SOCKET_URL=https://energy888-minimal-server.onrender.com"
+    echo "   - NEXT_PUBLIC_SOCKET_URL=https://energy888-socket-server.onrender.com"
     echo "   - NEXT_PUBLIC_TELEGRAM_BOT=energy_m_bot"
     echo "3. Пересоберите Game App"
 fi
@@ -123,6 +123,6 @@ echo ""
 echo "🔗 Полезные ссылки:"
 echo "   - Bot Server: https://botenergy-7to1.onrender.com"
 echo "   - Game App: https://energy888.onrender.com"
-echo "   - Minimal Server: https://energy888-minimal-server.onrender.com"
+echo "   - Socket Server: https://energy888-socket-server.onrender.com"
 echo "   - Telegram Bot: https://t.me/energy_m_bot"
 echo "   - Render Dashboard: https://dashboard.render.com"
