@@ -19,10 +19,22 @@ export default function RoomsPage() {
   const [joinRoomId, setJoinRoomId] = useState<string | null>(null);
 
   useEffect(() => {
-    const handleRooms = (list:any[]) => setRooms(list);
+    const handleRooms = (list:any[]) => {
+      console.log('📋 Получен список комнат:', list);
+      setRooms(list);
+    };
+    
+    console.log('🔌 Подключаемся к Socket.IO...');
+    console.log('🔌 Socket connected:', socket.connected);
+    console.log('🔌 Socket ID:', socket.id);
+    
     socket.on('roomsList', handleRooms);
     socket.emit('getRooms');
-    return () => { socket.off('roomsList', handleRooms); };
+    
+    return () => { 
+      console.log('🔌 Отключаемся от Socket.IO');
+      socket.off('roomsList', handleRooms); 
+    };
   }, []);
 
   const doCreate = () => {
