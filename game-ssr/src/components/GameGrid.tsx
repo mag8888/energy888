@@ -27,6 +27,14 @@ const GameGrid: React.FC<GameGridProps> = ({ scale, onCellClick }) => {
 
     // TOP row (13)
     for (let i = 0; i <= 12; i++) {
+      const cellNumber = i + 1;
+      const getCellIcon = (num: number) => {
+        if (num === 1) return '🏁'; // Start
+        if (num === 7) return '💰'; // Payday
+        if (num === 13) return '🎯'; // Goal
+        return '';
+      };
+      
       cells.push(
         <Box 
           key={`t-${i}`} 
@@ -46,17 +54,35 @@ const GameGrid: React.FC<GameGridProps> = ({ scale, onCellClick }) => {
             color: '#04233B', 
             fontWeight: 'bold', 
             fontSize: 12,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            position: 'relative'
           }}
-          onClick={() => onCellClick?.(i + 1)}
+          onClick={() => onCellClick?.(cellNumber)}
         >
-          {i + 1}
+          <Box sx={{ fontSize: '20px', mb: 0.5 }}>{getCellIcon(cellNumber)}</Box>
+          <Box sx={{ 
+            position: 'absolute', 
+            bottom: '2px', 
+            left: '2px', 
+            fontSize: '10px', 
+            fontWeight: 'bold',
+            color: '#04233B'
+          }}>
+            {cellNumber}
+          </Box>
         </Box>
       );
     }
 
     // RIGHT column (12 without corners)
     for (let i = 1; i <= 12; i++) {
+      const cellNumber = 13 + i;
+      const getCellIcon = (num: number) => {
+        if (num === 20) return '👶'; // Child
+        if (num === 25) return '🎲'; // Opportunity
+        return '';
+      };
+      
       cells.push(
         <Box 
           key={`r-${i}`} 
@@ -76,17 +102,36 @@ const GameGrid: React.FC<GameGridProps> = ({ scale, onCellClick }) => {
             color: '#04233B', 
             fontWeight: 'bold', 
             fontSize: 12,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            position: 'relative'
           }}
-          onClick={() => onCellClick?.(13 + i)}
+          onClick={() => onCellClick?.(cellNumber)}
         >
-          {13 + i}
+          <Box sx={{ fontSize: '20px', mb: 0.5 }}>{getCellIcon(cellNumber)}</Box>
+          <Box sx={{ 
+            position: 'absolute', 
+            bottom: '2px', 
+            left: '2px', 
+            fontSize: '10px', 
+            fontWeight: 'bold',
+            color: '#04233B'
+          }}>
+            {cellNumber}
+          </Box>
         </Box>
       );
     }
 
     // BOTTOM row (13)
     for (let i = 0; i <= 12; i++) {
+      const cellNumber = 26 + i;
+      const getCellIcon = (num: number) => {
+        if (num === 30) return '🛒'; // Doodad
+        if (num === 35) return '📈'; // Market
+        if (num === 38) return '❤️'; // Charity
+        return '';
+      };
+      
       cells.push(
         <Box 
           key={`b-${i}`} 
@@ -106,17 +151,36 @@ const GameGrid: React.FC<GameGridProps> = ({ scale, onCellClick }) => {
             color: '#04233B', 
             fontWeight: 'bold', 
             fontSize: 12,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            position: 'relative'
           }}
-          onClick={() => onCellClick?.(26 + i)}
+          onClick={() => onCellClick?.(cellNumber)}
         >
-          {26 + i}
+          <Box sx={{ fontSize: '20px', mb: 0.5 }}>{getCellIcon(cellNumber)}</Box>
+          <Box sx={{ 
+            position: 'absolute', 
+            bottom: '2px', 
+            left: '2px', 
+            fontSize: '10px', 
+            fontWeight: 'bold',
+            color: '#04233B'
+          }}>
+            {cellNumber}
+          </Box>
         </Box>
       );
     }
 
     // LEFT column (12 without corners)
     for (let i = 1; i <= 12; i++) {
+      const cellNumber = 39 + i;
+      const getCellIcon = (num: number) => {
+        if (num === 42) return '💸'; // Loss
+        if (num === 45) return '🎯'; // Goal
+        if (num === 50) return '🏆'; // Victory
+        return '';
+      };
+      
       cells.push(
         <Box 
           key={`l-${i}`} 
@@ -136,11 +200,22 @@ const GameGrid: React.FC<GameGridProps> = ({ scale, onCellClick }) => {
             color: '#04233B', 
             fontWeight: 'bold', 
             fontSize: 12,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            position: 'relative'
           }}
-          onClick={() => onCellClick?.(39 + i)}
+          onClick={() => onCellClick?.(cellNumber)}
         >
-          {39 + i}
+          <Box sx={{ fontSize: '20px', mb: 0.5 }}>{getCellIcon(cellNumber)}</Box>
+          <Box sx={{ 
+            position: 'absolute', 
+            bottom: '2px', 
+            left: '2px', 
+            fontSize: '10px', 
+            fontWeight: 'bold',
+            color: '#04233B'
+          }}>
+            {cellNumber}
+          </Box>
         </Box>
       );
     }
@@ -160,6 +235,16 @@ const GameGrid: React.FC<GameGridProps> = ({ scale, onCellClick }) => {
       const x = center.x + Math.cos(angle) * ringRadius - innerCell / 2;
       const y = center.y + Math.sin(angle) * ringRadius - innerCell / 2;
       const info = getRatCell(k);
+      const cellNumber = k + 1;
+      
+      const getInnerIcon = (num: number) => {
+        if (num === 1) return '🏁'; // Start
+        if (num === 6) return '💰'; // Payday
+        if (num === 12) return '👶'; // Child
+        if (num === 18) return '🎲'; // Opportunity
+        if (num === 24) return '🎯'; // Goal
+        return '';
+      };
       
       cells.push(
         <Box 
@@ -180,11 +265,22 @@ const GameGrid: React.FC<GameGridProps> = ({ scale, onCellClick }) => {
             color: (info.type as string) === 'loss' ? '#fff' : '#fff', 
             fontWeight: 'bold', 
             fontSize: 14,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            position: 'relative'
           }}
           onClick={() => onCellClick?.(k)}
         >
-          {k + 1}
+          <Box sx={{ fontSize: '18px', mb: 0.5 }}>{getInnerIcon(cellNumber)}</Box>
+          <Box sx={{ 
+            position: 'absolute', 
+            bottom: '2px', 
+            left: '2px', 
+            fontSize: '10px', 
+            fontWeight: 'bold',
+            color: (info.type as string) === 'loss' ? '#fff' : '#fff'
+          }}>
+            {cellNumber}
+          </Box>
         </Box>
       );
     }
@@ -193,42 +289,71 @@ const GameGrid: React.FC<GameGridProps> = ({ scale, onCellClick }) => {
   }, []);
 
   const renderActionCards = useMemo(() => {
-    const center = { x: BOARD_SIZE / 2, y: BOARD_SIZE / 2 };
+    const boardSize = BOARD_SIZE;
+    const padding = 20;
     
-    const card = (key: string, label: string, colorFrom: string, colorTo: string, dx: number, dy: number) => (
-      <Box 
-        key={key} 
-        sx={{ 
-          position: 'absolute', 
-          left: center.x + dx, 
-          top: center.y + dy, 
-          transform: 'translate(-50%, -50%)',
-          width: 110, 
-          height: 130, 
-          background: `linear-gradient(135deg, ${colorFrom} 0%, ${colorTo} 100%)`, 
-          borderRadius: '18px', 
-          border: '2px solid rgba(255,255,255,0.35)', 
-          boxShadow: `0 12px 38px ${colorFrom}55, 0 0 20px rgba(239, 68, 68, 0.2)`, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          cursor: 'pointer'
-        }}
-      >
-        <Box sx={{ color: 'white', mb: 1, fontSize: '24px' }}>💠</Box>
-        <Box sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '12px', lineHeight: 1.2 }}>
-          {label}
+    const card = (key: string, label: string, colorFrom: string, colorTo: string, position: string) => {
+      let left, top;
+      switch (position) {
+        case 'top-left':
+          left = padding;
+          top = padding;
+          break;
+        case 'top-right':
+          left = boardSize - 110 - padding;
+          top = padding;
+          break;
+        case 'bottom-left':
+          left = padding;
+          top = boardSize - 130 - padding;
+          break;
+        case 'bottom-right':
+          left = boardSize - 110 - padding;
+          top = boardSize - 130 - padding;
+          break;
+        default:
+          left = padding;
+          top = padding;
+      }
+
+      return (
+        <Box 
+          key={key} 
+          sx={{ 
+            position: 'absolute', 
+            left, 
+            top, 
+            width: 110, 
+            height: 130, 
+            background: `linear-gradient(135deg, ${colorFrom} 0%, ${colorTo} 100%)`, 
+            borderRadius: '18px', 
+            border: '2px solid rgba(255,255,255,0.35)', 
+            boxShadow: `0 12px 38px ${colorFrom}55, 0 0 20px rgba(239, 68, 68, 0.2)`, 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            cursor: 'pointer',
+            transition: 'transform 0.2s ease',
+            '&:hover': {
+              transform: 'scale(1.05)'
+            }
+          }}
+        >
+          <Box sx={{ color: 'white', mb: 1, fontSize: '24px' }}>💠</Box>
+          <Box sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '12px', lineHeight: 1.2 }}>
+            {label}
+          </Box>
+          <Box sx={{ color: 'white', fontSize: '10px', mt: 0.5, opacity: 0.9 }}>0 карт</Box>
         </Box>
-        <Box sx={{ color: 'white', fontSize: '10px', mt: 0.5, opacity: 0.9 }}>0 карт</Box>
-      </Box>
-    );
+      );
+    };
 
     return [
-      card('big', 'Большая сделка', '#00BCD4', '#0097A7', ACTION_CARD_OFFSETS.big.dx, ACTION_CARD_OFFSETS.big.dy),
-      card('small', 'Малая сделка', '#3B82F6', '#2563EB', ACTION_CARD_OFFSETS.small.dx, ACTION_CARD_OFFSETS.small.dy),
-      card('expenses', 'Расходы', '#EF4444', '#DC2626', ACTION_CARD_OFFSETS.expenses.dx, ACTION_CARD_OFFSETS.expenses.dy),
-      card('market', 'Рынок', '#F59E0B', '#D97706', ACTION_CARD_OFFSETS.market.dx, ACTION_CARD_OFFSETS.market.dy)
+      card('big', 'Большая сделка', '#00BCD4', '#0097A7', 'top-left'),
+      card('small', 'Малая сделка', '#3B82F6', '#2563EB', 'top-right'),
+      card('expenses', 'Расходы', '#EF4444', '#DC2626', 'bottom-left'),
+      card('market', 'Рынок', '#F59E0B', '#D97706', 'bottom-right')
     ];
   }, []);
 
