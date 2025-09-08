@@ -18,7 +18,23 @@ if (typeof window !== 'undefined') {
 const theme = createTheme({
   palette: {
     mode: 'dark'
-  }
+  },
+  components: {
+    MuiDialog: {
+      defaultProps: {
+        disableEnforceFocus: true,
+        disableAutoFocus: true,
+        disableRestoreFocus: true,
+      },
+    },
+    MuiModal: {
+      defaultProps: {
+        disableEnforceFocus: true,
+        disableAutoFocus: true,
+        disableRestoreFocus: true,
+      },
+    },
+  },
 });
 
 export default function App({ Component, pageProps }: AppProps) {

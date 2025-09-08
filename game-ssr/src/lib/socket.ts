@@ -4,6 +4,9 @@ type Handler = (...args: any[]) => void;
 class SocketStub {
   connected = true;
   private handlers: Record<string, Handler[]> = {};
+  private rooms: any[] = [];
+  private roomCounter = 1;
+
   on(event: string, handler: Handler) {
     this.handlers[event] = this.handlers[event] || [];
     this.handlers[event].push(handler);
@@ -14,6 +17,47 @@ class SocketStub {
     this.handlers[event] = this.handlers[event].filter(h => h !== handler);
   }
   emit(event: string, ...args: any[]) {
+    console.log(`🔌 Socket emit: ${event}`, args);
+    
+    // Обработка событий в заглушке
+    if (event === 'createRoom') {
+      const roomData = args[0];
+      const newRoom = {
+        id: `room_${this.roomCounter++}`,
+        name: roomData.name,
+        creatorId: roomData.creatorId,
+        creatorUsername: roomData.creatorUsername,
+        creatorProfession: roomData.creatorProfession,
+        creatorDream: roomData.creatorDream,
+        assignProfessionToAll: roomData.assignProfessionToAll,
+        maxPlayers: roomData.maxPlayers,
+        password: roomData.password,
+        timing: roomData.timing,
+        gameDurationSec: roomData.gameDurationSec,
+        hasPassword: !!roomData.password,
+        players: [{
+          id: roomData.creatorId,
+          username: roomData.creatorUsername,
+          profession: roomData.creatorProfession,
+          dream: roomData.creatorDream
+        }],
+        status: 'waiting',
+        createdAt: new Date().toISOString()
+      };
+      this.rooms.push(newRoom);
+      
+      // Отправляем обновленный список комнат
+      setTimeout(() => {
+        this.trigger('roomsList', this.rooms);
+      }, 100);
+    } else if (event === 'getRooms') {
+      // Отправляем текущий список комнат
+      setTimeout(() => {
+        this.trigger('roomsList', this.rooms);
+      }, 100);
+    }
+    
+    // Вызываем обработчики
     (this.handlers[event] || []).forEach(h => { 
       try { 
         h(...args); 
@@ -22,13 +66,24 @@ class SocketStub {
       }
     });
   }
+  
+  private trigger(event: string, ...args: any[]) {
+    (this.handlers[event] || []).forEach(h => { 
+      try { 
+        h(...args); 
+      } catch (error) {
+        console.warn('Socket handler error:', error);
+      }
+    });
+  }
+  
   get id() { return 'socket-stub-id'; }
 }
 
 const sock: any = new SocketStub();
 
 declare const process: any;
-const url = typeof window !== 'undefined' ? (process?.env?.NEXT_PUBLIC_SOCKET_URL as string | undefined) : undefined;
+const url = typeof window !== 'undefined' ? (process?.env?.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-socket.onrender.com') : undefined;
 
 // Lazy upgrade to real socket in browser
 if (typeof window !== 'undefined' && url) {

@@ -11,7 +11,7 @@ export default function AuthPage() {
   const [tab, setTab] = useState(0);
   const [snackbar, setSnackbar] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
-  const bot = process.env.NEXT_PUBLIC_TELEGRAM_BOT || 'energy_money_bot';
+  const bot = process.env.NEXT_PUBLIC_TELEGRAM_BOT || 'energy_m_bot';
   const botName = (bot || '').replace(/^@/, '');
 
   // remember chosen method
@@ -68,20 +68,24 @@ export default function AuthPage() {
     try {
       const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-socket.onrender.com';
       
-      // Пробуем подключиться к серверу
+      console.log('🔌 Попытка подключения к серверу:', socketUrl);
+      
+      // Пробуем подключиться к серверу с более мягкими настройками CORS
       const r = await fetch(`${socketUrl}/tg/new-token`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        mode: 'cors'
+        mode: 'cors',
+        credentials: 'omit'
       });
       
       if (!r.ok) {
-        throw new Error(`Server error: ${r.status}`);
+        throw new Error(`Server error: ${r.status} - ${r.statusText}`);
       }
       
       const j = await r.json();
+      console.log('🔌 Получен токен от сервера:', j);
       setBotToken(j.token);
       setAuthLoading(true);
       
@@ -129,10 +133,20 @@ export default function AuthPage() {
     } catch (e: any) {
       console.warn('Server connection failed, using fallback:', e);
       
+      // Определяем тип ошибки
+      let errorMessage = 'Сервер недоступен';
+      if (e.message?.includes('CORS')) {
+        errorMessage = 'CORS ошибка: сервер не настроен для вашего домена';
+      } else if (e.message?.includes('Failed to fetch')) {
+        errorMessage = 'Не удается подключиться к серверу';
+      } else if (e.message?.includes('404')) {
+        errorMessage = 'Endpoint не найден на сервере';
+      }
+      
       // Fallback: создаем демо-токен для тестирования
       const demoToken = `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       setBotToken(demoToken);
-      setSnackbar('Сервер недоступен. Используется демо-режим. Нажмите "Войти" для тестирования.');
+      setSnackbar(`${errorMessage}. Используется демо-режим. Нажмите "Демо-вход" для тестирования.`);
       
       // Показываем кнопку для демо-входа
       setTimeout(() => {

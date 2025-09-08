@@ -12,7 +12,7 @@ export default function RoomsPage() {
   const [rooms, setRooms] = useState<any[]>([]);
   const [openCreate, setOpenCreate] = useState(false);
   const [snack, setSnack] = useState<string|null>(null);
-  const [createForm, setCreateForm] = useState({ name: '', maxPlayers: 2, timing: 120, gameDurationSec: 10800, password: '', assignAll: true, dreamId: '', professionId: 'entrepreneur' });
+  const [createForm, setCreateForm] = useState({ name: '', maxPlayers: 2, timing: 2, gameDurationSec: 10800, password: '', assignAll: true, dreamId: '', professionId: 'entrepreneur' });
   const dreams = getFastTrackDreams();
   const prof = getProfession(createForm.professionId);
   const [joinPwd, setJoinPwd] = useState('');
@@ -49,7 +49,7 @@ export default function RoomsPage() {
       assignProfessionToAll: !!createForm.assignAll,
       maxPlayers: Number(createForm.maxPlayers),
       password: createForm.password || null,
-      timing: Number(createForm.timing),
+      timing: Number(createForm.timing) * 60, // Конвертируем минуты в секунды
       gameDurationSec: Number(createForm.gameDurationSec)
     });
     setOpenCreate(false);
@@ -198,7 +198,13 @@ export default function RoomsPage() {
                   fullWidth 
                 />
                 <TextField label="Макс. игроков" type="number" value={createForm.maxPlayers} onChange={e=>setCreateForm({...createForm, maxPlayers: Number(e.target.value)})} fullWidth />
-                <TextField label="Таймер хода (сек)" type="number" value={createForm.timing} onChange={e=>setCreateForm({...createForm, timing: Number(e.target.value)})} fullWidth />
+                <TextField select label="Время хода" value={createForm.timing} onChange={e=>setCreateForm({...createForm, timing: Number(e.target.value)})} fullWidth>
+                  <MenuItem value={1}>1 минута</MenuItem>
+                  <MenuItem value={2}>2 минуты</MenuItem>
+                  <MenuItem value={3}>3 минуты</MenuItem>
+                  <MenuItem value={4}>4 минуты</MenuItem>
+                  <MenuItem value={5}>5 минут</MenuItem>
+                </TextField>
                 <TextField label="Пароль (необязательно)" value={createForm.password} onChange={e=>setCreateForm({...createForm, password: e.target.value})} fullWidth />
                 <TextField select label="Длительность игры" value={createForm.gameDurationSec} onChange={e=>setCreateForm({...createForm, gameDurationSec: Number(e.target.value)})} fullWidth>
                   <MenuItem value={1800}>30 минут</MenuItem>
