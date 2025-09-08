@@ -29,7 +29,7 @@ export default function AuthPage() {
   
   const createBotToken = async () => {
     try {
-      const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
+      const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-socket.onrender.com';
       const r = await fetch(`${socketUrl}/tg/new-token`);
       const j = await r.json();
       setBotToken(j.token);

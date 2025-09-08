@@ -5,6 +5,16 @@ import { CssBaseline, ThemeProvider, createTheme, Box } from '@mui/material';
 import { AuthProvider } from '@/lib/auth';
 import FooterBar from '@/ui/FooterBar';
 
+// Обработка ошибок message port (расширения браузера)
+if (typeof window !== 'undefined') {
+  window.addEventListener('unhandledrejection', (event) => {
+    if (event.reason && event.reason.message && event.reason.message.includes('message port closed')) {
+      console.warn('Message port error suppressed:', event.reason.message);
+      event.preventDefault();
+    }
+  });
+}
+
 const theme = createTheme({
   palette: {
     mode: 'dark'
