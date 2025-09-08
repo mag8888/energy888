@@ -563,6 +563,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
     const center = { x: boardSize / 2, y: boardSize / 2 };
     
     const card = (key: string, label: string, colorFrom: string, colorTo: string, dx: number, dy: number) => {
+      const discardCount = 0; // TODO: wire up from game state
       return (
         <Box 
           key={key} 
@@ -592,6 +593,25 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
             {label}
           </Box>
           <Box sx={{ color: 'white', fontSize: '10px', mt: 0.5, opacity: 0.9 }}>0 карт</Box>
+          <Box sx={{
+            position: 'absolute',
+            bottom: 6,
+            left: 6,
+            right: 6,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 4,
+            color: '#fff',
+            fontSize: '10px',
+            opacity: 0.9,
+            background: 'rgba(0,0,0,0.18)',
+            borderRadius: '8px',
+            padding: '2px 6px'
+          }}>
+            <span>В отбое:</span>
+            <b style={{ fontWeight: 700 }}>{discardCount}</b>
+          </Box>
         </Box>
       );
     };
@@ -617,29 +637,38 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
 
     let idx = 1;
 
-    const make = (num: number, left: number, top: number) => (
-      <Box
-        key={`outer-${num}`}
-        sx={{
-          position: 'absolute',
-          left,
-          top,
-          width: cellSize,
-          height: cellSize,
-          borderRadius: '12px',
-          background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.95) 100%)',
-          border: '1px solid rgba(255,255,255,0.12)',
-          color: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          userSelect: 'none'
-        }}
-        onClick={() => onCellClick?.(num)}
-      >
-        {num}
-      </Box>
-    );
+    const make = (num: number, left: number, top: number) => {
+      const typeIcon = getCellType(num);
+      const baseColor = getCellColor(num);
+      const isBusiness = typeIcon === '💼';
+      const owned = Array.isArray(playerData?.ownedBusinessCells) && playerData.ownedBusinessCells.includes(num);
+      const playerColor = playerData?.color || '#3B82F6';
+      const colorFrom = owned && isBusiness ? playerColor : baseColor;
+      const colorTo = owned && isBusiness ? playerColor : baseColor;
+      return (
+        <Box
+          key={`outer-${num}`}
+          sx={{
+            position: 'absolute',
+            left,
+            top,
+            width: cellSize,
+            height: cellSize,
+            borderRadius: '12px',
+            background: `linear-gradient(135deg, ${colorFrom}22 0%, ${colorTo}55 100%)`,
+            border: `1px solid ${baseColor}44`,
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            userSelect: 'none'
+          }}
+          onClick={() => handleCellClick(num)}
+        >
+          <Box sx={{ fontSize: '14px' }}>{typeIcon}</Box>
+        </Box>
+      );
+    };
 
     // top 1..14
     for (let i = 0; i < 14; i++) cells.push(make(idx++, left0 + i * step, top0));
@@ -652,6 +681,13 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
 
     console.log('✅ renderOuterCellsClean total:', cells.length);
     return cells;
+  };
+
+  // Popup for cell details
+  const [selectedCell, setSelectedCell] = React.useState<number | null>(null);
+  const handleCellClick = (num: number) => {
+    setSelectedCell(num);
+    onCellClick?.(num);
   };
 
   console.log('🎮 SimpleGameBoard rendering');
@@ -709,7 +745,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
               БАНК
             </Typography>
             <Typography variant="h4" sx={{ color: 'white', fontWeight: 'bold' }}>
-              ${playerData.balance?.toLocaleString() || '3,000'}
+              ${playerData.balance?.toLocaleString('en-US') || '3,000'}
             </Typography>
           </Box>
         </Box>
@@ -734,7 +770,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
               {playerData.username}
             </Typography>
             <Typography variant="body2" sx={{ color: 'white', opacity: 0.8 }}>
-              ${playerData.balance?.toLocaleString() || '3,000'}
+              ${playerData.balance?.toLocaleString('en-US') || '3,000'}
             </Typography>
           </Box>
         </Box>
@@ -814,6 +850,37 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
             </Box>
           </Box>
         </Box>
+
+        {/* Stylish popup for cell details */}
+        {selectedCell !== null && (
+          <Box sx={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(0,0,0,0.45)',
+            zIndex: 2000
+          }} onClick={() => setSelectedCell(null)}>
+            <Box sx={{
+              minWidth: 320,
+              maxWidth: 380,
+              borderRadius: 4,
+              background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+              color: '#fff',
+              p: 2
+            }} onClick={(e) => e.stopPropagation()}>
+              <Typography variant="h6" sx={{ mb: 1 }}>Клетка {selectedCell}</Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>{getCellDescription(selectedCell)}</Typography>
+              <Typography variant="body2">Тип: {getCellType(selectedCell)}</Typography>
+            </Box>
+          </Box>
+        )}
 
         {/* Right Panel - Bank, Dice, Timing */}
         <Box sx={{ 
