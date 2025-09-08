@@ -773,10 +773,9 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
             top: y, 
             width: innerCell, 
             height: innerCell, 
-            background: `linear-gradient(145deg, ${cellColor}22 0%, ${cellColor}55 100%)`,
-            border: `2px solid ${cellColor}88`, 
+            background: `linear-gradient(135deg, ${cellColor} 0%, ${cellColor} 50%, ${cellColor} 100%)`,
             borderRadius: '16px', 
-            boxShadow: `0 12px 30px ${cellColor}33, inset 0 0 18px ${cellColor}22`, 
+            boxShadow: `0 8px 32px ${cellColor}40, inset 0 1px 0 rgba(255, 255, 255, 0.2)`, 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center', 
@@ -785,17 +784,11 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
             fontSize: 14,
             cursor: 'pointer',
             userSelect: 'none',
-            // Частичная заливка 90% площади
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: '5%',
-              left: '5%',
-              right: '5%',
-              bottom: '5%',
-              borderRadius: '12px',
-              background: `linear-gradient(135deg, ${cellColor}CC 0%, ${cellColor}99 100%)`,
-              zIndex: 1
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              background: `linear-gradient(135deg, ${cellColor} 0%, ${cellColor} 50%, ${cellColor} 100%)`,
+              boxShadow: `0 12px 40px ${cellColor}60, inset 0 1px 0 rgba(255, 255, 255, 0.3)`,
+              transform: 'translateY(-2px)'
             }
           }}
           onClick={() => handleInnerCellClick(cellNumber)}
@@ -1024,6 +1017,8 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
   // Popup for cell details
   const [selectedCell, setSelectedCell] = React.useState<number | null>(null);
   const [selectedInnerCell, setSelectedInnerCell] = React.useState<number | null>(null);
+  const [diceValue, setDiceValue] = React.useState<number | null>(null);
+  const [isDiceRolling, setIsDiceRolling] = React.useState<boolean>(false);
   
   const handleCellClick = (num: number) => {
     setSelectedCell(num);
@@ -1040,6 +1035,38 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
   const handleInnerCellClick = (num: number) => {
     setSelectedInnerCell(num);
     setSelectedCell(null); // Сброс выбора большого круга
+  };
+
+  const rollDice = () => {
+    if (isDiceRolling) return;
+    
+    setIsDiceRolling(true);
+    setDiceValue(null);
+    
+    // Анимация кубика
+    const rollDuration = 2000; // 2 секунды
+    const startTime = Date.now();
+    
+    const animateDice = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / rollDuration, 1);
+      
+      if (progress < 1) {
+        // Показываем случайные числа во время анимации
+        setDiceValue(Math.floor(Math.random() * 6) + 1);
+        requestAnimationFrame(animateDice);
+      } else {
+        // Финальный результат
+        const finalValue = Math.floor(Math.random() * 6) + 1;
+        setDiceValue(finalValue);
+        setIsDiceRolling(false);
+        
+        // Здесь можно добавить логику движения игроков
+        console.log(`🎲 Выпало: ${finalValue}`);
+      }
+    };
+    
+    requestAnimationFrame(animateDice);
   };
 
   console.log('🎮 SimpleGameBoard rendering');
@@ -1191,31 +1218,72 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
               width: 240, 
               height: 240, 
               borderRadius: '50%', 
-              background: 'radial-gradient(circle at 30% 30%, #A855F7, #7C3AED)', 
-              border: '3px solid rgba(255,255,255,0.25)', 
-              boxShadow: '0 25px 60px rgba(124,58,237,0.45)', 
+              background: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 50%, #60A5FA 100%)', 
+              boxShadow: '0 8px 32px rgba(30, 64, 175, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)', 
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'center', 
-              flexDirection: 'column' 
-            }}>
-              <Typography variant="h4" sx={{ color: 'white', fontWeight: 'bold', textShadow: '0 3px 10px rgba(0,0,0,0.4)' }}>
-                ЦЕНТР
+              flexDirection: 'column',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%)',
+                boxShadow: '0 12px 40px rgba(30, 64, 175, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+                transform: 'translateY(-2px)'
+              }
+            }} onClick={rollDice}>
+              {/* Golden $ Symbol */}
+              <Typography variant="h1" sx={{ 
+                color: '#FFD700', 
+                fontWeight: 'bold',
+                textShadow: '0 3px 6px rgba(0,0,0,0.5)',
+                fontSize: '4rem',
+                lineHeight: 1,
+                mb: 2
+              }}>
+                $
               </Typography>
-              <Button 
-                sx={{ 
-                  mt: 1, 
-                  background: 'linear-gradient(45deg, #22C55E, #16A34A)', 
-                  color: 'white', 
-                  fontWeight: 'bold', 
-                  borderRadius: '999px', 
-                  px: 2, 
-                  py: 0.5, 
-                  '&:hover': { background: 'linear-gradient(45deg, #16A34A, #15803D)' } 
-                }}
-              >
-                $ БРОСИТЬ
-              </Button>
+              
+              {/* Dice Display */}
+              <Box sx={{
+                width: 60,
+                height: 60,
+                borderRadius: '12px',
+                background: isDiceRolling 
+                  ? 'linear-gradient(135deg, #FF6B6B, #FF8E8E)' 
+                  : 'linear-gradient(135deg, #2C3E50, #34495E)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                animation: isDiceRolling ? 'diceRoll 0.1s infinite' : 'none',
+                '@keyframes diceRoll': {
+                  '0%': { transform: 'rotate(0deg)' },
+                  '25%': { transform: 'rotate(90deg)' },
+                  '50%': { transform: 'rotate(180deg)' },
+                  '75%': { transform: 'rotate(270deg)' },
+                  '100%': { transform: 'rotate(360deg)' }
+                }
+              }}>
+                <Typography variant="h4" sx={{ 
+                  color: '#fff', 
+                  fontWeight: 'bold',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                }}>
+                  {diceValue || '?'}
+                </Typography>
+              </Box>
+              
+              {/* Click hint */}
+              <Typography variant="caption" sx={{ 
+                color: '#E0E7FF', 
+                fontWeight: 'bold',
+                textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                mt: 1,
+                opacity: 0.9
+              }}>
+                {isDiceRolling ? 'Крутится...' : 'Нажмите для броска'}
+              </Typography>
             </Box>
           </Box>
         </Box>
