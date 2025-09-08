@@ -1,7 +1,9 @@
 import * as React from 'react';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
-import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { CssBaseline, ThemeProvider, createTheme, Box } from '@mui/material';
+import { AuthProvider } from '@/lib/auth';
+import FooterBar from '@/ui/FooterBar';
 
 const theme = createTheme({
   palette: {
@@ -18,9 +20,15 @@ export default function App({ Component, pageProps }: AppProps) {
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Component {...pageProps} />
+        <AuthProvider>
+          <Box minHeight="100vh" display="flex" flexDirection="column">
+            <Box flex={1}>
+              <Component {...pageProps} />
+            </Box>
+            <FooterBar />
+          </Box>
+        </AuthProvider>
       </ThemeProvider>
     </>
   );
 }
-

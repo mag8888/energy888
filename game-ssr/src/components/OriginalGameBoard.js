@@ -69,6 +69,15 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Join socket room to enable server features
+  useEffect(() => {
+    try {
+      if (roomId && playerData?.id && playerData?.username && (socket && typeof socket.emit === 'function')) {
+        socket.emit('joinRoom', roomId, { id: playerData.id, username: playerData.username, balance: playerMoney });
+      }
+    } catch {}
+  }, [roomId, playerData?.id, playerData?.username]);
+
   // open cell popup when rolled
   useEffect(() => {
     if (turnState === 'rolled') {

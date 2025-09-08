@@ -34,4 +34,7 @@ git push -u origin main
 Notes
 - SSR is initially disabled for the board component to avoid `window`/`document` access issues. We can enable full SSR with Emotion SSR once needed.
 - To wire real socket/data, replace stubs in `game-ssr/src/lib`, `game-ssr/src/data`, and components.
-
+- Auth (demo, client-side):
+  - Email register/login stored in localStorage. Page: `/auth`.
+  - Telegram: uses Login Widget. Set `NEXT_PUBLIC_TELEGRAM_BOT` to your bot username to enable the widget.
+  - Auth context: `game-ssr/src/lib/auth.tsx`. Current user ID is used in the board.

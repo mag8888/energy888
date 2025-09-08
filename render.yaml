@@ -9,4 +9,13 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 18
-
+  - type: web
+    name: energy888-socket
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
