@@ -3,6 +3,7 @@ import { Box, Typography, Button, useMediaQuery, useTheme, Card, CardContent, Ch
 import { motion } from 'framer-motion';
 import { AccountBalance, TrendingUp, TrendingDown, CreditCard, AttachMoney } from '@mui/icons-material';
 import BankModal from './BankModal';
+import MobileBankModal from './MobileBankModal';
 
 const BankModule = ({
   playerData,
@@ -144,7 +145,7 @@ const BankModule = ({
         </CardContent>
       </Card>
 
-      <BankModal isOpen={showBankModal} onClose={() => setShowBankModal(false)} playerData={playerData} gamePlayers={gamePlayers} socket={socket} roomId={roomId} bankBalance={currentBalance} onBankBalanceChange={handleBankBalanceChange} />
+      <MobileBankModal isOpen={showBankModal} onClose={() => setShowBankModal(false)} playerData={playerData} gamePlayers={gamePlayers} socket={socket} roomId={roomId} bankBalance={currentBalance} onBankBalanceChange={handleBankBalanceChange} />
     </motion.div>
   );
 };
