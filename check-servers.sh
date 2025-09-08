@@ -60,8 +60,8 @@ bot_status=$?
 check_server "Game App" "https://energy888.onrender.com" "200"
 game_status=$?
 
-# Проверка Unified Server (если уже создан)
-check_server "Unified Server" "https://energy888-unified-server.onrender.com" "200"
+# Проверка Simple Server (если уже создан)
+check_server "Simple Server" "https://energy888-simple-server.onrender.com" "200"
 unified_status=$?
 
 echo ""
@@ -73,10 +73,10 @@ if [ $bot_status -eq 0 ]; then
     check_api "Bot Health" "https://botenergy-7to1.onrender.com/health" "OK"
 fi
 
-# Проверка Unified Server API (если доступен)
+# Проверка Simple Server API (если доступен)
 if [ $unified_status -eq 0 ]; then
-    check_api "Unified Health" "https://energy888-unified-server.onrender.com/health" "ok"
-    check_api "Unified Token" "https://energy888-unified-server.onrender.com/tg/new-token" "token"
+    check_api "Simple Health" "https://energy888-simple-server.onrender.com/health" "ok"
+    check_api "Simple Token" "https://energy888-simple-server.onrender.com/tg/new-token" "token"
 fi
 
 echo ""
@@ -96,25 +96,25 @@ else
 fi
 
 if [ $unified_status -eq 0 ]; then
-    echo -e "🔧 Unified Server: ${GREEN}✅ Работает${NC}"
+    echo -e "🔧 Simple Server: ${GREEN}✅ Работает${NC}"
 else
-    echo -e "🔧 Unified Server: ${YELLOW}⏳ Нужно создать${NC}"
+    echo -e "🔧 Simple Server: ${YELLOW}⏳ Нужно создать${NC}"
 fi
 
 echo ""
 echo "📝 Следующие шаги:"
 
 if [ $unified_status -ne 0 ]; then
-    echo "1. Создайте Unified Server на Render.com"
-    echo "   - Name: energy888-unified-server"
+    echo "1. Создайте Simple Server на Render.com"
+    echo "   - Name: energy888-simple-server"
     echo "   - Build: cd server && npm install"
-    echo "   - Start: cd server && node unified-server.js"
-    echo "   - Env: NODE_ENV=production, BOT_TOKEN=8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI"
+    echo "   - Start: cd server && node simple-server.js"
+    echo "   - Env: NODE_ENV=production, PORT=10000"
 fi
 
 if [ $game_status -eq 0 ] && [ $unified_status -eq 0 ]; then
     echo "2. Обновите Game App с новыми переменными:"
-    echo "   - NEXT_PUBLIC_SOCKET_URL=https://energy888-unified-server.onrender.com"
+    echo "   - NEXT_PUBLIC_SOCKET_URL=https://energy888-simple-server.onrender.com"
     echo "   - NEXT_PUBLIC_TELEGRAM_BOT=energy_m_bot"
     echo "3. Пересоберите Game App"
 fi
@@ -123,6 +123,6 @@ echo ""
 echo "🔗 Полезные ссылки:"
 echo "   - Bot Server: https://botenergy-7to1.onrender.com"
 echo "   - Game App: https://energy888.onrender.com"
-echo "   - Unified Server: https://energy888-unified-server.onrender.com"
+echo "   - Simple Server: https://energy888-simple-server.onrender.com"
 echo "   - Telegram Bot: https://t.me/energy_m_bot"
 echo "   - Render Dashboard: https://dashboard.render.com"
