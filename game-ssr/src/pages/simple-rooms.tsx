@@ -35,8 +35,12 @@ export default function SimpleRooms() {
 
     // Подключаемся к Socket.IO
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-1.onrender.com';
+    console.log('🔌 Подключаемся к Socket.IO:', socketUrl);
+    
     const newSocket = io(socketUrl, {
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      timeout: 20000,
+      forceNew: true
     });
 
     newSocket.on('connect', () => {
@@ -113,7 +117,7 @@ export default function SimpleRooms() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
       padding: '20px',
       fontFamily: 'Arial, sans-serif'
     }}>
@@ -127,11 +131,12 @@ export default function SimpleRooms() {
           justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: '30px',
-          background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(10px)',
+          background: 'rgba(0, 0, 0, 0.8)',
+          backdropFilter: 'blur(15px)',
           borderRadius: '15px',
           padding: '20px',
-          border: '1px solid rgba(255, 255, 255, 0.2)'
+          border: '2px solid rgba(255, 255, 255, 0.3)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
         }}>
           <h1 style={{
             color: 'white',
@@ -145,14 +150,17 @@ export default function SimpleRooms() {
             <button
               onClick={() => setShowCreateForm(true)}
               style={{
-                background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                background: 'linear-gradient(45deg, #ff6b6b, #ee5a24)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
-                padding: '10px 20px',
+                padding: '12px 24px',
                 marginRight: '10px',
                 cursor: 'pointer',
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                fontSize: '16px',
+                boxShadow: '0 4px 15px rgba(255, 107, 107, 0.4)',
+                transition: 'all 0.3s ease'
               }}
             >
               Создать комнату
@@ -160,12 +168,15 @@ export default function SimpleRooms() {
             <button
               onClick={handleLogout}
               style={{
-                background: 'rgba(255, 255, 255, 0.1)',
+                background: 'rgba(255, 255, 255, 0.2)',
                 color: 'white',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
+                border: '2px solid rgba(255, 255, 255, 0.5)',
                 borderRadius: '8px',
-                padding: '10px 20px',
-                cursor: 'pointer'
+                padding: '12px 24px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                transition: 'all 0.3s ease'
               }}
             >
               Выйти
