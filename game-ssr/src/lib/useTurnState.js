@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 
-export default function useTurnState(initialTime = 30) {
+export default function useTurnState(initialTime = 120) {
   const [state, setState] = useState('yourTurn'); // yourTurn | rolled | waitingOther
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [isRolling, setIsRolling] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
   const [dice, setDice] = useState(1);
+  const [rolledAt, setRolledAt] = useState(null);
 
   const roll = () => {
     if (isRolling || isMoving || state !== 'yourTurn') return;
@@ -15,6 +16,7 @@ export default function useTurnState(initialTime = 30) {
       setDice(v);
       setIsRolling(false);
       setState('rolled');
+      setRolledAt(Date.now());
     }, 500);
   };
 
@@ -43,6 +45,7 @@ export default function useTurnState(initialTime = 30) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
-  return { state, timeLeft, isRolling, isMoving, dice, roll, pass, setIsMoving };
-}
+  const canPass = state === 'rolled' && rolledAt && Date.now() - rolledAt >= 10000; // 10s after roll
 
+  return { state, timeLeft, isRolling, isMoving, dice, roll, pass, setIsMoving, canPass };
+}

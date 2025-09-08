@@ -7,13 +7,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+const FRONT_ORIGIN = process.env.FRONT_ORIGIN || '*';
+app.use(cors({ origin: FRONT_ORIGIN === '*' ? true : FRONT_ORIGIN }));
 app.get('/', (_req, res) => res.json({ ok: true, name: 'energy888-socket-server' }));
 
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] }
-});
+const io = new Server(server, { cors: { origin: FRONT_ORIGIN === '*' ? true : FRONT_ORIGIN, methods: ['GET', 'POST'] } });
 
 // In-memory room state
 const rooms = new Map(); // roomId -> { players: Map<username, { id, username, socketId, balance }> }
@@ -96,4 +95,3 @@ const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
   console.log('Socket server listening on', PORT);
 });
-

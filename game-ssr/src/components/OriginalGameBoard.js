@@ -39,7 +39,7 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
   const [currentTurn, setCurrentTurn] = useState(gamePlayers[0]?.username || 'Игрок');
   const [playerMoney, setPlayerMoney] = useState(playerData?.profession?.balance ?? 3000);
   const [toast, setToast] = useState({ open: false, message: '', severity: 'info' });
-  const { state: turnState, timeLeft, isRolling, isMoving, dice: diceValue, roll: rollDice, pass: passTurn } = useTurnState(30);
+  const { state: turnState, timeLeft, isRolling, isMoving, dice: diceValue, roll: rollDice, pass: passTurn, canPass } = useTurnState(120);
   const [showCellPopup, setShowCellPopup] = useState(false);
   const [selectedCell, setSelectedCell] = useState(null);
   const [isOnBigCircle] = useState(true);
@@ -50,6 +50,24 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
   const [scale, setScale] = useState(1);
   const [showProfession, setShowProfession] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [childrenCount, setChildrenCount] = useState(0);
+  const [monthlyChildExpense, setMonthlyChildExpense] = useState(0);
+  const [assets, setAssets] = useState([]);
+  const [dealDialogOpen, setDealDialogOpen] = useState(false);
+  const [dealChoice, setDealChoice] = useState(null); // 'small'|'big'
+  const [currentDealCard, setCurrentDealCard] = useState(null);
+  const [discardPile, setDiscardPile] = useState([]);
+
+  const smallDeck = useRef([
+    { id: 's1', name: 'Акции TechCo', cost: 1000, income: 50 },
+    { id: 's2', name: 'Облигации City', cost: 2000, income: 110 },
+    { id: 's3', name: 'Стартап доля', cost: 3000, income: 0 }
+  ]);
+  const bigDeck = useRef([
+    { id: 'b1', name: 'Кофейня', cost: 10000, income: 700 },
+    { id: 'b2', name: 'Квартира', cost: 40000, income: 700 },
+    { id: 'b3', name: 'Франшиза', cost: 25000, income: 1200 }
+  ]);
 
   useEffect(() => { setCurrentTurn(gamePlayers[currentPlayer]?.username || 'Игрок'); }, [currentPlayer, gamePlayers]);
 
@@ -78,13 +96,90 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
     } catch {}
   }, [roomId, playerData?.id, playerData?.username]);
 
-  // open cell popup when rolled
+  // Open cell popup and handle landing rules
   useEffect(() => {
     if (turnState === 'rolled') {
-      setSelectedCell({ id: diceValue, name: 'Секция', description: 'Описание клетки' });
-      setShowCellPopup(true);
+      handleLanding(diceValue);
     }
   }, [turnState, diceValue]);
+
+  const getCashFlow = () => {
+    const salary = playerData?.profession?.salary ?? 0;
+    const passive = assets.reduce((s,a)=>s+(a.income||0),0);
+    const baseExpenses = playerData?.profession?.totalExpenses ?? 0;
+    const childExp = monthlyChildExpense;
+    return salary + passive - (baseExpenses + childExp);
+  };
+
+  const handleLanding = (cellId) => {
+    // Payday cells: 6,14,22
+    if ([6,14,22].includes(cellId)) {
+      const salary = playerData?.profession?.salary ?? 0;
+      setPlayerMoney(prev => prev + salary);
+      setToast({ open: true, severity: 'success', message: `💰 PAYDAY: +$${salary.toLocaleString()}` });
+      return;
+    }
+    // Child: choose 12
+    if (cellId === 12) {
+      const childDice = Math.floor(Math.random()*6)+1;
+      if (childDice <= 4) {
+        setChildrenCount(c=>c+1);
+        setMonthlyChildExpense(e=>e+400); // базово +$400/мес
+        setPlayerMoney(prev => prev + 5000);
+        setToast({ open: true, severity: 'success', message: `👶 Ребёнок родился! +$5,000 (кубик ${childDice})` });
+      } else {
+        setToast({ open: true, severity: 'info', message: `👶 Ребёнок не родился (кубик ${childDice})` });
+      }
+      return;
+    }
+    // Opportunities on odd cells
+    if ([1,3,5,7,9,11,13,15,17,19,21,23].includes(cellId)) {
+      setDealDialogOpen(true);
+      return;
+    }
+    // Default popup
+    setSelectedCell({ id: cellId, name: `Клетка ${cellId}`, description: 'Стандартная клетка' });
+    setShowCellPopup(true);
+  };
+
+  const drawDeal = (type) => {
+    const deck = type==='small' ? smallDeck.current : bigDeck.current;
+    if (deck.length === 0) {
+      if (discardPile.length) {
+        const shuffled = [...discardPile].sort(()=>Math.random()-0.5);
+        if (type==='small') smallDeck.current = shuffled;
+        else bigDeck.current = shuffled;
+        setDiscardPile([]);
+      } else {
+        setToast({ open: true, severity: 'warning', message: '❌ Колода пуста' });
+        return null;
+      }
+    }
+    const card = deck.shift();
+    return card;
+  };
+
+  const purchaseDeal = (card) => {
+    if (!card) return;
+    if (playerMoney < card.cost) {
+      setToast({ open: true, severity: 'error', message: 'Недостаточно денег для покупки' });
+      return;
+    }
+    if (assets.find(a=>a.name===card.name)) {
+      setToast({ open: true, severity: 'info', message: 'Карточка уже у вас' });
+      return;
+    }
+    setPlayerMoney(prev=>prev-card.cost);
+    setAssets(prev=>[...prev, card]);
+    setToast({ open: true, severity: 'success', message: `✅ Куплено: ${card.name}` });
+    setCurrentDealCard(null);
+  };
+
+  const cancelDeal = (card) => {
+    if (!card) return;
+    setDiscardPile(prev=>[card, ...prev]);
+    setCurrentDealCard(null);
+  };
 
   return (
     <Fragment>
@@ -232,22 +327,26 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
 
             <Paper sx={{ p: 2, mb: 2, bgcolor: 'rgba(17,24,39,0.6)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <Typography sx={{ color: 'white', fontWeight: 'bold', mb: 1 }}>Активы</Typography>
-              <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Пока пусто</Typography>
+              {assets.length===0 ? (
+                <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Пока пусто</Typography>
+              ) : assets.map(a => (
+                <Typography key={a.id} sx={{ color: 'rgba(255,255,255,0.9)', fontSize: 12 }}>• {a.name} — доход ${a.income}/мес</Typography>
+              ))}
             </Paper>
 
             <Paper sx={{ p: 2, bgcolor: 'rgba(17,24,39,0.6)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <Typography sx={{ color: 'white', fontWeight: 'bold', mb: 1 }}>Активность</Typography>
               <Button fullWidth variant="contained" onClick={() => {
                 if (turnState === 'yourTurn') rollDice();
-                else if (turnState === 'rolled') passTurn();
+                else if (turnState === 'rolled' && canPass) passTurn();
               }}
-              disabled={turnState === 'waitingOther' || isRolling || isMoving}
+              disabled={turnState === 'waitingOther' || isRolling || isMoving || (turnState==='rolled' && !canPass)}
               sx={{ background: turnState === 'yourTurn' ? 'linear-gradient(45deg, #8B5CF6, #06B6D4)' : (turnState === 'rolled' ? 'linear-gradient(45deg, #22C55E, #16A34A)' : 'linear-gradient(45deg, #6B7280, #4B5563)') }}>
-                {turnState === 'yourTurn' ? '🎲 Бросить кубик' : turnState === 'rolled' ? '⏭️ Передать ход' : '⏳ Ожидание хода'}
+                {turnState === 'yourTurn' ? '🎲 Бросить кубик' : turnState === 'rolled' ? (canPass ? '⏭️ Передать ход' : '⏳ Ждите...') : '⏳ Ожидание хода'}
               </Button>
               <Box sx={{ mt: 2 }}>
-                <LinearProgress variant="determinate" value={((30 - timeLeft) / 30) * 100} sx={{ height: 8, borderRadius: 1 }} />
-                <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, mt: 0.5 }}>Таймер: {timeLeft}s</Typography>
+                <LinearProgress variant="determinate" value={((120 - timeLeft) / 120) * 100} sx={{ height: 8, borderRadius: 1, '& .MuiLinearProgress-bar': { backgroundColor: timeLeft>60 ? '#22C55E' : (timeLeft>20 ? '#EAB308' : '#EF4444') } }} />
+                <Typography sx={{ color: timeLeft>60 ? '#22C55E' : (timeLeft>20 ? '#EAB308' : '#EF4444'), fontSize: 12, mt: 0.5 }}>Таймер: {timeLeft}s</Typography>
               </Box>
             </Paper>
           </Box>
@@ -265,6 +364,24 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setShowProfession(false)}>Закрыть</Button>
+          </DialogActions>
+        </Dialog>
+        {/* Deal dialogs */}
+        <Dialog open={dealDialogOpen} onClose={()=>setDealDialogOpen(false)}>
+          <DialogTitle>Выберите тип сделки</DialogTitle>
+          <DialogActions>
+            <Button onClick={()=>{ setDealDialogOpen(false); const c = drawDeal('small'); setCurrentDealCard(c); }}>Малая</Button>
+            <Button onClick={()=>{ setDealDialogOpen(false); const c = drawDeal('big'); setCurrentDealCard(c); }}>Большая</Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={!!currentDealCard} onClose={()=>{ cancelDeal(currentDealCard); }}>
+          <DialogTitle>{currentDealCard?.name}</DialogTitle>
+          <DialogContent>
+            <Typography sx={{ color: 'rgba(255,255,255,0.8)' }}>Цена: ${currentDealCard?.cost?.toLocaleString()} | Доход: ${currentDealCard?.income?.toLocaleString()}/мес</Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={()=>cancelDeal(currentDealCard)}>Отмена</Button>
+            <Button variant="contained" onClick={()=>purchaseDeal(currentDealCard)}>Купить</Button>
           </DialogActions>
         </Dialog>
         {/* Debug footer in one line at page bottom */}
