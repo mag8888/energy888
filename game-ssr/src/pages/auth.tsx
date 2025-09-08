@@ -146,7 +146,20 @@ export default function AuthPage() {
           {user && (
             <GlassCard sx={{ mt: 3, p: 2 }}>
               <Typography sx={{ color: '#22C55E' }}>В системе как: <b>{user.username}</b> (ID: {user.id})</Typography>
-              <GradientButton href="/1game" sx={{ mt: 1 }}>Перейти в игру</GradientButton>
+              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                <GradientButton href="/1game">Перейти в игру</GradientButton>
+                <GradientButton 
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      localStorage.removeItem('eom_user');
+                      window.location.reload();
+                    }
+                  }}
+                  sx={{ bgcolor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+                >
+                  Выйти
+                </GradientButton>
+              </Box>
             </GlassCard>
           )}
       </GlassCard>

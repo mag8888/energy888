@@ -116,7 +116,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     saveUser(u);
   };
 
-  const logout = () => saveUser(null);
+  const logout = () => {
+    saveUser(null);
+    // Очищаем все данные авторизации
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('eom_user');
+      localStorage.removeItem('eom_auth_tab');
+    }
+  };
 
   const value = useMemo(() => ({ user, loading, registerEmail, loginEmail, loginTelegram, logout }), [user, loading]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

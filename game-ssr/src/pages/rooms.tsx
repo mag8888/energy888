@@ -127,8 +127,30 @@ export default function RoomsPage() {
   return (
     <Box sx={{ p: { xs: 1.5, md: 3 }, maxWidth: 1100, mx: 'auto' }}>
       <GlassCard sx={{ mb: 2 }}>
-        <Typography variant="h5" sx={{ color: '#fff', fontWeight: 800, mb: 1 }}>Комнаты</Typography>
-        <Typography sx={{ color: 'rgba(255,255,255,0.7)' }}>Создавайте комнаты с параметрами и приглашайте друзей.</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Box>
+            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 800, mb: 1 }}>Комнаты</Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.7)' }}>Создавайте комнаты с параметрами и приглашайте друзей.</Typography>
+          </Box>
+          {user && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                👤 {user.username}
+              </Typography>
+              <GradientButton 
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    localStorage.removeItem('eom_user');
+                    window.location.reload();
+                  }
+                }}
+                sx={{ px: 2, py: 1, fontSize: '0.875rem' }}
+              >
+                Выйти
+              </GradientButton>
+            </Box>
+          )}
+        </Box>
       </GlassCard>
 
       <GlassCard sx={{ mb: 2 }}>
