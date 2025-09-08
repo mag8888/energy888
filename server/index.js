@@ -14,15 +14,82 @@ app.get('/', (_req, res) => res.json({ ok: true, name: 'energy888-socket-server'
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: FRONT_ORIGIN === '*' ? true : FRONT_ORIGIN, methods: ['GET', 'POST'] } });
 
-// In-memory room state
-const rooms = new Map(); // roomId -> { players: Map<username, { id, username, socketId, balance }> }
+// In-memory rooms and state
+// room: { id, name, creatorId, creatorUsername, creatorProfession, assignProfessionToAll, maxPlayers, password, timing, createdAt, players: Map<username, player> }
+const rooms = new Map();
 
 function getRoom(roomId) {
   if (!rooms.has(roomId)) rooms.set(roomId, { players: new Map() });
   return rooms.get(roomId);
 }
 
+function listRooms() {
+  return Array.from(rooms.values()).map(r => ({
+    id: r.id,
+    name: r.name || 'Комната',
+    creatorId: r.creatorId,
+    creatorUsername: r.creatorUsername,
+    maxPlayers: r.maxPlayers || 6,
+    playersCount: r.players ? r.players.size : 0,
+    hasPassword: !!r.password,
+    timing: r.timing || 120
+  }));
+}
+
 io.on('connection', (socket) => {
+  // Rooms listing
+  socket.on('getRooms', () => {
+    socket.emit('roomsList', listRooms());
+  });
+
+  // Create room
+  socket.on('createRoom', (payload = {}) => {
+    const id = payload.id || `room_${Date.now().toString(36)}`;
+    if (rooms.has(id)) {
+      socket.emit('roomCreateError', { message: 'Комната с таким ID уже существует' });
+      return;
+    }
+    const room = {
+      id,
+      name: payload.name || 'Комната',
+      creatorId: payload.creatorId || socket.id,
+      creatorUsername: payload.creatorUsername || 'Игрок',
+      creatorProfession: payload.creatorProfession || null,
+      assignProfessionToAll: !!payload.assignProfessionToAll,
+      maxPlayers: Number(payload.maxPlayers || 6),
+      password: payload.password || null,
+      timing: Number(payload.timing || 120),
+      createdAt: Date.now(),
+      players: new Map()
+    };
+    rooms.set(id, room);
+    socket.emit('roomCreated', { id, ...room, players: [] });
+    io.emit('roomsList', listRooms());
+  });
+
+  // Join room with metadata
+  socket.on('joinRoomMeta', ({ roomId, user, password }) => {
+    const room = rooms.get(roomId);
+    if (!room) { socket.emit('roomJoinError', { message: 'Комната не найдена' }); return; }
+    if (room.password && room.password !== password) { socket.emit('roomJoinError', { message: 'Неверный пароль' }); return; }
+    if (room.players.size >= (room.maxPlayers || 6)) { socket.emit('roomJoinError', { message: 'Комната заполнена' }); return; }
+
+    socket.join(roomId);
+    const p = {
+      id: user?.id || socket.id,
+      username: user?.username || `User-${socket.id.slice(0,5)}`,
+      socketId: socket.id,
+      profession: user?.profession || room.creatorProfession || null,
+      balance: Number(user?.balance ?? 3000),
+      isHost: room.players.size === 0 && !room.creatorId ? true : (user?.id === room.creatorId)
+    };
+    room.id = room.id || roomId;
+    room.players.set(p.username, p);
+    io.to(roomId).emit('playersUpdate', Array.from(room.players.values()));
+    socket.emit('roomJoinedMeta', { roomId, room: { ...room, players: Array.from(room.players.values()) } });
+    io.emit('roomsList', listRooms());
+  });
+
   socket.on('joinRoom', (roomId, player) => {
     try {
       const room = getRoom(roomId);
@@ -88,6 +155,7 @@ io.on('connection', (socket) => {
       }
       io.to(roomId).emit('playersUpdate', Array.from(room.players.values()));
     });
+    io.emit('roomsList', listRooms());
   });
 });
 
