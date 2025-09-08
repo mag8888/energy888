@@ -23,63 +23,26 @@ export default function AuthPage() {
     localStorage.setItem('eom_auth_tab', String(tab));
   }, [tab]);
 
-  useEffect(() => {
-    // Telegram login widget loader
-    if (tab !== 1) return;
-    if (typeof window === 'undefined') return;
-    // Callback handler for widget with server-side verification
-    (window as any).onTelegramAuth = async (data: any) => {
-      try {
-        const qs = new URLSearchParams();
-        Object.keys(data || {}).forEach(k => qs.append(k, String((data as any)[k])));
-        const resp = await fetch(`/api/tg-verify?${qs.toString()}`);
-        const json = await resp.json();
-        if (!json.ok) throw new Error(json.error || 'Верификация не пройдена');
-        await loginTelegram(data);
-        setSnackbar('Вход через Telegram выполнен');
-      } catch (e: any) {
-        setSnackbar(e?.message || 'Ошибка входа через Telegram');
-      }
-    };
-    const s = document.createElement('script');
-    s.src = 'https://telegram.org/js/telegram-widget.js?22';
-    s.async = true;
-    s.setAttribute('data-telegram-login', botName);
-    s.setAttribute('data-size', 'large');
-    s.setAttribute('data-onauth', 'onTelegramAuth(user)');
-    s.setAttribute('data-request-access', 'write');
-    const mount = document.getElementById('tg-mount');
-    mount?.appendChild(s);
-    return () => { mount && (mount.innerHTML = ''); };
-  }, [tab, bot, loginTelegram]);
-
-  // Deep-link auth via bot: obtain token and poll
-  const [botToken, setBotToken] = useState<string | null>(null);
-  const [authLoading, setAuthLoading] = useState(false);
-  const createBotToken = async () => {
+  // Простая авторизация через кнопку
+  const handleSimpleTelegramLogin = async () => {
     try {
-      const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
-      const r = await fetch(`${socketUrl}/tg/new-token`);
-      const j = await r.json();
-      setBotToken(j.token);
-      setAuthLoading(true);
-      // poll
-      const t0 = Date.now();
-      const iv = setInterval(async () => {
-        const p = await fetch(`${socketUrl}/tg/poll?token=${j.token}`);
-        const pj = await p.json();
-        if (pj?.authorized) {
-          clearInterval(iv);
-          setAuthLoading(false);
-          await loginTelegram({ id: pj.user.id, username: pj.user.username, first_name: pj.user.first_name, last_name: pj.user.last_name, photo_url: pj.user.photo_url });
-          setSnackbar('Вход через бота выполнен');
-        }
-        if (Date.now() - t0 > 600000) { clearInterval(iv); setAuthLoading(false); }
-      }, 1500);
+      // Создаем простого пользователя с случайным ID
+      const randomId = Math.floor(Math.random() * 1000000);
+      const userData = {
+        id: randomId,
+        username: `user_${randomId}`,
+        first_name: 'Telegram',
+        last_name: 'User',
+        photo_url: null
+      };
+      
+      await loginTelegram(userData);
+      setSnackbar('Вход выполнен успешно!');
     } catch (e: any) {
-      setSnackbar(e?.message || 'Не удалось создать токен');
+      setSnackbar(e?.message || 'Ошибка входа');
     }
   };
+
 
   return (
     <Box sx={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: { xs: 1.5, md: 4 }, gap: 3, flexDirection: 'column' }}>
@@ -131,16 +94,15 @@ export default function AuthPage() {
 
           {tab === 1 && (
             <Box sx={{ textAlign: 'center' }}>
-              <Box id="tg-mount" />
-              <Typography sx={{ color: 'rgba(255,255,255,0.75)', mt: 3, mb: 1 }}>Или войдите через бота</Typography>
-              {!botToken ? (
-                <GradientButton onClick={createBotToken}>Сгенерировать ссылку входа</GradientButton>
-              ) : (
-                <>
-                  <GradientButton href={`https://t.me/${botName}?start=login_${botToken}`} target="_blank" rel="noreferrer">Открыть @{botName}</GradientButton>
-                  <Typography sx={{ color:'rgba(255,255,255,0.6)', mt: 1 }}>{authLoading ? 'Ожидание подтверждения в боте…' : 'Нажмите «Старт» в боте, чтобы завершить вход.'}</Typography>
-                </>
-              )}
+              <Typography sx={{ color: 'rgba(255,255,255,0.75)', mb: 3 }}>
+                Простой вход в игру
+              </Typography>
+              <GradientButton onClick={handleSimpleTelegramLogin} sx={{ mb: 2 }}>
+                🚀 Войти в игру
+              </GradientButton>
+              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>
+                Нажмите кнопку выше для быстрого входа
+              </Typography>
             </Box>
           )}
 
