@@ -638,7 +638,12 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
 
     let idx = 1;
 
-    const make = (num: number, left: number, top: number, opts?: { icon?: string; color?: string }) => {
+    const make = (
+      num: number,
+      left: number,
+      top: number,
+      opts?: { icon?: string; color?: string; variant?: 'bank' }
+    ) => {
       const typeIcon = opts?.icon ?? getCellType(num);
       const baseColor = opts?.color ?? getCellColor(num);
       const isBusiness = typeIcon === '💼';
@@ -646,6 +651,8 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
       const playerColor = playerData?.color || '#3B82F6';
       const colorFrom = owned && isBusiness ? playerColor : baseColor;
       const colorTo = owned && isBusiness ? playerColor : baseColor;
+      const emerald = opts?.color || '#10B981';
+      const isBankStyle = opts?.variant === 'bank';
       return (
         <Box
           key={`outer-${num}`}
@@ -656,9 +663,15 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
             width: cellSize,
             height: cellSize,
             borderRadius: '12px',
-            background: `linear-gradient(145deg, ${colorFrom}55 0%, ${colorTo}CC 100%)`,
-            border: `1px solid ${baseColor}88`,
-            boxShadow: `0 8px 22px ${baseColor}33, inset 0 0 18px ${baseColor}22`,
+            background: isBankStyle
+              ? 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.95) 100%)'
+              : `linear-gradient(145deg, ${colorFrom}55 0%, ${colorTo}CC 100%)`,
+            border: isBankStyle
+              ? `1px solid ${emerald}55`
+              : `1px solid ${baseColor}88`,
+            boxShadow: isBankStyle
+              ? `0 8px 22px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03) inset`
+              : `0 8px 22px ${baseColor}33, inset 0 0 18px ${baseColor}22`,
             color: '#fff',
             display: 'flex',
             alignItems: 'center',
@@ -667,6 +680,17 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
           }}
           onClick={() => handleCellClick(num)}
         >
+          {/* shimmer top line when bank style */}
+          {isBankStyle && (
+            <Box sx={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: 0,
+              height: '2px',
+              background: `linear-gradient(90deg, ${emerald}, ${emerald}CC, ${emerald})`
+            }}/>
+          )}
           <Box sx={{ fontSize: '14px' }}>{typeIcon}</Box>
         </Box>
       );
@@ -682,7 +706,14 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData, o
     for (let i = 0; i < 14; i++) {
       const overrideIcon = demoIcons[i % demoIcons.length];
       const overrideColor = demoTones[i % demoTones.length];
-      cells.push(make(idx++, left0 + (13 - i) * step, bottomY, { icon: overrideIcon, color: overrideColor }));
+      cells.push(
+        make(
+          idx++,
+          left0 + (13 - i) * step,
+          bottomY,
+          { icon: overrideIcon, color: overrideColor, variant: 'bank' }
+        )
+      );
     }
     // left 41..52 (bottom->top, also exclude corners)
     for (let i = 0; i < 12; i++) cells.push(make(idx++, left0, top0 + (12 - i) * step));
