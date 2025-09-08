@@ -407,7 +407,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
   // Функция для определения цвета клетки
   const getCellColor = (cellNumber: number) => {
     // ДЕНЬГИ (Желтый цвет - #FFD700)
-    if ([1, 14, 36, 40, 41].includes(cellNumber)) {
+    if ([1, 14, 36, 40, 27].includes(cellNumber)) {
       return '#FFD700';
     }
     // МЕЧТЫ (Розовый цвет - #E91E63)
@@ -415,7 +415,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
       return '#E91E63';
     }
     // БИЗНЕС (Зеленый цвет - #4CAF50)
-    else if ([3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 38, 43, 45, 47, 49].includes(cellNumber)) {
+    else if ([3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 29, 31, 33, 38, 41, 43, 45, 47, 49].includes(cellNumber)) {
       return '#4CAF50';
     }
     // ПОТЕРИ (Бордовый цвет - #8B0000)
@@ -433,7 +433,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
   // Функция для определения типа клетки
   const getCellType = (cellNumber: number) => {
     // ДЕНЬГИ
-    if ([1, 14, 36, 40, 41].includes(cellNumber)) {
+    if ([1, 14, 36, 40, 27].includes(cellNumber)) {
       return '💰';
     }
     // МЕЧТЫ
@@ -441,7 +441,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
       return '🎯';
     }
     // БИЗНЕС
-    else if ([3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 38, 43, 45, 47, 49].includes(cellNumber)) {
+    else if ([3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 29, 31, 33, 38, 41, 43, 45, 47, 49].includes(cellNumber)) {
       return '💼';
     }
     // ПОТЕРИ
@@ -485,7 +485,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
       24: 'Эко-ранчо',
       25: 'Кругосветное плавание',
       26: 'Биржа',
-      27: 'Частный самолёт',
+      27: 'Денежная клетка',
       28: 'NFT-платформа',
       29: 'Лидер мнений',
       30: 'Полет на Марс',
@@ -499,7 +499,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
       38: 'Франшиза "поток денег"',
       39: 'Санкции',
       40: 'Доход от инвестиций',
-      41: 'Денежная клетка',
+      41: 'Частный самолёт',
       42: 'Белоснежная Яхта',
       43: 'Пекарня с доставкой',
       44: 'Благотворительный фонд',
@@ -655,8 +655,9 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
             width: cellSize,
             height: cellSize,
             borderRadius: '12px',
-            background: `linear-gradient(135deg, ${colorFrom}22 0%, ${colorTo}55 100%)`,
-            border: `1px solid ${baseColor}44`,
+            background: `linear-gradient(145deg, ${colorFrom}55 0%, ${colorTo}CC 100%)`,
+            border: `1px solid ${baseColor}88`,
+            boxShadow: `0 8px 22px ${baseColor}33, inset 0 0 18px ${baseColor}22`,
             color: '#fff',
             display: 'flex',
             alignItems: 'center',
@@ -973,7 +974,7 @@ const SimpleGameBoard: React.FC<SimpleGameBoardProps> = ({ roomId, playerData })
               Профессия: {playerData.profession?.name || 'Программист'}
             </Typography>
             <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>
-              Зарплата: ${playerData.profession?.salary?.toLocaleString() || '6,000'}
+              Зарплата: ${playerData.profession?.salary?.toLocaleString('en-US') || '6,000'}
             </Typography>
           </Box>
         </Box>
