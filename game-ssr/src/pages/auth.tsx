@@ -9,7 +9,7 @@ export default function AuthPage() {
   const [tab, setTab] = useState(0);
   const [snackbar, setSnackbar] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
-  const bot = process.env.NEXT_PUBLIC_TELEGRAM_BOT || 'EnergyMoneyBot';
+  const bot = process.env.NEXT_PUBLIC_TELEGRAM_BOT || 'energy_m_bot';
 
   useEffect(() => {
     // Telegram login widget loader

@@ -61,15 +61,15 @@ const BankModule = ({
   return (
     <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.3 }}>
       <Card sx={{
-        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
+        background: 'linear-gradient(135deg, rgba(6, 11, 25, 0.95) 0%, rgba(16, 24, 39, 0.95) 100%)',
         borderRadius: '16px',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        border: '1px solid rgba(255, 255, 255, 0.06)',
         position: 'relative',
         overflow: 'hidden',
         cursor: 'pointer',
         transition: 'all 0.3s ease',
-        '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 12px 24px rgba(0, 0, 0, 0.3)', border: '1px solid rgba(16, 185, 129, 0.3)' },
-        '&::before': { content: '""', position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, #10B981, #059669, #10B981)', animation: 'shimmer 2s infinite' }
+        '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 12px 24px rgba(0, 0, 0, 0.35)', border: '1px solid rgba(16, 185, 129, 0.35)' },
+        '&::before': { content: '""', position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, #22C55E, #06B6D4, #8B5CF6)', opacity: 0.9 }
       }} onClick={() => setShowBankModal(true)}>
         <CardContent sx={{ p: isMobile ? 2 : 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -81,7 +81,7 @@ const BankModule = ({
           </Box>
 
           <Box sx={{ mb: 2 }}>
-            <Typography variant={isMobile ? 'h4' : 'h3'} sx={{ color: '#10B981', fontWeight: 'bold', textShadow: '0 0 10px rgba(16, 185, 129, 0.3)', mb: 0.5 }}>
+            <Typography variant={isMobile ? 'h4' : 'h3'} sx={{ color: '#10B981', fontWeight: 'bold', textShadow: '0 0 8px rgba(16,185,129,0.3)', mb: 0.5 }}>
               {(currentBalance ?? 0).toLocaleString()}
             </Typography>
             <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.8rem' }}>Доступно для операций</Typography>
@@ -150,4 +150,3 @@ const BankModule = ({
 };
 
 export default BankModule;
-

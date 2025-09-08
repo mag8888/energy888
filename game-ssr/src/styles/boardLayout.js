@@ -6,9 +6,9 @@ export const INNER_RING_RADIUS = 225;
 export const INNER_CELL = 68;
 
 export const ACTION_CARD_OFFSETS = {
-  big: { dx: -220, dy: -140 },
-  small: { dx: 220, dy: -140 },
-  expenses: { dx: -220, dy: 160 },
-  market: { dx: 220, dy: 160 }
+  // ближе к углам внутреннего поля
+  big: { dx: -260, dy: -170 },
+  small: { dx: 260, dy: -170 },
+  expenses: { dx: -260, dy: 200 },
+  market: { dx: 260, dy: 200 }
 };
-

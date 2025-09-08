@@ -216,17 +216,7 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
         flexDirection: { xs: 'column', md: 'row' }
       }}>
 
-        {/* Big circle info */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, p: 2, background: 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.2))', borderRadius: 2, border: '1px solid rgba(34,197,94,0.3)' }}>
-          <Box>
-            <Typography variant="h6" sx={{ color: '#22C55E', fontWeight: 'bold' }}>💰 Баланс: ${playerMoney.toLocaleString()}</Typography>
-            <Typography variant="body2" sx={{ color: 'rgba(34,197,94,0.8)' }}>📈 Пассивный доход: ${bigCirclePassiveIncome.toLocaleString()}/ход</Typography>
-          </Box>
-          <Box>
-            <Typography variant="body2" sx={{ color: 'rgba(34,197,94,0.8)' }}>🏢 Бизнесов: 0</Typography>
-            <Typography variant="body2" sx={{ color: 'rgba(34,197,94,0.8)' }}>🌟 Мечт: 0</Typography>
-          </Box>
-        </Box>
+        {/* Info bar removed per request */}
 
         {/* Board + Right panel */}
         <Box sx={{ display: 'flex', gap: 2 }}>
@@ -299,13 +289,17 @@ const OriginalGameBoard = ({ roomId, playerData, onExit }) => {
               </Box>
             );
 
-            // Player token
-            const posAngle = (Math.PI * 2 * position) / 24 - Math.PI / 2;
-            const px = center.x + Math.cos(posAngle) * ringRadius - 12;
-            const py = center.y + Math.sin(posAngle) * ringRadius - 12;
-            cells.push(
-              <Box key="token" sx={{ position: 'absolute', left: px, top: py, width: 24, height: 24, background: gamePlayers[0]?.color || '#FF5722', border: '2px solid #fff', borderRadius: '50%', boxShadow: '0 0 10px rgba(255,255,255,0.5)' }} />
-            );
+            // Player tokens
+            const tokenRadius = ringRadius + 2; // чуть поверх клетки
+            gamePlayers.forEach((p, idx) => {
+              const pPos = (p.position ?? (idx*2)) % 24; // если нет позиций — разнести
+              const a = (Math.PI * 2 * pPos) / 24 - Math.PI / 2 + (idx*0.12);
+              const tx = center.x + Math.cos(a) * tokenRadius - 12;
+              const ty = center.y + Math.sin(a) * tokenRadius - 12;
+              cells.push(
+                <Box key={`token-${p.socketId||p.id||idx}`} sx={{ position: 'absolute', left: tx, top: ty, width: 24, height: 24, background: p.color || '#FF5722', border: '2px solid #fff', borderRadius: '50%', boxShadow: '0 0 10px rgba(255,255,255,0.5)' }} />
+              );
+            });
 
             // Four action cards placed between outer square and inner ring
             const card = (key, label, colorFrom, colorTo, dx, dy) => (
