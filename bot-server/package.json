@@ -1,0 +1,13 @@
+{
+  "name": "energy888-telegram-bot",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "start": "node telegram-bot.js",
+    "dev": "node telegram-bot.js"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
