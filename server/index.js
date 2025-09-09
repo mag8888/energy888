@@ -3,6 +3,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import DatabaseService from './services/database.js';
 
 dotenv.config();
 
@@ -45,6 +46,39 @@ app.options('*', (req, res) => {
 });
 
 app.get('/', (_req, res) => res.json({ ok: true, name: 'energy888-socket-server' }));
+
+// Эндпоинт для мониторинга
+app.get('/stats', async (_req, res) => {
+  try {
+    const stats = await DatabaseService.getStats();
+    res.json({
+      ok: true,
+      ...stats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Ошибка получения статистики:', error);
+    res.status(500).json({ ok: false, error: 'Ошибка получения статистики' });
+  }
+});
+
+// Эндпоинт для получения топа игроков
+app.get('/hall-of-fame', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const sortBy = req.query.sortBy || 'points';
+    const players = await DatabaseService.getTopPlayers(limit, sortBy);
+    res.json({
+      ok: true,
+      players,
+      limit,
+      sortBy
+    });
+  } catch (error) {
+    console.error('❌ Ошибка получения зала славы:', error);
+    res.status(500).json({ ok: false, error: 'Ошибка получения зала славы' });
+  }
+});
 // Telegram bot deep-link flow
 const tgSessions = new Map(); // token -> { createdAt, authorized, user }
 app.get('/tg/new-token', (_req, res) => {
@@ -113,121 +147,208 @@ const io = new Server(server, {
   } 
 });
 
-// In-memory rooms and state
-// room: { id, name, creatorId, creatorUsername, creatorProfession, assignProfessionToAll, maxPlayers, password, timing, createdAt, players: Map<username, player>, started, order, currentIndex, turnEndAt, gameDurationSec, gameEndAt, deleteAfterAt }
-const rooms = new Map();
+// In-memory cache for active rooms (для быстрого доступа)
+const roomsCache = new Map();
 const roomIntervals = new Map(); // roomId -> intervalId
-const hallOfFame = new Map(); // username -> { games, wins, points }
 
-// Функция очистки комнат через 5 часов
-function scheduleRoomCleanup(roomId) {
-  const cleanupTime = 5 * 60 * 60 * 1000; // 5 часов в миллисекундах
-  
-  setTimeout(() => {
-    const room = rooms.get(roomId);
-    if (room && !room.started) {
-      console.log(`🗑️ Удаляем неактивную комнату: ${roomId}`);
-      rooms.delete(roomId);
-      io.emit('rooms-updated');
+// Инициализация базы данных
+let dbInitialized = false;
+
+// Функции для работы с комнатами через базу данных
+async function getRoom(roomId) {
+  try {
+    // Сначала проверяем кэш
+    if (roomsCache.has(roomId)) {
+      return roomsCache.get(roomId);
     }
-  }, cleanupTime);
+    
+    // Если нет в кэше, загружаем из БД
+    const room = await DatabaseService.getRoom(roomId);
+    if (room) {
+      // Конвертируем players в Map для совместимости
+      const roomData = {
+        ...room.toObject(),
+        players: new Map(room.players.map(p => [p.socketId, p]))
+      };
+      roomsCache.set(roomId, roomData);
+      return roomData;
+    }
+    return null;
+  } catch (error) {
+    console.error('❌ Ошибка получения комнаты:', error);
+    return null;
+  }
 }
 
-function getRoom(roomId) {
-  return rooms.get(roomId);
+async function listRooms() {
+  try {
+    const rooms = await DatabaseService.getAllRooms();
+    return rooms.map(room => ({
+      id: room.id,
+      name: room.name || 'Комната',
+      creatorId: room.creatorId,
+      creatorUsername: room.creatorUsername,
+      maxPlayers: room.maxPlayers || 6,
+      playersCount: room.players ? room.players.length : 0,
+      hasPassword: !!room.password,
+      timing: room.timing || 120
+    }));
+  } catch (error) {
+    console.error('❌ Ошибка получения списка комнат:', error);
+    return [];
+  }
 }
 
-function listRooms() {
-  return Array.from(rooms.values()).map(r => ({
-    id: r.id,
-    name: r.name || 'Комната',
-    creatorId: r.creatorId,
-    creatorUsername: r.creatorUsername,
-    maxPlayers: r.maxPlayers || 6,
-    playersCount: r.players ? r.players.size : 0,
-    hasPassword: !!r.password,
-    timing: r.timing || 120
-  }));
+async function createRoom(roomData) {
+  try {
+    const room = await DatabaseService.createRoom(roomData);
+    
+    // Добавляем в кэш
+    const roomDataForCache = {
+      ...room.toObject(),
+      players: new Map()
+    };
+    roomsCache.set(room.id, roomDataForCache);
+    
+    return room;
+  } catch (error) {
+    console.error('❌ Ошибка создания комнаты:', error);
+    throw error;
+  }
 }
 
-io.on('connection', (socket) => {
+async function updateRoom(roomId, updateData) {
+  try {
+    const room = await DatabaseService.updateRoom(roomId, updateData);
+    if (room) {
+      // Обновляем кэш
+      const roomDataForCache = {
+        ...room.toObject(),
+        players: new Map(room.players.map(p => [p.socketId, p]))
+      };
+      roomsCache.set(roomId, roomDataForCache);
+    }
+    return room;
+  } catch (error) {
+    console.error('❌ Ошибка обновления комнаты:', error);
+    throw error;
+  }
+}
+
+async function deleteRoom(roomId) {
+  try {
+    await DatabaseService.deleteRoom(roomId);
+    roomsCache.delete(roomId);
+    console.log(`🗑️ Комната удалена: ${roomId}`);
+  } catch (error) {
+    console.error('❌ Ошибка удаления комнаты:', error);
+  }
+}
+
+io.on('connection', async (socket) => {
+  // Инициализация базы данных при первом подключении
+  if (!dbInitialized) {
+    try {
+      await DatabaseService.connect();
+      dbInitialized = true;
+      console.log('✅ База данных инициализирована');
+    } catch (error) {
+      console.error('❌ Ошибка инициализации БД:', error);
+    }
+  }
+
   // Rooms listing
-  socket.on('getRooms', () => {
-    socket.emit('roomsList', listRooms());
+  socket.on('getRooms', async () => {
+    try {
+      const rooms = await listRooms();
+      socket.emit('roomsList', rooms);
+    } catch (error) {
+      console.error('❌ Ошибка получения списка комнат:', error);
+      socket.emit('error', 'Ошибка получения списка комнат');
+    }
   });
 
   // Get rooms (simple version)
-  socket.on('get-rooms', () => {
-    console.log('📋 Запрос списка комнат, всего комнат:', rooms.size);
-    const roomsList = Array.from(rooms.values()).map(room => {
-      console.log('📋 Комната в списке:', room.id, room.name);
-      return {
-        id: room.id,
-        name: room.name,
-        maxPlayers: room.maxPlayers,
-        currentPlayers: room.currentPlayers || 0,
-        status: room.started ? 'playing' : 'waiting',
-        turnTime: room.timing || 120
-      };
-    });
-    console.log('📋 Отправляем список комнат:', roomsList.length);
-    socket.emit('rooms-list', roomsList);
+  socket.on('get-rooms', async () => {
+    try {
+      console.log('📋 Запрос списка комнат');
+      const rooms = await listRooms();
+      const roomsList = rooms.map(room => {
+        console.log('📋 Комната в списке:', room.id, room.name, 'игроков:', room.playersCount);
+        return {
+          id: room.id,
+          name: room.name || 'Комната',
+          maxPlayers: room.maxPlayers || 4,
+          players: room.playersCount || 0,
+          status: 'waiting', // Пока всегда waiting, можно добавить логику для started
+          timing: room.timing || 120
+        };
+      });
+      console.log('📋 Отправляем список комнат:', roomsList.length);
+      socket.emit('rooms-list', roomsList);
+    } catch (error) {
+      console.error('❌ Ошибка получения списка комнат:', error);
+      socket.emit('error', 'Ошибка получения списка комнат');
+    }
   });
 
   // Create room (simple version)
-  socket.on('create-room', (payload = {}) => {
-    console.log('🏠 Создание комнаты:', payload);
-    const id = `room_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
-    if (rooms.has(id)) {
-      socket.emit('error', 'Комната с таким ID уже существует');
-      return;
-    }
-    const room = {
-      id,
-      name: payload.name || 'Комната',
-      creatorId: socket.id,
-      maxPlayers: Number(payload.maxPlayers || 4),
-      timing: Number(payload.timing || 120),
-      createdAt: Date.now(),
-      players: new Map(),
-      started: false,
-      currentPlayers: 0
-    };
-    rooms.set(id, room);
-    
-    // Планируем очистку комнаты через 5 часов
-    scheduleRoomCleanup(id);
-    
-    const roomData = {
-      id: room.id,
-      name: room.name,
-      maxPlayers: room.maxPlayers,
-      currentPlayers: 0,
-      turnTime: room.timing,
-      status: 'waiting',
-      players: []
-    };
-    
-    console.log('✅ Комната создана и сохранена:', id);
-    console.log('✅ Всего комнат в памяти:', rooms.size);
-    console.log('✅ Комната в Map:', rooms.has(id));
-    
-    socket.emit('room-created', roomData);
-    io.emit('rooms-updated');
-    
-    // Принудительно обновляем список комнат
-    setTimeout(() => {
-      const roomsList = Array.from(rooms.values()).map(room => ({
+  socket.on('create-room', async (payload = {}) => {
+    try {
+      console.log('🏠 Создание комнаты:', payload);
+      const id = `room_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+      
+      const roomData = {
+        id,
+        name: payload.name || 'Комната',
+        creatorId: socket.id,
+        creatorUsername: payload.playerName || 'Игрок',
+        maxPlayers: Number(payload.maxPlayers || 4),
+        timing: Number(payload.timing || 120),
+        createdAt: new Date(),
+        players: [],
+        started: false
+      };
+      
+      const room = await createRoom(roomData);
+      
+      const roomResponse = {
         id: room.id,
         name: room.name,
         maxPlayers: room.maxPlayers,
-        currentPlayers: room.currentPlayers || 0,
-        status: room.started ? 'playing' : 'waiting',
-        turnTime: room.timing || 120
-      }));
-      console.log('🔄 Принудительно обновляем список комнат:', roomsList.length);
-      io.emit('rooms-list', roomsList);
-    }, 100);
+        players: 0,
+        timing: room.timing,
+        status: 'waiting'
+      };
+      
+      console.log('✅ Комната создана и сохранена в БД:', id);
+      
+      socket.emit('room-created', roomResponse);
+      io.emit('rooms-updated');
+      
+      // Принудительно обновляем список комнат
+      setTimeout(async () => {
+        try {
+          const rooms = await listRooms();
+          const roomsList = rooms.map(room => ({
+            id: room.id,
+            name: room.name,
+            maxPlayers: room.maxPlayers,
+            players: room.playersCount || 0,
+            status: 'waiting',
+            timing: room.timing || 120
+          }));
+          console.log('🔄 Принудительно обновляем список комнат:', roomsList.length);
+          io.emit('rooms-list', roomsList);
+        } catch (error) {
+          console.error('❌ Ошибка обновления списка комнат:', error);
+        }
+      }, 100);
+      
+    } catch (error) {
+      console.error('❌ Ошибка создания комнаты:', error);
+      socket.emit('error', 'Ошибка создания комнаты');
+    }
   });
 
   // Create room
@@ -260,98 +381,136 @@ io.on('connection', (socket) => {
   });
 
   // Join room (simple version)
-  socket.on('join-room', ({ roomId, playerName, playerEmail }) => {
-    console.log('🚪 Присоединение к комнате:', { roomId, playerName, playerEmail });
-    const room = rooms.get(roomId);
-    if (!room) { 
-      socket.emit('error', 'Комната не найдена'); 
-      return; 
-    }
-    if (room.players.size >= (room.maxPlayers || 6)) { 
-      socket.emit('error', 'Комната заполнена'); 
-      return; 
-    }
+  socket.on('join-room', async ({ roomId, playerName, playerEmail }) => {
+    try {
+      console.log('🚪 Присоединение к комнате:', { roomId, playerName, playerEmail });
+      
+      const room = await getRoom(roomId);
+      if (!room) { 
+        socket.emit('error', 'Комната не найдена'); 
+        return; 
+      }
+      
+      if (room.players.size >= (room.maxPlayers || 6)) { 
+        socket.emit('error', 'Комната заполнена'); 
+        return; 
+      }
 
-    socket.join(roomId);
-    const player = {
-      id: socket.id,
-      name: playerName || 'Игрок',
-      email: playerEmail || 'player@example.com',
-      socketId: socket.id,
-      isReady: false,
-      profession: null,
-      dream: null
-    };
-    
-    room.players.set(socket.id, player);
-    room.currentPlayers = room.players.size;
-    
-    console.log('✅ Игрок присоединился к комнате:', player);
-    
-    // Отправляем данные комнаты
-    const roomData = {
-      id: room.id,
-      name: room.name,
-      maxPlayers: room.maxPlayers,
-      currentPlayers: room.currentPlayers,
-      turnTime: room.timing || 120,
-      status: room.started ? 'playing' : 'waiting',
-      players: Array.from(room.players.values())
-    };
-    
-    socket.emit('room-joined', roomData);
-    io.to(roomId).emit('room-updated', roomData);
-    io.emit('rooms-updated');
+      socket.join(roomId);
+      const player = {
+        id: socket.id,
+        name: playerName || 'Игрок',
+        email: playerEmail || 'player@example.com',
+        socketId: socket.id,
+        isReady: false,
+        profession: null,
+        dream: null
+      };
+      
+      // Добавляем игрока в БД
+      await DatabaseService.addPlayerToRoom(roomId, player);
+      
+      // Обновляем кэш
+      room.players.set(socket.id, player);
+      roomsCache.set(roomId, room);
+      
+      console.log('✅ Игрок присоединился к комнате:', player);
+      
+      // Отправляем данные комнаты
+      const roomData = {
+        id: room.id,
+        name: room.name,
+        maxPlayers: room.maxPlayers,
+        players: room.players.size,
+        timing: room.timing || 120,
+        status: room.started ? 'playing' : 'waiting',
+        playersList: Array.from(room.players.values())
+      };
+      
+      socket.emit('room-joined', roomData);
+      io.to(roomId).emit('room-updated', roomData);
+      io.emit('rooms-updated');
+      
+    } catch (error) {
+      console.error('❌ Ошибка присоединения к комнате:', error);
+      socket.emit('error', 'Ошибка присоединения к комнате');
+    }
   });
 
   // Обработка отключения игрока
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async () => {
     console.log('🔌 Игрок отключился:', socket.id);
     
-    // Находим комнаты, где был этот игрок
-    for (const [roomId, room] of rooms.entries()) {
-      if (room.players.has(socket.id)) {
-        room.players.delete(socket.id);
-        room.currentPlayers = room.players.size;
-        
-        console.log(`👋 Игрок покинул комнату ${roomId}`);
-        
-        // Если в комнате не осталось игроков, не удаляем её сразу
-        if (room.players.size === 0) {
-          console.log(`🏠 Комната ${roomId} пуста, но остается активной`);
+    try {
+      // Находим комнаты, где был этот игрок
+      for (const [roomId, room] of roomsCache.entries()) {
+        if (room.players.has(socket.id)) {
+          // Удаляем игрока из БД
+          await DatabaseService.removePlayerFromRoom(roomId, socket.id);
+          
+          // Удаляем из кэша
+          room.players.delete(socket.id);
+          roomsCache.set(roomId, room);
+          
+          console.log(`👋 Игрок покинул комнату ${roomId}`);
+          
+          // Если в комнате не осталось игроков, планируем удаление через 1 час
+          if (room.players.size === 0) {
+            console.log(`🏠 Комната ${roomId} пуста, планируем удаление через 1 час`);
+            setTimeout(async () => {
+              try {
+                const currentRoom = await getRoom(roomId);
+                if (currentRoom && currentRoom.players.size === 0 && !currentRoom.started) {
+                  console.log(`🗑️ Удаляем пустую комнату после отключения всех игроков: ${roomId}`);
+                  await deleteRoom(roomId);
+                  io.emit('rooms-updated');
+                }
+              } catch (error) {
+                console.error('❌ Ошибка при удалении пустой комнаты:', error);
+              }
+            }, 60 * 60 * 1000); // 1 час
+          }
+          
+          // Обновляем данные комнаты
+          const roomData = {
+            id: room.id,
+            name: room.name,
+            maxPlayers: room.maxPlayers,
+            players: room.players.size,
+            timing: room.timing || 120,
+            status: room.started ? 'playing' : 'waiting',
+            playersList: Array.from(room.players.values())
+          };
+          
+          io.to(roomId).emit('room-updated', roomData);
+          io.emit('rooms-updated');
+          break;
         }
-        
-        // Обновляем данные комнаты
-        const roomData = {
-          id: room.id,
-          name: room.name,
-          maxPlayers: room.maxPlayers,
-          currentPlayers: room.currentPlayers,
-          turnTime: room.timing || 120,
-          status: room.started ? 'playing' : 'waiting',
-          players: Array.from(room.players.values())
-        };
-        
-        io.to(roomId).emit('room-updated', roomData);
-        io.emit('rooms-updated');
-        break;
       }
+    } catch (error) {
+      console.error('❌ Ошибка при отключении игрока:', error);
     }
   });
 
   // Обработчик rooms-updated
-  socket.on('rooms-updated', () => {
-    console.log('🔄 Обновление списка комнат запрошено');
-    const roomsList = Array.from(rooms.values()).map(room => ({
-      id: room.id,
-      name: room.name,
-      maxPlayers: room.maxPlayers,
-      currentPlayers: room.currentPlayers || 0,
-      status: room.started ? 'playing' : 'waiting',
-      turnTime: room.timing || 120
-    }));
-    console.log('🔄 Отправляем обновленный список комнат:', roomsList.length);
-    socket.emit('rooms-list', roomsList);
+  socket.on('rooms-updated', async () => {
+    try {
+      console.log('🔄 Обновление списка комнат запрошено');
+      const rooms = await listRooms();
+      const roomsList = rooms.map(room => ({
+        id: room.id,
+        name: room.name,
+        maxPlayers: room.maxPlayers,
+        players: room.playersCount || 0,
+        status: 'waiting',
+        timing: room.timing || 120
+      }));
+      console.log('🔄 Отправляем обновленный список комнат:', roomsList.length);
+      socket.emit('rooms-list', roomsList);
+    } catch (error) {
+      console.error('❌ Ошибка обновления списка комнат:', error);
+      socket.emit('error', 'Ошибка обновления списка комнат');
+    }
   });
 
   // Join room with metadata
@@ -641,10 +800,33 @@ setInterval(() => {
 const PORT = process.env.PORT || 4000;
 const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 
-server.listen(PORT, HOST, () => {
+server.listen(PORT, HOST, async () => {
   console.log(`Socket server listening on ${HOST}:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Front origin: ${FRONT_ORIGIN}`);
+  
+  // Инициализация базы данных и восстановление комнат
+  try {
+    await DatabaseService.connect();
+    console.log('✅ База данных подключена');
+    
+    // Восстанавливаем активные комнаты
+    const rooms = await DatabaseService.restoreRooms();
+    console.log(`🔄 Восстановлено ${rooms.length} активных комнат`);
+    
+    // Добавляем комнаты в кэш
+    for (const room of rooms) {
+      const roomData = {
+        ...room.toObject(),
+        players: new Map(room.players.map(p => [p.socketId, p]))
+      };
+      roomsCache.set(room.id, roomData);
+    }
+    
+    console.log('✅ Сервер полностью инициализирован');
+  } catch (error) {
+    console.error('❌ Ошибка инициализации сервера:', error);
+  }
 });
 
 server.on('error', (err) => {

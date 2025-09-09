@@ -1,12 +1,20 @@
 {
-  "name": "energy888-telegram-bot",
+  "name": "energy888-socket-server",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.5.0",
+  "type": "module",
   "scripts": {
-    "start": "node telegram-bot.js",
-    "dev": "node telegram-bot.js"
+    "start": "node socket-server.js",
+    "dev": "node socket-server.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "mongodb": "^6.3.0",
+    "mongoose": "^8.0.3"
+  },
   "engines": {
     "node": ">=18.0.0"
   }
