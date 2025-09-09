@@ -277,7 +277,7 @@ io.on('connection', (socket) => {
   // Присоединение к комнате
   socket.on('join-room', (data) => {
     try {
-      const { roomId, playerName } = data;
+      const { roomId, playerName, playerEmail } = data;
       const room = rooms.get(roomId);
       
       if (!room) {
@@ -295,12 +295,28 @@ io.on('connection', (socket) => {
         return;
       }
       
+      // Проверяем, не присоединился ли уже этот игрок
+      const existingPlayer = room.players.find(p => p.id === socket.id);
+      if (existingPlayer) {
+        // Игрок уже в комнате, просто отправляем обновленную информацию
+        socket.emit('room-joined', {
+          id: room.id,
+          name: room.name,
+          maxPlayers: room.maxPlayers,
+          currentPlayers: room.players.length,
+          turnTime: room.timing,
+          status: room.status,
+          players: room.players
+        });
+        return;
+      }
+      
       // Присоединяем к комнате
       socket.join(roomId);
       room.players.push({
         id: socket.id,
         name: playerName || 'Игрок',
-        email: playerName || 'player@example.com',
+        email: playerEmail || 'player@example.com',
         isReady: false
       });
       
@@ -377,6 +393,58 @@ io.on('connection', (socket) => {
     }
   });
   
+  // Настройка персонажа (профессия и мечта)
+  socket.on('player-setup', (data) => {
+    try {
+      const { roomId, profession, dream } = data;
+      const room = rooms.get(roomId);
+      
+      if (!room) {
+        return;
+      }
+      
+      const player = room.players.find(p => p.id === socket.id);
+      if (player) {
+        player.profession = profession;
+        player.dream = dream;
+        player.isReady = true;
+        
+        console.log('👤 Игрок настроил персонажа:', roomId, player.name, profession, dream);
+        
+        // Уведомляем всех в комнате
+        io.to(roomId).emit('room-updated', {
+          id: room.id,
+          name: room.name,
+          maxPlayers: room.maxPlayers,
+          currentPlayers: room.players.length,
+          turnTime: room.timing,
+          status: room.status,
+          players: room.players
+        });
+        
+        // Проверяем, все ли готовы для начала игры
+        const allReady = room.players.length >= 2 && room.players.every(p => p.isReady && p.profession && p.dream);
+        if (allReady && room.status === 'waiting') {
+          room.status = 'playing';
+          console.log('🎮 Игра началась в комнате:', roomId);
+          
+          io.to(roomId).emit('game-started', {
+            id: room.id,
+            name: room.name,
+            maxPlayers: room.maxPlayers,
+            currentPlayers: room.players.length,
+            turnTime: room.timing,
+            status: room.status,
+            players: room.players
+          });
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ Ошибка настройки персонажа:', error);
+    }
+  });
+
   // Готовность игрока
   socket.on('player-ready', (data) => {
     try {
