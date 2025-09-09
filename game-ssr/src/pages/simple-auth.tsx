@@ -10,6 +10,7 @@ export default function SimpleAuth() {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [telegramLoading, setTelegramLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,6 +44,86 @@ export default function SimpleAuth() {
       setMessage('Ошибка: ' + (error as Error).message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTelegramAuth = async () => {
+    try {
+      setTelegramLoading(true);
+      setMessage('');
+
+      // Получаем токен от сервера
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SOCKET_URL}/tg/new-token`);
+      const data = await response.json();
+
+      if (!data.ok) {
+        throw new Error(data.error || 'Failed to get token');
+      }
+
+      const token = data.token;
+      console.log('🔑 Получен токен:', token);
+
+      // Создаем Telegram Login Widget
+      const script = document.createElement('script');
+      script.src = 'https://telegram.org/js/telegram-widget.js?22';
+      script.setAttribute('data-telegram-login', process.env.NEXT_PUBLIC_TELEGRAM_BOT || 'energy_m_bot');
+      script.setAttribute('data-size', 'large');
+      script.setAttribute('data-onauth', `onTelegramAuth(user, ${JSON.stringify({ token })})`);
+      script.setAttribute('data-request-access', 'write');
+      document.body.appendChild(script);
+
+      // Глобальная функция для обработки авторизации
+      (window as any).onTelegramAuth = async (user: any, authData: any) => {
+        try {
+          console.log('🔐 Telegram авторизация:', user);
+          
+          // Отправляем данные на сервер для проверки
+          const authResponse = await fetch(`${process.env.NEXT_PUBLIC_SOCKET_URL}/tg/authorize`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              token: authData.token,
+              id: user.id,
+              username: user.username,
+              first_name: user.first_name,
+              last_name: user.last_name,
+              photo_url: user.photo_url
+            })
+          });
+
+          const authResult = await authResponse.json();
+          
+          if (authResult.ok && authResult.authorized) {
+            // Сохраняем пользователя
+            const userData = {
+              id: authResult.user.id,
+              name: authResult.user.firstName || authResult.user.username || 'Telegram User',
+              email: `${authResult.user.username || authResult.user.id}@telegram.local`
+            };
+            
+            localStorage.setItem('user', JSON.stringify(userData));
+            setMessage('✅ Авторизация через Telegram успешна!');
+            
+            setTimeout(() => {
+              router.push('/simple-rooms');
+            }, 1000);
+          } else {
+            throw new Error(authResult.error || 'Authorization failed');
+          }
+        } catch (error) {
+          console.error('❌ Ошибка Telegram авторизации:', error);
+          setMessage('❌ Ошибка авторизации через Telegram');
+        } finally {
+          setTelegramLoading(false);
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ Ошибка получения токена:', error);
+      setMessage('❌ Ошибка подключения к серверу');
+      setTelegramLoading(false);
     }
   };
 
@@ -195,6 +276,39 @@ export default function SimpleAuth() {
             }}
           >
             {loading ? 'Загрузка...' : (isLogin ? 'Войти' : 'Зарегистрироваться')}
+          </button>
+
+          <div style={{
+            margin: '20px 0',
+            textAlign: 'center',
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontSize: '14px'
+          }}>
+            или
+          </div>
+
+          <button
+            onClick={handleTelegramAuth}
+            disabled={telegramLoading}
+            style={{
+              width: '100%',
+              padding: '15px',
+              border: 'none',
+              borderRadius: '10px',
+              background: 'linear-gradient(45deg, #0088cc, #00a8ff)',
+              color: 'white',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              cursor: telegramLoading ? 'not-allowed' : 'pointer',
+              opacity: telegramLoading ? 0.7 : 1,
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px'
+            }}
+          >
+            {telegramLoading ? '🔄 Загрузка...' : '📱 Войти через Telegram'}
           </button>
         </form>
 
