@@ -70,6 +70,20 @@ export default function SimpleRooms() {
       setRooms(prev => [...prev, room]);
       setMessage('Комната создана успешно!');
       setShowCreateForm(false);
+      
+      // Автоматически присоединяемся к созданной комнате
+      console.log('🚪 Автоматически присоединяемся к комнате:', room.id);
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      newSocket.emit('join-room', {
+        roomId: room.id,
+        playerName: userData.name || 'Игрок',
+        playerEmail: userData.email || 'player@example.com'
+      });
+      
+      // Переходим в комнату
+      setTimeout(() => {
+        router.push(`/room/${room.id}`);
+      }, 500);
     });
 
     newSocket.on('rooms-updated', () => {
