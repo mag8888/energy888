@@ -143,6 +143,54 @@ io.on('connection', (socket) => {
     socket.emit('roomsList', listRooms());
   });
 
+  // Get rooms (simple version)
+  socket.on('get-rooms', () => {
+    const roomsList = Array.from(rooms.values()).map(room => ({
+      id: room.id,
+      name: room.name,
+      maxPlayers: room.maxPlayers,
+      currentPlayers: room.currentPlayers || 0,
+      status: room.started ? 'playing' : 'waiting',
+      turnTime: room.timing || 120
+    }));
+    socket.emit('rooms-list', roomsList);
+  });
+
+  // Create room (simple version)
+  socket.on('create-room', (payload = {}) => {
+    console.log('🏠 Создание комнаты:', payload);
+    const id = `room_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+    if (rooms.has(id)) {
+      socket.emit('error', 'Комната с таким ID уже существует');
+      return;
+    }
+    const room = {
+      id,
+      name: payload.name || 'Комната',
+      creatorId: socket.id,
+      maxPlayers: Number(payload.maxPlayers || 4),
+      timing: Number(payload.timing || 120),
+      createdAt: Date.now(),
+      players: new Map(),
+      started: false,
+      currentPlayers: 0
+    };
+    rooms.set(id, room);
+    
+    const roomData = {
+      id: room.id,
+      name: room.name,
+      maxPlayers: room.maxPlayers,
+      currentPlayers: 0,
+      turnTime: room.timing,
+      status: 'waiting',
+      players: []
+    };
+    
+    socket.emit('room-created', roomData);
+    io.emit('rooms-updated');
+  });
+
   // Create room
   socket.on('createRoom', (payload = {}) => {
     const id = payload.id || `room_${Date.now().toString(36)}`;
@@ -170,6 +218,51 @@ io.on('connection', (socket) => {
     rooms.set(id, room);
     socket.emit('roomCreated', { id, ...room, players: [] });
     io.emit('roomsList', listRooms());
+  });
+
+  // Join room (simple version)
+  socket.on('join-room', ({ roomId, playerName, playerEmail }) => {
+    console.log('🚪 Присоединение к комнате:', { roomId, playerName, playerEmail });
+    const room = rooms.get(roomId);
+    if (!room) { 
+      socket.emit('error', 'Комната не найдена'); 
+      return; 
+    }
+    if (room.players.size >= (room.maxPlayers || 6)) { 
+      socket.emit('error', 'Комната заполнена'); 
+      return; 
+    }
+
+    socket.join(roomId);
+    const player = {
+      id: socket.id,
+      name: playerName || 'Игрок',
+      email: playerEmail || 'player@example.com',
+      socketId: socket.id,
+      isReady: false,
+      profession: null,
+      dream: null
+    };
+    
+    room.players.set(socket.id, player);
+    room.currentPlayers = room.players.size;
+    
+    console.log('✅ Игрок присоединился к комнате:', player);
+    
+    // Отправляем данные комнаты
+    const roomData = {
+      id: room.id,
+      name: room.name,
+      maxPlayers: room.maxPlayers,
+      currentPlayers: room.currentPlayers,
+      turnTime: room.timing || 120,
+      status: room.started ? 'playing' : 'waiting',
+      players: Array.from(room.players.values())
+    };
+    
+    socket.emit('room-joined', roomData);
+    io.to(roomId).emit('room-updated', roomData);
+    io.emit('rooms-updated');
   });
 
   // Join room with metadata
