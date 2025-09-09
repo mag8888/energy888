@@ -158,14 +158,19 @@ io.on('connection', (socket) => {
 
   // Get rooms (simple version)
   socket.on('get-rooms', () => {
-    const roomsList = Array.from(rooms.values()).map(room => ({
-      id: room.id,
-      name: room.name,
-      maxPlayers: room.maxPlayers,
-      currentPlayers: room.currentPlayers || 0,
-      status: room.started ? 'playing' : 'waiting',
-      turnTime: room.timing || 120
-    }));
+    console.log('📋 Запрос списка комнат, всего комнат:', rooms.size);
+    const roomsList = Array.from(rooms.values()).map(room => {
+      console.log('📋 Комната в списке:', room.id, room.name);
+      return {
+        id: room.id,
+        name: room.name,
+        maxPlayers: room.maxPlayers,
+        currentPlayers: room.currentPlayers || 0,
+        status: room.started ? 'playing' : 'waiting',
+        turnTime: room.timing || 120
+      };
+    });
+    console.log('📋 Отправляем список комнат:', roomsList.length);
     socket.emit('rooms-list', roomsList);
   });
 
@@ -204,8 +209,25 @@ io.on('connection', (socket) => {
     };
     
     console.log('✅ Комната создана и сохранена:', id);
+    console.log('✅ Всего комнат в памяти:', rooms.size);
+    console.log('✅ Комната в Map:', rooms.has(id));
+    
     socket.emit('room-created', roomData);
     io.emit('rooms-updated');
+    
+    // Принудительно обновляем список комнат
+    setTimeout(() => {
+      const roomsList = Array.from(rooms.values()).map(room => ({
+        id: room.id,
+        name: room.name,
+        maxPlayers: room.maxPlayers,
+        currentPlayers: room.currentPlayers || 0,
+        status: room.started ? 'playing' : 'waiting',
+        turnTime: room.timing || 120
+      }));
+      console.log('🔄 Принудительно обновляем список комнат:', roomsList.length);
+      io.emit('rooms-list', roomsList);
+    }, 100);
   });
 
   // Create room
@@ -315,6 +337,21 @@ io.on('connection', (socket) => {
         break;
       }
     }
+  });
+
+  // Обработчик rooms-updated
+  socket.on('rooms-updated', () => {
+    console.log('🔄 Обновление списка комнат запрошено');
+    const roomsList = Array.from(rooms.values()).map(room => ({
+      id: room.id,
+      name: room.name,
+      maxPlayers: room.maxPlayers,
+      currentPlayers: room.currentPlayers || 0,
+      status: room.started ? 'playing' : 'waiting',
+      turnTime: room.timing || 120
+    }));
+    console.log('🔄 Отправляем обновленный список комнат:', roomsList.length);
+    socket.emit('rooms-list', roomsList);
   });
 
   // Join room with metadata
