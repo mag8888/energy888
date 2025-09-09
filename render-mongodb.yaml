@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: energy888-mongodb-server
+    env: node
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && node production-server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: FRONT_ORIGIN
+        value: "*"
+      - key: MONGODB_URI
+        value: mongodb+srv://energy888:password123@cluster0.mongodb.net/energy888?retryWrites=true&w=majority
+      - key: BOT_TOKEN
+        value: 8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI
+    healthCheckPath: /health
+    autoDeploy: true
+    branch: main
