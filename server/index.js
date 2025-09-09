@@ -119,8 +119,21 @@ const rooms = new Map();
 const roomIntervals = new Map(); // roomId -> intervalId
 const hallOfFame = new Map(); // username -> { games, wins, points }
 
+// Функция очистки комнат через 5 часов
+function scheduleRoomCleanup(roomId) {
+  const cleanupTime = 5 * 60 * 60 * 1000; // 5 часов в миллисекундах
+  
+  setTimeout(() => {
+    const room = rooms.get(roomId);
+    if (room && !room.started) {
+      console.log(`🗑️ Удаляем неактивную комнату: ${roomId}`);
+      rooms.delete(roomId);
+      io.emit('rooms-updated');
+    }
+  }, cleanupTime);
+}
+
 function getRoom(roomId) {
-  if (!rooms.has(roomId)) rooms.set(roomId, { players: new Map() });
   return rooms.get(roomId);
 }
 
@@ -177,6 +190,9 @@ io.on('connection', (socket) => {
     };
     rooms.set(id, room);
     
+    // Планируем очистку комнаты через 5 часов
+    scheduleRoomCleanup(id);
+    
     const roomData = {
       id: room.id,
       name: room.name,
@@ -187,6 +203,7 @@ io.on('connection', (socket) => {
       players: []
     };
     
+    console.log('✅ Комната создана и сохранена:', id);
     socket.emit('room-created', roomData);
     io.emit('rooms-updated');
   });
@@ -263,6 +280,41 @@ io.on('connection', (socket) => {
     socket.emit('room-joined', roomData);
     io.to(roomId).emit('room-updated', roomData);
     io.emit('rooms-updated');
+  });
+
+  // Обработка отключения игрока
+  socket.on('disconnect', () => {
+    console.log('🔌 Игрок отключился:', socket.id);
+    
+    // Находим комнаты, где был этот игрок
+    for (const [roomId, room] of rooms.entries()) {
+      if (room.players.has(socket.id)) {
+        room.players.delete(socket.id);
+        room.currentPlayers = room.players.size;
+        
+        console.log(`👋 Игрок покинул комнату ${roomId}`);
+        
+        // Если в комнате не осталось игроков, не удаляем её сразу
+        if (room.players.size === 0) {
+          console.log(`🏠 Комната ${roomId} пуста, но остается активной`);
+        }
+        
+        // Обновляем данные комнаты
+        const roomData = {
+          id: room.id,
+          name: room.name,
+          maxPlayers: room.maxPlayers,
+          currentPlayers: room.currentPlayers,
+          turnTime: room.timing || 120,
+          status: room.started ? 'playing' : 'waiting',
+          players: Array.from(room.players.values())
+        };
+        
+        io.to(roomId).emit('room-updated', roomData);
+        io.emit('rooms-updated');
+        break;
+      }
+    }
   });
 
   // Join room with metadata
