@@ -70,18 +70,17 @@ async function handleMessage(update) {
     if (text === '/start') {
       await sendTelegramRequest('sendMessage', {
         chat_id: chatId,
-        text: `🎮 Добро пожаловать в Energy of Money!\n\n` +
+        text: `🎮 <b>Добро пожаловать в Energy of Money!</b>\n\n` +
               `👋 Привет, ${message.from.first_name}!\n\n` +
               `🎯 Это игра про управление деньгами и достижение целей.\n\n` +
-              `📱 Для игры перейдите на сайт:\n` +
-              `🔗 https://energy888.onrender.com\n\n` +
-              `💡 Команды бота:\n` +
+              `🔗 <a href="https://energy888.onrender.com">Играть в Energy of Money</a>\n\n` +
+              `💡 <b>Команды бота:</b>\n` +
               `/start - Начать\n` +
               `/help - Помощь\n` +
               `/game - Перейти к игре\n` +
-              `/rooms - Список комнат\n` +
-              `/create - Создать комнату`,
-        parse_mode: 'HTML'
+              `/rooms - Список комнат`,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true
       });
     }
     else if (text === '/help') {
@@ -93,22 +92,18 @@ async function handleMessage(update) {
               `2. Создайте комнату или присоединитесь к существующей\n` +
               `3. Выберите профессию и мечту\n` +
               `4. Начните играть!\n\n` +
-              `🎯 <b>Цель игры:</b>\n` +
-              `Управляйте деньгами, инвестируйте и достигайте своих целей!\n\n` +
-              `🔗 <b>Ссылки:</b>\n` +
-              `🌐 Сайт игры: https://energy888.onrender.com\n` +
-              `🤖 Этот бот: @energy_m_bot\n\n` +
+              `🔗 <a href="https://energy888.onrender.com">Играть в Energy of Money</a>\n\n` +
               `💬 <b>Поддержка:</b>\n` +
               `Если у вас есть вопросы, напишите @mag8888`,
-        parse_mode: 'HTML'
+        parse_mode: 'HTML',
+        disable_web_page_preview: true
       });
     }
     else if (text === '/game') {
       await sendTelegramRequest('sendMessage', {
         chat_id: chatId,
         text: `🎮 <b>Переход к игре</b>\n\n` +
-              `🔗 Нажмите на ссылку, чтобы начать играть:\n\n` +
-              `🌐 <a href="https://energy888.onrender.com">Играть в Energy of Money</a>\n\n` +
+              `🔗 <a href="https://energy888.onrender.com">Играть в Energy of Money</a>\n\n` +
               `💡 <i>Игра откроется в новом окне</i>`,
         parse_mode: 'HTML',
         disable_web_page_preview: true
@@ -118,20 +113,8 @@ async function handleMessage(update) {
       await sendTelegramRequest('sendMessage', {
         chat_id: chatId,
         text: `🏠 <b>Список комнат</b>\n\n` +
-              `🔗 Перейдите на сайт, чтобы увидеть доступные комнаты:\n\n` +
-              `🌐 <a href="https://energy888.onrender.com/simple-rooms">Просмотреть комнаты</a>\n\n` +
+              `🔗 <a href="https://energy888.onrender.com/simple-rooms">Просмотреть комнаты</a>\n\n` +
               `💡 <i>Там вы сможете создать новую комнату или присоединиться к существующей</i>`,
-        parse_mode: 'HTML',
-        disable_web_page_preview: true
-      });
-    }
-    else if (text === '/create') {
-      await sendTelegramRequest('sendMessage', {
-        chat_id: chatId,
-        text: `➕ <b>Создание комнаты</b>\n\n` +
-              `🔗 Перейдите на сайт, чтобы создать новую комнату:\n\n` +
-              `🌐 <a href="https://energy888.onrender.com/simple-rooms">Создать комнату</a>\n\n` +
-              `💡 <i>Нажмите кнопку "Создать комнату" на сайте</i>`,
         parse_mode: 'HTML',
         disable_web_page_preview: true
       });
