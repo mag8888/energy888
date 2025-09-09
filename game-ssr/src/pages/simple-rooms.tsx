@@ -117,8 +117,8 @@ export default function SimpleRooms() {
       playerEmail: userData.email || 'player@example.com'
     });
 
-    // Переходим в комнату (временно используем тестовую страницу)
-    router.push(`/test-room?id=${roomId}`);
+    // Переходим в комнату
+    router.push(`/room/${roomId}`);
   };
 
   const handleLogout = () => {
