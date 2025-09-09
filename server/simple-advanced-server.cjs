@@ -23,71 +23,6 @@ async function connectToMongoDB() {
 
 connectToMongoDB();
 
-// Схемы Mongoose
-const playerSchema = new mongoose.Schema({
-  id: { type: String, required: true },
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-  socketId: { type: String, required: true },
-  isReady: { type: Boolean, default: false },
-  profession: { type: String, default: '' },
-  dream: { type: String, default: '' },
-  selectedProfession: { type: String, default: '' },
-  professionConfirmed: { type: Boolean, default: false },
-  joinedAt: { type: Date, default: Date.now },
-  money: { type: Number, default: 0 },
-  position: { type: Number, default: 0 },
-  cards: [{ type: Object }],
-  isActive: { type: Boolean, default: true }
-});
-
-const roomSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true },
-  name: { type: String, required: true },
-  creatorId: { type: String, required: true },
-  creatorUsername: { type: String, required: true },
-  creatorProfession: { type: String, default: '' },
-  creatorDream: { type: String, default: '' },
-  assignProfessionToAll: { type: Boolean, default: false },
-  availableProfessions: [{ type: String }],
-  professionSelectionMode: { 
-    type: String, 
-    enum: ['random', 'choice', 'assigned'], 
-    default: 'choice' 
-  },
-  maxPlayers: { type: Number, min: 2, max: 10, default: 4 },
-  password: { type: String, default: '' },
-  timing: { type: Number, min: 60, max: 300, default: 120 },
-  createdAt: { type: Date, default: Date.now },
-  gameDurationSec: { type: Number, default: 3600 },
-  gameEndAt: { type: Date },
-  deleteAfterAt: { type: Date },
-  players: [playerSchema],
-  started: { type: Boolean, default: false },
-  order: [{ type: String }],
-  currentIndex: { type: Number, default: 0 },
-  turnEndAt: { type: Date },
-  lastActivity: { type: Date, default: Date.now },
-  isActive: { type: Boolean, default: true }
-});
-
-const hallOfFameSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  games: { type: Number, default: 0 },
-  wins: { type: Number, default: 0 },
-  points: { type: Number, default: 0 },
-  lastPlayed: { type: Date, default: Date.now },
-  totalPlayTime: { type: Number, default: 0 },
-  averageGameTime: { type: Number, default: 0 },
-  winRate: { type: Number, default: 0 },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
-
-// Модели
-const Room = mongoose.model('Room', roomSchema);
-const HallOfFame = mongoose.model('HallOfFame', hallOfFameSchema);
-
 // Хранилище токенов (в памяти)
 const tokens = new Map();
 
@@ -152,8 +87,8 @@ const server = http.createServer((req, res) => {
   if (path === '/' && method === 'GET') {
     sendJSON(res, 200, {
       ok: true,
-      name: 'energy888-socket-server',
-      message: 'Energy888 Socket Server with MongoDB is running',
+      name: 'energy888-advanced-socket-server',
+      message: 'Energy888 Advanced Socket Server with MongoDB is running',
       environment: process.env.NODE_ENV || 'development',
       port: PORT,
       host: HOST,
@@ -181,8 +116,13 @@ const server = http.createServer((req, res) => {
     });
   }
   else if (path === '/stats' && method === 'GET') {
-    Room.countDocuments({ isActive: true }).then(activeRooms => {
-      HallOfFame.countDocuments().then(totalPlayers => {
+    if (!db) {
+      sendJSON(res, 500, { ok: false, error: 'Database not connected' });
+      return;
+    }
+    
+    db.collection('rooms').countDocuments({ isActive: true }).then(activeRooms => {
+      db.collection('hallOfFame').countDocuments().then(totalPlayers => {
         sendJSON(res, 200, {
           ok: true,
           activeRooms,
@@ -191,17 +131,25 @@ const server = http.createServer((req, res) => {
           uptime: process.uptime()
         });
       });
+    }).catch(err => {
+      sendJSON(res, 500, { ok: false, error: err.message });
     });
   }
   else if (path === '/rooms' && method === 'GET') {
-    Room.find({ isActive: true })
-      .select('id name maxPlayers players started createdAt')
+    if (!db) {
+      sendJSON(res, 500, { ok: false, error: 'Database not connected' });
+      return;
+    }
+    
+    db.collection('rooms').find({ isActive: true })
+      .project({ id: 1, name: 1, maxPlayers: 1, players: 1, started: 1, createdAt: 1 })
+      .toArray()
       .then(rooms => {
         const roomsList = rooms.map(room => ({
           id: room.id,
           name: room.name,
           maxPlayers: room.maxPlayers,
-          currentPlayers: room.players.length,
+          currentPlayers: room.players ? room.players.length : 0,
           started: room.started,
           createdAt: room.createdAt
         }));
@@ -212,9 +160,15 @@ const server = http.createServer((req, res) => {
       });
   }
   else if (path === '/hall-of-fame' && method === 'GET') {
-    HallOfFame.find()
+    if (!db) {
+      sendJSON(res, 500, { ok: false, error: 'Database not connected' });
+      return;
+    }
+    
+    db.collection('hallOfFame').find()
       .sort({ points: -1, winRate: -1 })
       .limit(10)
+      .toArray()
       .then(players => {
         sendJSON(res, 200, { ok: true, players });
       })
@@ -314,15 +268,21 @@ io.on('connection', (socket) => {
   // Получение списка комнат
   socket.on('get-rooms', async () => {
     try {
-      const rooms = await Room.find({ isActive: true })
-        .select('id name maxPlayers players started createdAt creatorUsername')
-        .sort({ createdAt: -1 });
+      if (!db) {
+        socket.emit('error', { message: 'Database not connected' });
+        return;
+      }
+      
+      const rooms = await db.collection('rooms').find({ isActive: true })
+        .project({ id: 1, name: 1, maxPlayers: 1, players: 1, started: 1, createdAt: 1, creatorUsername: 1 })
+        .sort({ createdAt: -1 })
+        .toArray();
       
       const roomsList = rooms.map(room => ({
         id: room.id,
         name: room.name,
         maxPlayers: room.maxPlayers,
-        currentPlayers: room.players.length,
+        currentPlayers: room.players ? room.players.length : 0,
         started: room.started,
         createdAt: room.createdAt,
         creator: room.creatorUsername
@@ -339,12 +299,17 @@ io.on('connection', (socket) => {
   // Создание комнаты
   socket.on('create-room', async (roomData) => {
     try {
+      if (!db) {
+        socket.emit('error', { message: 'Database not connected' });
+        return;
+      }
+      
       const roomId = `room_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
       
       // Планируем удаление комнаты через 5 часов
       const deleteAfterAt = new Date(Date.now() + 5 * 60 * 60 * 1000);
       
-      const room = new Room({
+      const room = {
         id: roomId,
         name: roomData.name || `Комната ${Date.now()}`,
         creatorId: socket.id,
@@ -364,10 +329,11 @@ io.on('connection', (socket) => {
         order: [],
         currentIndex: 0,
         lastActivity: new Date(),
-        isActive: true
-      });
+        isActive: true,
+        createdAt: new Date()
+      };
       
-      await room.save();
+      await db.collection('rooms').insertOne(room);
       
       // Присоединяем создателя к комнате
       socket.join(roomId);
@@ -395,9 +361,14 @@ io.on('connection', (socket) => {
   // Присоединение к комнате
   socket.on('join-room', async (data) => {
     try {
+      if (!db) {
+        socket.emit('join-room-error', { error: 'Database not connected' });
+        return;
+      }
+      
       const { roomId, playerName, playerEmail, profession, dream } = data;
       
-      const room = await Room.findOne({ id: roomId, isActive: true });
+      const room = await db.collection('rooms').findOne({ id: roomId, isActive: true });
       if (!room) {
         socket.emit('join-room-error', { error: 'Room not found' });
         return;
@@ -438,28 +409,33 @@ io.on('connection', (socket) => {
         isActive: true
       };
       
-      room.players.push(player);
-      await room.save();
+      await db.collection('rooms').updateOne(
+        { id: roomId },
+        { $push: { players: player } }
+      );
       
       // Присоединяемся к комнате
       socket.join(roomId);
       
       console.log('👤 Игрок присоединился:', playerName, 'к комнате:', roomId);
       
+      // Получаем обновленную комнату
+      const updatedRoom = await db.collection('rooms').findOne({ id: roomId });
+      
       // Отправляем обновленную информацию о комнате
       socket.emit('room-joined', {
-        roomId: room.id,
-        roomName: room.name,
-        players: room.players,
-        maxPlayers: room.maxPlayers,
-        professionSelectionMode: room.professionSelectionMode,
-        availableProfessions: room.availableProfessions
+        roomId: updatedRoom.id,
+        roomName: updatedRoom.name,
+        players: updatedRoom.players,
+        maxPlayers: updatedRoom.maxPlayers,
+        professionSelectionMode: updatedRoom.professionSelectionMode,
+        availableProfessions: updatedRoom.availableProfessions
       });
       
       // Уведомляем всех в комнате
       io.to(roomId).emit('player-joined', {
         player,
-        players: room.players
+        players: updatedRoom.players
       });
       
       // Уведомляем всех о обновлении списка комнат
@@ -474,17 +450,15 @@ io.on('connection', (socket) => {
   // Покидание комнаты
   socket.on('leave-room', async (data) => {
     try {
+      if (!db) return;
+      
       const { roomId } = data;
       
-      const room = await Room.findOne({ id: roomId, isActive: true });
-      if (!room) {
-        return;
-      }
+      const room = await db.collection('rooms').findOne({ id: roomId, isActive: true });
+      if (!room) return;
       
       const playerIndex = room.players.findIndex(p => p.socketId === socket.id);
-      if (playerIndex === -1) {
-        return;
-      }
+      if (playerIndex === -1) return;
       
       const player = room.players[playerIndex];
       room.players.splice(playerIndex, 1);
@@ -495,10 +469,18 @@ io.on('connection', (socket) => {
       
       // Если комната пустая, удаляем её
       if (room.players.length === 0) {
-        room.isActive = false;
-        await room.save();
+        await db.collection('rooms').updateOne(
+          { id: roomId },
+          { $set: { isActive: false } }
+        );
         console.log('🗑️ Комната удалена (пустая):', roomId);
       } else {
+        // Обновляем комнату
+        await db.collection('rooms').updateOne(
+          { id: roomId },
+          { $set: { players: room.players } }
+        );
+        
         // Уведомляем остальных игроков
         io.to(roomId).emit('player-left', {
           player,
@@ -517,39 +499,51 @@ io.on('connection', (socket) => {
   // Настройка игрока (профессия и мечта)
   socket.on('player-setup', async (data) => {
     try {
+      if (!db) {
+        socket.emit('setup-error', { error: 'Database not connected' });
+        return;
+      }
+      
       const { roomId, profession, dream } = data;
       
-      const room = await Room.findOne({ id: roomId, isActive: true });
+      const room = await db.collection('rooms').findOne({ id: roomId, isActive: true });
       if (!room) {
         socket.emit('setup-error', { error: 'Room not found' });
         return;
       }
       
-      const player = room.players.find(p => p.socketId === socket.id);
-      if (!player) {
+      const playerIndex = room.players.findIndex(p => p.socketId === socket.id);
+      if (playerIndex === -1) {
         socket.emit('setup-error', { error: 'Player not found' });
         return;
       }
       
       // Обновляем профессию и мечту
+      const updateData = {};
       if (profession) {
-        player.profession = profession;
-        player.selectedProfession = profession;
-        player.professionConfirmed = true;
+        updateData[`players.${playerIndex}.profession`] = profession;
+        updateData[`players.${playerIndex}.selectedProfession`] = profession;
+        updateData[`players.${playerIndex}.professionConfirmed`] = true;
       }
       
       if (dream) {
-        player.dream = dream;
+        updateData[`players.${playerIndex}.dream`] = dream;
       }
       
-      await room.save();
+      await db.collection('rooms').updateOne(
+        { id: roomId },
+        { $set: updateData }
+      );
       
-      console.log('⚙️ Настройка игрока:', player.name, 'профессия:', profession, 'мечта:', dream);
+      console.log('⚙️ Настройка игрока:', room.players[playerIndex].name, 'профессия:', profession, 'мечта:', dream);
+      
+      // Получаем обновленную комнату
+      const updatedRoom = await db.collection('rooms').findOne({ id: roomId });
       
       // Уведомляем всех в комнате
       io.to(roomId).emit('player-updated', {
-        player,
-        players: room.players
+        player: updatedRoom.players[playerIndex],
+        players: updatedRoom.players
       });
       
     } catch (error) {
@@ -561,46 +555,57 @@ io.on('connection', (socket) => {
   // Готовность игрока
   socket.on('player-ready', async (data) => {
     try {
+      if (!db) return;
+      
       const { roomId } = data;
       
-      const room = await Room.findOne({ id: roomId, isActive: true });
-      if (!room) {
-        return;
-      }
+      const room = await db.collection('rooms').findOne({ id: roomId, isActive: true });
+      if (!room) return;
       
-      const player = room.players.find(p => p.socketId === socket.id);
-      if (!player) {
-        return;
-      }
+      const playerIndex = room.players.findIndex(p => p.socketId === socket.id);
+      if (playerIndex === -1) return;
       
-      player.isReady = !player.isReady;
-      await room.save();
+      const newReadyState = !room.players[playerIndex].isReady;
       
-      console.log('✅ Готовность игрока:', player.name, player.isReady ? 'готов' : 'не готов');
+      await db.collection('rooms').updateOne(
+        { id: roomId },
+        { $set: { [`players.${playerIndex}.isReady`]: newReadyState } }
+      );
+      
+      console.log('✅ Готовность игрока:', room.players[playerIndex].name, newReadyState ? 'готов' : 'не готов');
+      
+      // Получаем обновленную комнату
+      const updatedRoom = await db.collection('rooms').findOne({ id: roomId });
       
       // Уведомляем всех в комнате
       io.to(roomId).emit('player-ready-updated', {
-        player,
-        players: room.players
+        player: updatedRoom.players[playerIndex],
+        players: updatedRoom.players
       });
       
       // Проверяем, все ли готовы
-      const allReady = room.players.length >= 2 && room.players.every(p => p.isReady);
-      if (allReady && !room.started) {
-        room.started = true;
-        room.gameEndAt = new Date(Date.now() + room.gameDurationSec * 1000);
-        room.order = room.players.map(p => p.socketId);
-        room.currentIndex = 0;
-        room.turnEndAt = new Date(Date.now() + room.timing * 1000);
-        await room.save();
+      const allReady = updatedRoom.players.length >= 2 && updatedRoom.players.every(p => p.isReady);
+      if (allReady && !updatedRoom.started) {
+        await db.collection('rooms').updateOne(
+          { id: roomId },
+          { 
+            $set: { 
+              started: true,
+              gameEndAt: new Date(Date.now() + updatedRoom.gameDurationSec * 1000),
+              order: updatedRoom.players.map(p => p.socketId),
+              currentIndex: 0,
+              turnEndAt: new Date(Date.now() + updatedRoom.timing * 1000)
+            }
+          }
+        );
         
         console.log('🎮 Игра началась в комнате:', roomId);
         
         io.to(roomId).emit('game-started', {
-          players: room.players,
-          order: room.order,
-          currentPlayer: room.players[room.currentIndex],
-          turnEndAt: room.turnEndAt
+          players: updatedRoom.players,
+          order: updatedRoom.players.map(p => p.socketId),
+          currentPlayer: updatedRoom.players[0],
+          turnEndAt: new Date(Date.now() + updatedRoom.timing * 1000)
         });
       }
       
@@ -612,9 +617,14 @@ io.on('connection', (socket) => {
   // Получение информации о комнате
   socket.on('get-room-info', async (data) => {
     try {
+      if (!db) {
+        socket.emit('room-info-error', { error: 'Database not connected' });
+        return;
+      }
+      
       const { roomId } = data;
       
-      const room = await Room.findOne({ id: roomId, isActive: true });
+      const room = await db.collection('rooms').findOne({ id: roomId, isActive: true });
       if (!room) {
         socket.emit('room-info-error', { error: 'Room not found' });
         return;
@@ -644,11 +654,13 @@ io.on('connection', (socket) => {
     console.log('🔌 Клиент отключен:', socket.id);
     
     try {
+      if (!db) return;
+      
       // Удаляем игрока из всех комнат
-      const rooms = await Room.find({ 
+      const rooms = await db.collection('rooms').find({ 
         'players.socketId': socket.id, 
         isActive: true 
-      });
+      }).toArray();
       
       for (const room of rooms) {
         const playerIndex = room.players.findIndex(p => p.socketId === socket.id);
@@ -658,10 +670,18 @@ io.on('connection', (socket) => {
           
           // Если комната пустая, удаляем её
           if (room.players.length === 0) {
-            room.isActive = false;
-            await room.save();
+            await db.collection('rooms').updateOne(
+              { id: room.id },
+              { $set: { isActive: false } }
+            );
             console.log('🗑️ Комната удалена (пустая):', room.id);
           } else {
+            // Обновляем комнату
+            await db.collection('rooms').updateOne(
+              { id: room.id },
+              { $set: { players: room.players } }
+            );
+            
             // Уведомляем остальных игроков
             io.to(room.id).emit('player-left', {
               player,
@@ -683,14 +703,16 @@ io.on('connection', (socket) => {
 // Периодическая очистка неактивных комнат
 setInterval(async () => {
   try {
+    if (!db) return;
+    
     const now = new Date();
-    const result = await Room.updateMany(
+    const result = await db.collection('rooms').updateMany(
       { 
         deleteAfterAt: { $lt: now },
         isActive: true 
       },
       { 
-        isActive: false 
+        $set: { isActive: false }
       }
     );
     
@@ -716,7 +738,7 @@ server.listen(PORT, HOST, () => {
 process.on('SIGTERM', () => {
   console.log('🛑 Получен SIGTERM, завершаем работу...');
   server.close(() => {
-    mongoose.connection.close();
+    client.close();
     process.exit(0);
   });
 });
@@ -724,7 +746,7 @@ process.on('SIGTERM', () => {
 process.on('SIGINT', () => {
   console.log('🛑 Получен SIGINT, завершаем работу...');
   server.close(() => {
-    mongoose.connection.close();
+    client.close();
     process.exit(0);
   });
 });
