@@ -14,6 +14,8 @@ interface Room {
     name: string;
     email: string;
     isReady: boolean;
+    profession?: string;
+    dream?: string;
   }>;
 }
 
@@ -91,6 +93,10 @@ export default function RoomPage() {
     if (socket && room) {
       socket.emit('player-ready', { roomId: id });
     }
+  };
+
+  const handleSetupCharacter = () => {
+    router.push(`/room/setup?id=${id}`);
   };
 
   if (loading) {
@@ -317,6 +323,24 @@ export default function RoomPage() {
           {room.status === 'waiting' && (
             <div style={{ textAlign: 'center' }}>
               <button
+                onClick={handleSetupCharacter}
+                style={{
+                  background: 'linear-gradient(45deg, #2196F3, #1976D2)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '15px 30px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '18px',
+                  boxShadow: '0 4px 15px rgba(33, 150, 243, 0.4)',
+                  transition: 'all 0.3s ease',
+                  marginRight: '10px'
+                }}
+              >
+                Настроить персонажа
+              </button>
+              <button
                 onClick={handleReady}
                 style={{
                   background: 'linear-gradient(45deg, #4CAF50, #45a049)',
@@ -386,6 +410,26 @@ export default function RoomPage() {
                 }}>
                   {player.email}
                 </div>
+                {player.profession && (
+                  <div style={{
+                    color: '#2196F3',
+                    fontSize: '0.8rem',
+                    marginBottom: '4px',
+                    fontWeight: 'bold'
+                  }}>
+                    💼 {player.profession}
+                  </div>
+                )}
+                {player.dream && (
+                  <div style={{
+                    color: '#FF9800',
+                    fontSize: '0.8rem',
+                    marginBottom: '4px',
+                    fontWeight: 'bold'
+                  }}>
+                    🌟 {player.dream}
+                  </div>
+                )}
                 <div style={{
                   color: player.isReady ? '#4CAF50' : '#ff6b6b',
                   fontSize: '0.9rem',
