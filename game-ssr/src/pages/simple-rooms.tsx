@@ -85,11 +85,13 @@ export default function SimpleRooms() {
     setLoading(true);
     setMessage('');
 
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
     const roomData = {
       name: createForm.name || `Комната ${rooms.length + 1}`,
       maxPlayers: createForm.maxPlayers,
       timing: createForm.timing * 60, // конвертируем в секунды
-      playerName: JSON.parse(localStorage.getItem('user') || '{}').name || 'Игрок'
+      playerName: userData.name || 'Игрок',
+      playerEmail: userData.email || 'player@example.com'
     };
 
     socket.emit('create-room', roomData);
