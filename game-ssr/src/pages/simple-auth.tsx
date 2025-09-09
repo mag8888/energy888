@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 export default function SimpleAuth() {
@@ -12,6 +12,40 @@ export default function SimpleAuth() {
   const [message, setMessage] = useState('');
   const [telegramLoading, setTelegramLoading] = useState(false);
   const router = useRouter();
+
+  // Проверяем Telegram авторизацию при загрузке
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const auth = urlParams.get('auth');
+    const token = urlParams.get('token');
+    const user = urlParams.get('user');
+
+    if (auth === 'telegram' && token && user) {
+      try {
+        console.log('🔐 Начинаем Telegram авторизацию...');
+        console.log('🔐 Параметры:', { auth, token, user });
+        const userData = JSON.parse(decodeURIComponent(user));
+        console.log('🔐 Telegram авторизация:', userData);
+        
+        // Сохраняем данные пользователя
+        localStorage.setItem('user', JSON.stringify({
+          id: userData.id,
+          name: userData.first_name || userData.username || `User${userData.id}`,
+          email: `${userData.username || userData.id}@telegram.local`,
+          photo: userData.photo_url || '',
+          source: 'telegram'
+        }));
+        
+        setMessage('✅ Авторизация через Telegram успешна!');
+        setTimeout(() => {
+          router.push('/simple-rooms');
+        }, 1000);
+      } catch (error) {
+        console.error('❌ Ошибка парсинга Telegram данных:', error);
+        setMessage('❌ Ошибка авторизации через Telegram');
+      }
+    }
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
