@@ -1,40 +1,49 @@
-Energy of Money — 1game (Standalone SSR)
+# 🤖 Energy of Money Telegram Bot
 
-Overview
-- Next.js app in `game-ssr/` with a standalone page at `/1game`.
-- Visuals preserved with local stubs (no backend required to render UI).
-- Ready for Render.com deploy via `render.yaml`.
+Telegram bot for Energy of Money game.
 
-Local Run
-1) cd game-ssr
-2) npm install
-3) npm run dev
-4) Open http://localhost:3000/1game
+## 🚀 Quick Start
 
-Deploy to Render
-- Push this repository to GitHub.
-- Render → New → Web Service → Select this repo.
-- Render detects `render.yaml` and creates the service:
-  - env: node
-  - rootDir: game-ssr
-  - build: npm install && npm run build
-  - start: npm run start (binds to $PORT)
-- After first deploy, open the service URL and append /1game
-
-Git Quick Start
-```
-git init
-git add -A
-git commit -m "feat: add Next.js /1game standalone with stubs + render.yaml"
-git branch -M main
-git remote add origin https://github.com/<you>/energy888.git
-git push -u origin main
+```bash
+npm install
+npm start
 ```
 
-Notes
-- SSR is initially disabled for the board component to avoid `window`/`document` access issues. We can enable full SSR with Emotion SSR once needed.
-- To wire real socket/data, replace stubs in `game-ssr/src/lib`, `game-ssr/src/data`, and components.
-- Auth (demo, client-side):
-  - Email register/login stored in localStorage. Page: `/auth`.
-  - Telegram: uses Login Widget. Set `NEXT_PUBLIC_TELEGRAM_BOT` to your bot username to enable the widget.
-  - Auth context: `game-ssr/src/lib/auth.tsx`. Current user ID is used in the board.
+## 🔧 Environment Variables
+
+- `BOT_TOKEN` - Telegram bot token
+- `WEBHOOK_URL` - Webhook URL for Render.com
+
+## 📡 Endpoints
+
+- `GET /` - Bot status
+- `GET /health` - Health check
+- `POST /webhook` - Telegram webhook
+- `POST /setwebhook` - Set webhook
+
+1. **Подключите GitHub репозиторий**
+2. **Выберите Node.js**
+3. **Команда сборки**: `npm install`
+4. **Команда запуска**: `node bot-simple.js`
+5. **Добавьте переменную окружения**: `BOT_TOKEN`
+
+## 📸 Изображения
+
+Бот использует красивые изображения из Unsplash:
+- Приветствие: Финансовые концепции
+- О проекте: Бизнес и образование
+- Доход: Деньги и успех
+- Клиенты: Сеть и партнерство
+- Играть: Игры и развлечения
+- Баланс: Финансовый учет
+
+## 🔗 Ссылки
+
+- **Бот**: https://t.me/energy_money_bot
+- **Игра**: https://energy8.vercel.app/
+- **Менеджер**: https://t.me/Aurelia_8888
+
+## 📝 Лицензия
+
+MIT License
+>>>>>>> 5f75fcde1af94d2a3639c7bd40c20303497373ed
