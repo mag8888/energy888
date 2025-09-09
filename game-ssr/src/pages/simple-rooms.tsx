@@ -110,11 +110,11 @@ export default function SimpleRooms() {
   const handleJoinRoom = (roomId: string) => {
     if (!socket) return;
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
     socket.emit('join-room', {
       roomId,
-      playerName: user.name || 'Игрок',
-      playerEmail: user.email || 'player@example.com'
+      playerName: userData.name || 'Игрок',
+      playerEmail: userData.email || 'player@example.com'
     });
 
     // Переходим в комнату
