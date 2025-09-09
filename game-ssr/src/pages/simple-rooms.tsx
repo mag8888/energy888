@@ -45,6 +45,9 @@ export default function SimpleRooms() {
     // Подключаемся к Socket.IO
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-1.onrender.com';
     console.log('🔌 Подключаемся к Socket.IO:', socketUrl);
+    console.log('🔍 NEXT_PUBLIC_SOCKET_URL:', process.env.NEXT_PUBLIC_SOCKET_URL);
+    console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
+    console.log('🔍 Все env переменные:', process.env);
     
     const newSocket = io(socketUrl, {
       transports: ['websocket', 'polling'],
