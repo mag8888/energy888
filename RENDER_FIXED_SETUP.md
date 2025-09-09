@@ -96,3 +96,4 @@ curl https://energy888-1.onrender.com/health
 - **Build Command** теперь просто `npm install`
 - **Start Command** теперь просто `npm start`
 
+

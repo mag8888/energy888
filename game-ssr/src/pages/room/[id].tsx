@@ -51,8 +51,16 @@ export default function RoomPage() {
       console.log('🔌 Socket connected:', newSocket.connected);
       setSocket(newSocket);
       
+      // Получаем данные пользователя
+      const user = localStorage.getItem('user');
+      const userData = user ? JSON.parse(user) : { name: 'Игрок', email: 'player@example.com' };
+      
       // Запрашиваем информацию о комнате
-      newSocket.emit('join-room', { roomId: id });
+      newSocket.emit('join-room', { 
+        roomId: id, 
+        playerName: userData.name || 'Игрок',
+        playerEmail: userData.email || 'player@example.com'
+      });
     });
 
     newSocket.on('room-joined', (roomData: Room) => {
