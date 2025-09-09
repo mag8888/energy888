@@ -3,7 +3,8 @@ import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { RoomController, DatabaseService, PROFESSIONS, ROOM_CONFIGS } from '../modules/rooms/index.js';
+import { RoomController, PROFESSIONS, ROOM_CONFIGS } from '../modules/rooms/index.js';
+import DatabaseService from '../modules/rooms/services/DatabaseService.js';
 
 dotenv.config();
 
