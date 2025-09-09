@@ -1,0 +1,34 @@
+{
+  "name": "energy888-advanced-socket-server",
+  "version": "1.0.0",
+  "description": "Advanced Socket.IO server for Energy of Money with MongoDB, professions, dreams, and hall of fame",
+  "main": "advanced-socket-server.js",
+  "scripts": {
+    "start": "node advanced-socket-server.js",
+    "dev": "nodemon advanced-socket-server.js",
+    "test": "node test-advanced-server.js"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.5",
+    "mongoose": "^8.0.3",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "socket.io",
+    "mongodb",
+    "energy",
+    "money",
+    "game",
+    "rooms",
+    "professions",
+    "hall-of-fame"
+  ],
+  "author": "Energy of Money Team",
+  "license": "MIT"
+}

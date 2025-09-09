@@ -1,7 +1,34 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import { useEffect, useState } from 'react';
 
 export default function App({ Component, pageProps }: AppProps) {
+  const [debugInfo, setDebugInfo] = useState<{ socketUrl: string; envUrl?: string; host: string; time: string } | null>(null);
+
+  useEffect(() => {
+    try {
+      const envUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
+      const qp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+      const qpUrl = qp?.get('socket') || undefined;
+      const lsUrl = typeof window !== 'undefined' ? (localStorage.getItem('SOCKET_URL') || undefined) : undefined;
+      const socketUrl = qpUrl || lsUrl || envUrl || 'https://energy888-1.onrender.com';
+      if (lsUrl !== socketUrl && typeof window !== 'undefined') {
+        localStorage.setItem('SOCKET_URL', socketUrl);
+      }
+      setDebugInfo({
+        socketUrl,
+        envUrl,
+        host: typeof window !== 'undefined' ? window.location.host : 'ssr',
+        time: new Date().toLocaleTimeString()
+      });
+      // eslint-disable-next-line no-console
+      console.log('💡 DEBUG: Socket URL resolved to:', socketUrl, { envUrl, qpUrl, lsUrl });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('DEBUG banner init error', e);
+    }
+  }, []);
+
   return (
     <>
       <Head>
@@ -10,6 +37,29 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      {debugInfo && (
+        <div style={{
+          position: 'fixed',
+          bottom: 8,
+          left: 8,
+          zIndex: 99999,
+          background: 'rgba(0,0,0,0.75)',
+          color: '#fff',
+          padding: '6px 10px',
+          border: '1px solid rgba(255,255,255,0.3)',
+          borderRadius: 6,
+          fontSize: 12,
+          lineHeight: 1.2,
+          backdropFilter: 'blur(6px)'
+        }}>
+          <div>ENV: {process.env.NODE_ENV || 'development'}</div>
+          <div>Host: {debugInfo.host}</div>
+          <div>Socket: {debugInfo.socketUrl}</div>
+          <div>EnvVar: {debugInfo.envUrl || 'undefined'}</div>
+          <div>t: {debugInfo.time}</div>
+          <div style={{ opacity: 0.7, marginTop: 4 }}>Override: ?socket=URL or localStorage.SOCKET_URL</div>
+        </div>
+      )}
       <Component {...pageProps} />
     </>
   );

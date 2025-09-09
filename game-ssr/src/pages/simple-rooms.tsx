@@ -42,12 +42,15 @@ export default function SimpleRooms() {
       console.error('❌ Ошибка парсинга данных пользователя:', error);
     }
 
-    // Подключаемся к Socket.IO
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-1.onrender.com';
+    // Подключаемся к Socket.IO (debug-aware resolver)
+    const qp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const overrideUrl = qp?.get('socket') || (typeof window !== 'undefined' ? localStorage.getItem('SOCKET_URL') || undefined : undefined);
+    const socketUrl = overrideUrl || process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-1.onrender.com';
+    if (overrideUrl && typeof window !== 'undefined') localStorage.setItem('SOCKET_URL', socketUrl);
     console.log('🔌 Подключаемся к Socket.IO:', socketUrl);
     console.log('🔍 NEXT_PUBLIC_SOCKET_URL:', process.env.NEXT_PUBLIC_SOCKET_URL);
     console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
-    console.log('🔍 Все env переменные:', process.env);
+    console.log('🔍 Override socket from:', overrideUrl ? 'query/localStorage' : 'env/default');
     
     const newSocket = io(socketUrl, {
       transports: ['websocket', 'polling'],
