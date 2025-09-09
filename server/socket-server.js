@@ -250,6 +250,7 @@ io.on('connection', (socket) => {
       room.players.push({
         id: socket.id,
         name: roomData.playerName || 'Игрок',
+        email: roomData.playerEmail || 'player@example.com',
         isReady: false
       });
       
@@ -299,10 +300,22 @@ io.on('connection', (socket) => {
       room.players.push({
         id: socket.id,
         name: playerName || 'Игрок',
+        email: playerName || 'player@example.com',
         isReady: false
       });
       
       console.log('👤 Игрок присоединился к комнате:', roomId, playerName);
+      
+      // Отправляем полную информацию о комнате
+      socket.emit('room-joined', {
+        id: room.id,
+        name: room.name,
+        maxPlayers: room.maxPlayers,
+        currentPlayers: room.players.length,
+        turnTime: room.timing,
+        status: room.status,
+        players: room.players
+      });
       
       // Уведомляем всех в комнате
       io.to(roomId).emit('player-joined', {
@@ -317,6 +330,100 @@ io.on('connection', (socket) => {
     } catch (error) {
       console.error('❌ Ошибка присоединения к комнате:', error);
       socket.emit('join-room-error', { error: 'Failed to join room' });
+    }
+  });
+  
+  // Покидание комнаты
+  socket.on('leave-room', (data) => {
+    try {
+      const { roomId } = data;
+      const room = rooms.get(roomId);
+      
+      if (!room) {
+        return;
+      }
+      
+      // Удаляем игрока из комнаты
+      const playerIndex = room.players.findIndex(p => p.id === socket.id);
+      if (playerIndex !== -1) {
+        room.players.splice(playerIndex, 1);
+        socket.leave(roomId);
+        
+        console.log('👤 Игрок покинул комнату:', roomId);
+        
+        // Если комната пустая, удаляем её
+        if (room.players.length === 0) {
+          rooms.delete(roomId);
+          console.log('🗑️ Комната удалена (пустая):', roomId);
+        } else {
+          // Уведомляем остальных игроков
+          io.to(roomId).emit('room-updated', {
+            id: room.id,
+            name: room.name,
+            maxPlayers: room.maxPlayers,
+            currentPlayers: room.players.length,
+            turnTime: room.timing,
+            status: room.status,
+            players: room.players
+          });
+        }
+        
+        // Уведомляем всех о обновлении списка комнат
+        io.emit('rooms-updated');
+      }
+      
+    } catch (error) {
+      console.error('❌ Ошибка покидания комнаты:', error);
+    }
+  });
+  
+  // Готовность игрока
+  socket.on('player-ready', (data) => {
+    try {
+      const { roomId } = data;
+      const room = rooms.get(roomId);
+      
+      if (!room) {
+        return;
+      }
+      
+      const player = room.players.find(p => p.id === socket.id);
+      if (player) {
+        player.isReady = !player.isReady;
+        
+        console.log('👤 Игрок изменил готовность:', roomId, player.name, player.isReady);
+        
+        // Уведомляем всех в комнате
+        io.to(roomId).emit('room-updated', {
+          id: room.id,
+          name: room.name,
+          maxPlayers: room.maxPlayers,
+          currentPlayers: room.players.length,
+          turnTime: room.timing,
+          status: room.status,
+          players: room.players
+        });
+        
+        // Проверяем, все ли готовы для начала игры
+        const allReady = room.players.length >= 2 && room.players.every(p => p.isReady);
+        if (allReady && room.status === 'waiting') {
+          room.status = 'playing';
+          console.log('🎮 Игра началась в комнате:', roomId);
+          
+          io.to(roomId).emit('game-started', {
+            id: room.id,
+            name: room.name,
+            maxPlayers: room.maxPlayers,
+            currentPlayers: room.players.length,
+            turnTime: room.timing,
+            status: room.status,
+            players: room.players
+          });
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ Ошибка изменения готовности:', error);
     }
   });
   
