@@ -23,6 +23,7 @@ export default function SimpleRooms() {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [userData, setUserData] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
