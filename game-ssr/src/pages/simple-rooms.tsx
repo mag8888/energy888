@@ -34,6 +34,14 @@ export default function SimpleRooms() {
       return;
     }
 
+    // Загружаем данные пользователя
+    try {
+      const userData = JSON.parse(user);
+      setUserData(userData);
+    } catch (error) {
+      console.error('❌ Ошибка парсинга данных пользователя:', error);
+    }
+
     // Подключаемся к Socket.IO
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-1.onrender.com';
     console.log('🔌 Подключаемся к Socket.IO:', socketUrl);
@@ -142,14 +150,23 @@ export default function SimpleRooms() {
           border: '2px solid rgba(255, 255, 255, 0.3)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
         }}>
-          <h1 style={{
-            color: 'white',
-            margin: 0,
-            fontSize: '2rem',
-            fontWeight: 'bold'
-          }}>
-            Energy of Money
-          </h1>
+          <div>
+            <h1 style={{
+              color: 'white',
+              margin: 0,
+              fontSize: '2rem',
+              fontWeight: 'bold'
+            }}>
+              Energy of Money
+            </h1>
+            <div style={{
+              color: 'rgba(255, 255, 255, 0.7)',
+              fontSize: '1rem',
+              marginTop: '5px'
+            }}>
+              Добро пожаловать, {userData?.name || 'Игрок'}!
+            </div>
+          </div>
           <div>
             <button
               onClick={() => setShowCreateForm(true)}
