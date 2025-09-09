@@ -16,253 +16,267 @@ async function connectToMongoDB() {
     await client.connect();
     db = client.db('energy888');
     console.log('✅ MongoDB подключена');
+    return true;
   } catch (err) {
     console.error('❌ Ошибка подключения к MongoDB:', err);
+    return false;
   }
 }
 
-connectToMongoDB();
-
-// Хранилище токенов (в памяти)
-const tokens = new Map();
-
-// CORS headers
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
-  'Content-Type': 'application/json'
-};
-
-// Функция для отправки JSON ответа
-function sendJSON(res, statusCode, data) {
-  res.writeHead(statusCode, corsHeaders);
-  res.end(JSON.stringify(data));
+// Ждем подключения к MongoDB перед запуском сервера
+async function startServer() {
+  const mongoConnected = await connectToMongoDB();
+  
+  if (!mongoConnected) {
+    console.error('❌ Не удалось подключиться к MongoDB. Сервер не запущен.');
+    process.exit(1);
+  }
+  
+  // Запускаем сервер только после подключения к MongoDB
+  startHTTPServer();
 }
 
-// Функция для парсинга POST данных
-function parsePostData(req, callback) {
-  let body = '';
-  req.on('data', chunk => {
-    body += chunk.toString();
-  });
-  req.on('end', () => {
-    try {
-      const data = JSON.parse(body);
-      callback(data);
-    } catch (error) {
-      callback(null);
-    }
-  });
-}
+function startHTTPServer() {
+  // CORS headers
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+    'Content-Type': 'application/json'
+  };
 
-// Профессии и мечты
-const PROFESSIONS = [
-  'Предприниматель', 'Инвестор', 'Финансист', 'Консультант', 
-  'Менеджер', 'Аналитик', 'Трейдер', 'Банкир'
-];
+  // Хранилище токенов (в памяти)
+  const tokens = new Map();
 
-const DREAMS = [
-  'Финансовая независимость', 'Собственный бизнес', 'Инвестиционный портфель',
-  'Пассивный доход', 'Международная карьера', 'Образовательный центр',
-  'Благотворительный фонд', 'Технологический стартап'
-];
+  // Создание HTTP сервера
+  const server = http.createServer((req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const path = parsedUrl.pathname;
+    const method = req.method;
 
-// Создание HTTP сервера
-const server = http.createServer((req, res) => {
-  const parsedUrl = url.parse(req.url, true);
-  const path = parsedUrl.pathname;
-  const method = req.method;
+    console.log(`${method} ${path}`);
 
-  console.log(`${method} ${path}`);
-
-  // Обработка CORS preflight
-  if (method === 'OPTIONS') {
-    res.writeHead(200, corsHeaders);
-    res.end();
-    return;
-  }
-
-  // Маршруты
-  if (path === '/' && method === 'GET') {
-    sendJSON(res, 200, {
-      ok: true,
-      name: 'energy888-advanced-socket-server',
-      message: 'Energy888 Advanced Socket Server with MongoDB is running',
-      environment: process.env.NODE_ENV || 'development',
-      port: PORT,
-      host: HOST,
-      timestamp: new Date().toISOString(),
-      endpoints: {
-        health: '/health',
-        stats: '/stats',
-        rooms: '/rooms',
-        hallOfFame: '/hall-of-fame',
-        newToken: '/tg/new-token',
-        poll: '/tg/poll',
-        authorize: '/tg/authorize'
-      }
-    });
-  }
-  else if (path === '/health' && method === 'GET') {
-    sendJSON(res, 200, {
-      ok: true,
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      memory: process.memoryUsage(),
-      tokens: tokens.size,
-      connectedClients: io.engine.clientsCount
-    });
-  }
-  else if (path === '/stats' && method === 'GET') {
-    if (!db) {
-      sendJSON(res, 500, { ok: false, error: 'Database not connected' });
+    // Обработка CORS preflight
+    if (method === 'OPTIONS') {
+      res.writeHead(200, corsHeaders);
+      res.end();
       return;
     }
-    
-    db.collection('rooms').countDocuments({ isActive: true }).then(activeRooms => {
-      db.collection('hallOfFame').countDocuments().then(totalPlayers => {
-        sendJSON(res, 200, {
-          ok: true,
-          activeRooms,
-          totalPlayers,
-          connectedClients: io.engine.clientsCount,
-          uptime: process.uptime()
-        });
-      });
-    }).catch(err => {
-      sendJSON(res, 500, { ok: false, error: err.message });
-    });
-  }
-  else if (path === '/rooms' && method === 'GET') {
-    if (!db) {
-      sendJSON(res, 500, { ok: false, error: 'Database not connected' });
-      return;
+
+    // Функция для отправки JSON ответа
+    function sendJSON(res, statusCode, data) {
+      res.writeHead(statusCode, corsHeaders);
+      res.end(JSON.stringify(data));
     }
-    
-    db.collection('rooms').find({ isActive: true })
-      .project({ id: 1, name: 1, maxPlayers: 1, players: 1, started: 1, createdAt: 1 })
-      .toArray()
-      .then(rooms => {
-        const roomsList = rooms.map(room => ({
-          id: room.id,
-          name: room.name,
-          maxPlayers: room.maxPlayers,
-          currentPlayers: room.players ? room.players.length : 0,
-          started: room.started,
-          createdAt: room.createdAt
-        }));
-        sendJSON(res, 200, { ok: true, rooms: roomsList });
-      })
-      .catch(err => {
-        sendJSON(res, 500, { ok: false, error: err.message });
+
+    // Функция для парсинга POST данных
+    function parsePostData(req, callback) {
+      let body = '';
+      req.on('data', chunk => {
+        body += chunk.toString();
       });
-  }
-  else if (path === '/hall-of-fame' && method === 'GET') {
-    if (!db) {
-      sendJSON(res, 500, { ok: false, error: 'Database not connected' });
-      return;
+      req.on('end', () => {
+        try {
+          const data = JSON.parse(body);
+          callback(data);
+        } catch (error) {
+          callback(null);
+        }
+      });
     }
-    
-    db.collection('hallOfFame').find()
-      .sort({ points: -1, winRate: -1 })
-      .limit(10)
-      .toArray()
-      .then(players => {
-        sendJSON(res, 200, { ok: true, players });
-      })
-      .catch(err => {
-        sendJSON(res, 500, { ok: false, error: err.message });
-      });
-  }
-  else if (path === '/tg/new-token' && method === 'GET') {
-    try {
-      const token = `t_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
-      
-      tokens.set(token, {
-        createdAt: Date.now(),
-        authorized: false
-      });
-      
-      console.log('🔑 Создан новый токен:', token);
-      
+
+    // Профессии и мечты
+    const PROFESSIONS = [
+      'Предприниматель', 'Инвестор', 'Финансист', 'Консультант', 
+      'Менеджер', 'Аналитик', 'Трейдер', 'Банкир'
+    ];
+
+    const DREAMS = [
+      'Финансовая независимость', 'Собственный бизнес', 'Инвестиционный портфель',
+      'Пассивный доход', 'Международная карьера', 'Образовательный центр',
+      'Благотворительный фонд', 'Технологический стартап'
+    ];
+
+    // Маршруты
+    if (path === '/' && method === 'GET') {
       sendJSON(res, 200, {
         ok: true,
-        token,
-        expiresIn: 300000
+        name: 'energy888-advanced-socket-server',
+        message: 'Energy888 Advanced Socket Server with MongoDB is running',
+        environment: process.env.NODE_ENV || 'development',
+        port: PORT,
+        host: HOST,
+        timestamp: new Date().toISOString(),
+        endpoints: {
+          health: '/health',
+          stats: '/stats',
+          rooms: '/rooms',
+          hallOfFame: '/hall-of-fame',
+          newToken: '/tg/new-token',
+          poll: '/tg/poll',
+          authorize: '/tg/authorize'
+        }
       });
-    } catch (error) {
-      sendJSON(res, 500, { ok: false, error: error.message });
     }
-  }
-  else if (path === '/tg/poll' && method === 'POST') {
-    parsePostData(req, (data) => {
-      if (!data || !data.token) {
-        sendJSON(res, 400, { ok: false, error: 'Token required' });
+    else if (path === '/health' && method === 'GET') {
+      sendJSON(res, 200, {
+        ok: true,
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        tokens: tokens.size,
+        connectedClients: io.engine.clientsCount
+      });
+    }
+    else if (path === '/stats' && method === 'GET') {
+      if (!db) {
+        sendJSON(res, 500, { ok: false, error: 'Database not connected' });
         return;
       }
       
-      const tokenData = tokens.get(data.token);
-      if (!tokenData) {
-        sendJSON(res, 404, { ok: false, error: 'Token not found' });
-        return;
-      }
-      
-      if (tokenData.authorized) {
-        sendJSON(res, 200, {
-          ok: true,
-          authorized: true,
-          user: tokenData.user
+      db.collection('rooms').countDocuments({ isActive: true }).then(activeRooms => {
+        db.collection('hallOfFame').countDocuments().then(totalPlayers => {
+            sendJSON(res, 200, {
+              ok: true,
+              activeRooms,
+              totalPlayers,
+              connectedClients: io.engine.clientsCount,
+              uptime: process.uptime()
+            });
+          });
+        }).catch(err => {
+          sendJSON(res, 500, { ok: false, error: err.message });
         });
-        tokens.delete(data.token);
-      } else {
-        sendJSON(res, 200, {
-          ok: true,
+      }
+    else if (path === '/rooms' && method === 'GET') {
+      if (!db) {
+        sendJSON(res, 500, { ok: false, error: 'Database not connected' });
+        return;
+      }
+      
+      db.collection('rooms').find({ isActive: true })
+        .project({ id: 1, name: 1, maxPlayers: 1, players: 1, started: 1, createdAt: 1 })
+        .toArray()
+        .then(rooms => {
+          const roomsList = rooms.map(room => ({
+            id: room.id,
+            name: room.name,
+            maxPlayers: room.maxPlayers,
+            currentPlayers: room.players ? room.players.length : 0,
+            started: room.started,
+            createdAt: room.createdAt
+          }));
+          sendJSON(res, 200, { ok: true, rooms: roomsList });
+        })
+        .catch(err => {
+          sendJSON(res, 500, { ok: false, error: err.message });
+        });
+      }
+    else if (path === '/hall-of-fame' && method === 'GET') {
+      if (!db) {
+        sendJSON(res, 500, { ok: false, error: 'Database not connected' });
+        return;
+      }
+      
+      db.collection('hallOfFame').find()
+        .sort({ points: -1, winRate: -1 })
+        .limit(10)
+        .toArray()
+        .then(players => {
+          sendJSON(res, 200, { ok: true, players });
+        })
+        .catch(err => {
+          sendJSON(res, 500, { ok: false, error: err.message });
+        });
+      }
+    else if (path === '/tg/new-token' && method === 'GET') {
+      try {
+        const token = `t_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
+        
+        tokens.set(token, {
+          createdAt: Date.now(),
           authorized: false
         });
+        
+        console.log('🔑 Создан новый токен:', token);
+        
+        sendJSON(res, 200, {
+          ok: true,
+          token,
+          expiresIn: 300000
+        });
+      } catch (error) {
+        sendJSON(res, 500, { ok: false, error: error.message });
       }
-    });
-  }
-  else if (path === '/tg/authorize' && method === 'POST') {
-    parsePostData(req, (data) => {
-      if (!data || !data.token || !data.user) {
-        sendJSON(res, 400, { ok: false, error: 'Token and user data required' });
-        return;
-      }
-      
-      const tokenData = tokens.get(data.token);
-      if (!tokenData) {
-        sendJSON(res, 404, { ok: false, error: 'Token not found' });
-        return;
-      }
-      
-      tokenData.authorized = true;
-      tokenData.user = data.user;
-      
-      console.log('✅ Пользователь авторизован:', data.user.name);
-      
-      sendJSON(res, 200, {
-        ok: true,
-        message: 'User authorized successfully'
+    }
+    else if (path === '/tg/poll' && method === 'POST') {
+      parsePostData(req, (data) => {
+        if (!data || !data.token) {
+          sendJSON(res, 400, { ok: false, error: 'Token required' });
+          return;
+        }
+        
+        const tokenData = tokens.get(data.token);
+        if (!tokenData) {
+          sendJSON(res, 404, { ok: false, error: 'Token not found' });
+          return;
+        }
+        
+        if (tokenData.authorized) {
+          sendJSON(res, 200, {
+            ok: true,
+            authorized: true,
+            user: tokenData.user
+          });
+          tokens.delete(data.token);
+        } else {
+          sendJSON(res, 200, {
+            ok: true,
+            authorized: false
+          });
+        }
       });
-    });
-  }
-  else {
-    sendJSON(res, 404, { ok: false, error: 'Not found' });
-  }
-});
+    }
+    else if (path === '/tg/authorize' && method === 'POST') {
+      parsePostData(req, (data) => {
+        if (!data || !data.token || !data.user) {
+          sendJSON(res, 400, { ok: false, error: 'Token and user data required' });
+          return;
+        }
+        
+        const tokenData = tokens.get(data.token);
+        if (!tokenData) {
+          sendJSON(res, 404, { ok: false, error: 'Token not found' });
+          return;
+        }
+        
+        tokenData.authorized = true;
+        tokenData.user = data.user;
+        
+        console.log('✅ Пользователь авторизован:', data.user.name);
+        
+        sendJSON(res, 200, {
+          ok: true,
+          message: 'User authorized successfully'
+        });
+      });
+    }
+    else {
+      sendJSON(res, 404, { ok: false, error: 'Not found' });
+    }
+  });
 
-// Создание Socket.IO сервера
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
+  // Создание Socket.IO сервера
+  const io = new Server(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+    }
+  });
 
-// Обработка подключений Socket.IO
-io.on('connection', (socket) => {
+  // Обработка подключений Socket.IO
+  io.on('connection', (socket) => {
   console.log('🔌 Клиент подключен:', socket.id);
   
   // Получение списка комнат
@@ -698,10 +712,10 @@ io.on('connection', (socket) => {
       console.error('❌ Ошибка при отключении:', error);
     }
   });
-});
+  });
 
-// Периодическая очистка неактивных комнат
-setInterval(async () => {
+  // Периодическая очистка неактивных комнат
+  setInterval(async () => {
   try {
     if (!db) return;
     
@@ -720,19 +734,20 @@ setInterval(async () => {
       console.log(`🧹 Очищено неактивных комнат: ${result.modifiedCount}`);
       io.emit('rooms-updated');
     }
-  } catch (error) {
-    console.error('❌ Ошибка очистки комнат:', error);
-  }
-}, 60000); // Каждую минуту
+    } catch (error) {
+      console.error('❌ Ошибка очистки комнат:', error);
+    }
+  }, 60000); // Каждую минуту
 
-// Запуск сервера
-server.listen(PORT, HOST, () => {
-  console.log(`🚀 Advanced Socket Server listening on ${HOST}:${PORT}`);
-  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📱 Process ID: ${process.pid}`);
-  console.log(`🔌 Socket.IO enabled for real-time rooms`);
-  console.log(`🗄️ MongoDB: ${MONGODB_URI}`);
-});
+  // Запуск сервера
+  server.listen(PORT, HOST, () => {
+    console.log(`🚀 Advanced Socket Server listening on ${HOST}:${PORT}`);
+    console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`📱 Process ID: ${process.pid}`);
+    console.log(`🔌 Socket.IO enabled for real-time rooms`);
+    console.log(`🗄️ MongoDB: ${MONGODB_URI}`);
+  });
+}
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
@@ -742,6 +757,9 @@ process.on('SIGTERM', () => {
     process.exit(0);
   });
 });
+
+// Запускаем сервер
+startServer();
 
 process.on('SIGINT', () => {
   console.log('🛑 Получен SIGINT, завершаем работу...');
