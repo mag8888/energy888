@@ -6,6 +6,9 @@ import { SocketProvider, useSocket } from '../contexts/SocketContext';
 function DebugInfo() {
   const { socketUrl, isConnected } = useSocket();
   const [debugInfo, setDebugInfo] = useState<{ socketUrl: string; envUrl?: string; host: string; time: string } | null>(null);
+  
+  // Версия приложения
+  const APP_VERSION = 'v2.1.3';
 
   useEffect(() => {
     try {
@@ -46,6 +49,7 @@ function DebugInfo() {
       lineHeight: 1.2,
       backdropFilter: 'blur(6px)'
     }}>
+      <div>Version: {APP_VERSION}</div>
       <div>ENV: {process.env.NODE_ENV || 'development'}</div>
       <div>Host: {debugInfo.host}</div>
       <div>Socket: {debugInfo.socketUrl}</div>

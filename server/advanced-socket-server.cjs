@@ -4,6 +4,9 @@ const { Server } = require('socket.io');
 const { MongoClient } = require('mongodb');
 const mongoose = require('mongoose');
 
+// Версия сервера
+const SERVER_VERSION = 'v2.1.3';
+
 const PORT = process.env.PORT || 4000;
 const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/energy888';
@@ -353,6 +356,21 @@ io.on('connection', (socket) => {
       socket.emit('error', { message: 'Failed to get rooms' });
     }
   });
+
+  // Получение Зала Славы
+  socket.on('get-hall-of-fame', async () => {
+    try {
+      const hallOfFame = await HallOfFame.find({})
+        .sort({ totalWins: -1, totalMoney: -1 })
+        .limit(50);
+      
+      socket.emit('hall-of-fame-list', hallOfFame);
+      console.log('🏆 Отправлен Зал Славы:', hallOfFame.length, 'игроков');
+    } catch (error) {
+      console.error('❌ Ошибка получения Зала Славы:', error);
+      socket.emit('error', { message: 'Failed to get hall of fame' });
+    }
+  });
   
   // Создание комнаты
   socket.on('create-room', async (roomData) => {
@@ -437,18 +455,25 @@ io.on('connection', (socket) => {
     try {
       const { roomId, playerName, playerEmail, profession, dream } = data;
       
+      console.log('🔍 Попытка присоединения к комнате:', { roomId, playerName, playerEmail, socketId: socket.id });
+      
       const room = await Room.findOne({ id: roomId, isActive: true });
       if (!room) {
+        console.log('❌ Комната не найдена:', roomId);
         socket.emit('join-room-error', { error: 'Room not found' });
         return;
       }
       
+      console.log('✅ Комната найдена:', { id: room.id, name: room.name, players: room.players.length, maxPlayers: room.maxPlayers });
+      
       if (room.players.length >= room.maxPlayers) {
+        console.log('❌ Комната переполнена:', { current: room.players.length, max: room.maxPlayers });
         socket.emit('join-room-error', { error: 'Room is full' });
         return;
       }
       
       if (room.started) {
+        console.log('❌ Комната уже началась:', roomId);
         socket.emit('join-room-error', { error: 'Room already started' });
         return;
       }
@@ -775,7 +800,7 @@ async function startServer() {
     await connectToMongoDB();
     
     server.listen(PORT, HOST, () => {
-      console.log(`🚀 Advanced Socket Server listening on ${HOST}:${PORT}`);
+      console.log(`🚀 Advanced Socket Server v${SERVER_VERSION} listening on ${HOST}:${PORT}`);
       console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`📱 Process ID: ${process.pid}`);
       console.log(`🔌 Socket.IO enabled for real-time rooms`);

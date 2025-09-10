@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { useSocket } from '../contexts/SocketContext';
 import { PROFESSIONS, DREAMS, GAME_DURATIONS, TURN_TIMES } from '../data/professions';
 
@@ -264,6 +265,22 @@ export default function SimpleRooms() {
             >
               Создать комнату
             </button>
+            <Link href="/hall-of-fame" style={{
+              background: 'rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              border: '2px solid rgba(255, 255, 255, 0.5)',
+              borderRadius: '8px',
+              padding: '12px 24px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              transition: 'all 0.3s ease',
+              textDecoration: 'none',
+              display: 'inline-block',
+              marginRight: '10px'
+            }}>
+              🏆 Зал Славы
+            </Link>
             <button
               onClick={handleLogout}
               style={{
