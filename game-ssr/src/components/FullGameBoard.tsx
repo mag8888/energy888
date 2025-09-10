@@ -120,10 +120,10 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           title={`${cell.name} (${cell.id})`}
         >
           <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-            {/* Номер клетки в верхнем левом углу */}
+            {/* Номер клетки в левом нижнем углу */}
             <div style={{
               position: 'absolute',
-              top: '2px',
+              bottom: '2px',
               left: '2px',
               fontSize: '8px',
               fontWeight: 'bold',
