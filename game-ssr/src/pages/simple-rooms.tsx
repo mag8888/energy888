@@ -15,6 +15,8 @@ interface Room {
   createdAt: number;
   professionSelectionMode: string;
   availableProfessions: string[];
+  currentPlayers?: number;
+  turnTime?: number;
 }
 
 export default function SimpleRooms() {
@@ -66,8 +68,25 @@ export default function SimpleRooms() {
       setRooms(roomsList);
     };
 
-    const handleRoomJoined = (room: Room) => {
-      console.log('🏠 Комната создана и присоединение:', room);
+    const handleRoomJoined = (roomData: any) => {
+      console.log('🏠 Комната создана и присоединение:', roomData);
+      
+      // Преобразуем данные сервера в формат, ожидаемый интерфейсом
+      const room: Room = {
+        id: roomData.id,
+        name: roomData.name,
+        players: roomData.currentPlayers || roomData.players || 0,
+        maxPlayers: roomData.maxPlayers,
+        status: roomData.status || 'waiting',
+        timing: roomData.turnTime || roomData.timing || 120,
+        gameDuration: Math.floor((roomData.gameDurationSec || 3600) / 60), // конвертируем в минуты
+        createdAt: Date.now(),
+        professionSelectionMode: 'choice',
+        availableProfessions: [],
+        currentPlayers: roomData.currentPlayers || roomData.players || 0,
+        turnTime: roomData.turnTime || roomData.timing || 120
+      };
+      
       setRooms(prev => [...prev, room]);
       setMessage('Комната создана успешно!');
       setShowCreateForm(false);
