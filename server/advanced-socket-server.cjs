@@ -466,18 +466,6 @@ io.on('connection', (socket) => {
       
       console.log('✅ Комната найдена:', { id: room.id, name: room.name, players: room.players.length, maxPlayers: room.maxPlayers });
       
-      if (room.players.length >= room.maxPlayers) {
-        console.log('❌ Комната переполнена:', { current: room.players.length, max: room.maxPlayers });
-        socket.emit('join-room-error', { error: 'Room is full' });
-        return;
-      }
-      
-      if (room.started) {
-        console.log('❌ Комната уже началась:', roomId);
-        socket.emit('join-room-error', { error: 'Room already started' });
-        return;
-      }
-      
       // Проверяем, не присоединен ли уже игрок по socketId или email
       const existingPlayer = room.players.find(p => p.socketId === socket.id || p.email === playerEmail);
       if (existingPlayer) {
@@ -500,6 +488,18 @@ io.on('connection', (socket) => {
             dream: p.dream
           }))
         });
+        return;
+      }
+      
+      if (room.players.length >= room.maxPlayers) {
+        console.log('❌ Комната переполнена:', { current: room.players.length, max: room.maxPlayers });
+        socket.emit('join-room-error', { error: 'Room is full' });
+        return;
+      }
+      
+      if (room.started) {
+        console.log('❌ Комната уже началась:', roomId);
+        socket.emit('join-room-error', { error: 'Room already started' });
         return;
       }
       
