@@ -69,6 +69,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <title>Energy of Money</title>
         <meta name="description" content="Energy of Money Game" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <DebugInfo />

@@ -69,9 +69,10 @@ export default function RoomPage() {
       setRoom(roomData);
     };
 
-    const handleError = (error: string) => {
+    const handleError = (error: any) => {
       console.error('❌ Socket error:', error);
-      setError(error);
+      const errorMessage = typeof error === 'string' ? error : error.message || 'Неизвестная ошибка';
+      setError(errorMessage);
       setLoading(false);
     };
 
@@ -137,6 +138,7 @@ export default function RoomPage() {
     socket.on('player-joined', handlePlayerJoined);
     socket.on('player-left', handlePlayerLeft);
     socket.on('player-ready-updated', handlePlayerReadyUpdated);
+    socket.on('game-started', handleGameStarted);
     socket.on('join-room-error', handleJoinRoomError);
     socket.on('error', handleError);
 
@@ -147,6 +149,7 @@ export default function RoomPage() {
       socket.off('player-joined', handlePlayerJoined);
       socket.off('player-left', handlePlayerLeft);
       socket.off('player-ready-updated', handlePlayerReadyUpdated);
+      socket.off('game-started', handleGameStarted);
       socket.off('join-room-error', handleJoinRoomError);
       socket.off('error', handleError);
     };
