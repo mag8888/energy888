@@ -72,6 +72,7 @@ const roomSchema = new mongoose.Schema({
   maxPlayers: { type: Number, min: 2, max: 10, default: 4 },
   password: { type: String, default: '' },
   timing: { type: Number, min: 60, max: 300, default: 120 },
+  turnTime: { type: Number, min: 60, max: 300, default: 120 },
   createdAt: { type: Date, default: Date.now },
   gameDurationSec: { type: Number, default: 3600 },
   gameEndAt: { type: Date },
@@ -336,7 +337,10 @@ io.on('connection', (socket) => {
         id: room.id,
         name: room.name,
         maxPlayers: room.maxPlayers,
+        players: room.players.length,
         currentPlayers: room.players.length,
+        timing: room.turnTime || 120, // время хода в секундах, по умолчанию 2 минуты
+        status: room.started ? 'playing' : 'waiting',
         started: room.started,
         createdAt: room.createdAt,
         creator: room.creatorUsername
@@ -371,6 +375,7 @@ io.on('connection', (socket) => {
         maxPlayers: roomData.maxPlayers || 4,
         password: roomData.password || '',
         timing: roomData.timing || 120,
+        turnTime: roomData.timing || 120,
         gameDurationSec: roomData.gameDurationSec || 3600,
         deleteAfterAt,
         players: [],
