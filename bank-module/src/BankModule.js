@@ -135,6 +135,30 @@ const BankModule = ({
     return { salary: 0, totalExpenses: 0 };
   }, [getCurrentPlayer, playerData?.profession]);
 
+  // Получение профессии игрока
+  const getPlayerProfession = useCallback(() => {
+    const currentPlayer = getCurrentPlayer();
+    const profession = currentPlayer?.profession || playerData?.profession;
+    
+    if (profession) {
+      return profession.name || profession.profession || 'Не выбрана';
+    }
+    
+    return 'Не выбрана';
+  }, [getCurrentPlayer, playerData?.profession]);
+
+  // Получение мечты игрока
+  const getPlayerDream = useCallback(() => {
+    const currentPlayer = getCurrentPlayer();
+    const dream = currentPlayer?.dream || playerData?.dream;
+    
+    if (dream) {
+      return dream.name || dream.dream || 'Не выбрана';
+    }
+    
+    return 'Не выбрана';
+  }, [getCurrentPlayer, playerData?.dream]);
+
   // Расчет денежного потока с учетом кредитов
   const calculateCashFlow = useCallback(() => {
     const financialInfo = getFinancialInfo();

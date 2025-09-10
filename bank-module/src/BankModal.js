@@ -544,8 +544,10 @@ const BankModal = ({
           background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
           borderRadius: '20px',
           overflow: 'hidden',
-          minHeight: isMobile ? '100vh' : 'auto',
-          maxHeight: isMobile ? '100vh' : '90vh',
+          height: isMobile ? '100vh' : '95vh',
+          width: isMobile ? '100vw' : '95vw',
+          maxHeight: '95vh',
+          maxWidth: '95vw',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
           backdropFilter: 'blur(20px)',
@@ -609,13 +611,15 @@ const BankModal = ({
       </DialogTitle>
 
       <DialogContent sx={{ 
-        p: 3,
+        p: 2,
         background: 'transparent',
-        borderRadius: '0 0 20px 20px'
+        borderRadius: '0 0 20px 20px',
+        height: 'calc(100% - 80px)',
+        overflow: 'hidden'
       }}>
-        <Grid container spacing={3}>
+        <Grid container spacing={2} sx={{ height: '100%' }}>
           {/* Левая панель - Баланс и статистика */}
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={4} sx={{ height: '100%' }}>
             <Card sx={{ 
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
               color: 'white',
@@ -854,10 +858,10 @@ const BankModal = ({
           </Grid>
 
           {/* Правая панель - Переводы и история */}
-          <Grid item xs={12} md={8}>
-            <Grid container spacing={3}>
+          <Grid item xs={12} md={8} sx={{ height: '100%' }}>
+            <Grid container spacing={2} sx={{ height: '100%' }}>
               {/* Форма перевода */}
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{ height: '50%' }}>
                 <Card sx={{ 
                   background: 'rgba(255, 255, 255, 0.05)',
                   backdropFilter: 'blur(10px)',
@@ -993,14 +997,22 @@ const BankModal = ({
               </Grid>
 
               {/* История операций */}
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{ height: '50%' }}>
                 <Card sx={{ 
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(10px)',
                   borderRadius: '15px',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column'
                 }}>
-                  <CardContent>
+                  <CardContent sx={{ 
+                    height: '100%', 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    p: 2
+                  }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                       <History sx={{ color: '#8B5CF6' }} />
                       <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'white' }}>

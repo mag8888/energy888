@@ -207,8 +207,10 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
     const cells = [];
     const cellSize = 46; // Увеличено на 15% с 40 до 46
     const spacing = 2;
-    const startX = 50;
-    const startY = 50;
+    const boardWidth = 14 * (cellSize + spacing) - spacing; // Общая ширина доски
+    const boardHeight = 14 * (cellSize + spacing) - spacing; // Общая высота доски
+    const startX = (800 - boardWidth) / 2; // Центрирование по горизонтали
+    const startY = (800 - boardHeight) / 2; // Центрирование по вертикали
     
     // Верхний ряд (14 клеток)
     for (let i = 0; i < 14; i++) {
@@ -274,10 +276,10 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
       );
     }
     
-    // Правый столбец (12 клеток) - СМЕЩЕН ВЛЕВО НА ОДНУ КЛЕТКУ
+    // Правый столбец (12 клеток) - СИММЕТРИЧНО
     for (let i = 0; i < 12; i++) {
       const cell = OUTER_CELLS[14 + i];
-      const x = startX + 13 * (cellSize + spacing); // Смещено влево на одну клетку
+      const x = startX + 13 * (cellSize + spacing); // Симметрично относительно левого столбца
       const y = startY + (i + 1) * (cellSize + spacing);
       cells.push(
         <div
@@ -338,7 +340,7 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
       );
     }
     
-    // Нижний ряд (14 клеток, справа налево)
+    // Нижний ряд (14 клеток, справа налево) - СИММЕТРИЧНО
     for (let i = 0; i < 14; i++) {
       const cell = OUTER_CELLS[26 + i];
       const x = startX + (13 - i) * (cellSize + spacing);
@@ -402,7 +404,7 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
       );
     }
     
-    // Левый столбец (12 клеток, снизу вверх)
+    // Левый столбец (12 клеток, снизу вверх) - СИММЕТРИЧНО
     for (let i = 0; i < 12; i++) {
       const cell = OUTER_CELLS[40 + i];
       const x = startX;
@@ -480,8 +482,8 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         <div
           style={{
             position: 'absolute',
-            left: 150,
-            top: 150,
+            left: 280,
+            top: 280,
             width: cardSize,
             height: cardHeight,
             background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
@@ -508,8 +510,8 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         <div
           style={{
             position: 'absolute',
-            right: 150,
-            top: 150,
+            right: 280,
+            top: 280,
             width: cardSize,
             height: cardHeight,
             background: 'linear-gradient(135deg, #32CD32 0%, #228B22 100%)',
@@ -536,8 +538,8 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         <div
           style={{
             position: 'absolute',
-            right: 150,
-            bottom: 150,
+            right: 280,
+            bottom: 280,
             width: cardSize,
             height: cardHeight,
             background: 'linear-gradient(135deg, #4169E1 0%, #0000CD 100%)',
@@ -564,8 +566,8 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         <div
           style={{
             position: 'absolute',
-            left: 150,
-            bottom: 150,
+            left: 280,
+            bottom: 280,
             width: cardSize,
             height: cardHeight,
             background: 'linear-gradient(135deg, #DC143C 0%, #B22222 100%)',
@@ -765,13 +767,13 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
               fontSize: '14px',
               marginBottom: '5px'
             }}>
-              Профессия: {currentPlayer?.profession || 'Не выбрана'}
+              Профессия: {currentPlayer?.profession?.name || currentPlayer?.profession || 'Не выбрана'}
             </div>
             <div style={{ 
               color: 'rgba(255, 255, 255, 0.7)', 
               fontSize: '14px'
             }}>
-              Мечта: {currentPlayer?.dream || 'Не выбрана'}
+              Мечта: {currentPlayer?.dream?.name || currentPlayer?.dream || 'Не выбрана'}
             </div>
           </div>
         </div>
