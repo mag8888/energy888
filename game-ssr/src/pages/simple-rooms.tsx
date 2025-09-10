@@ -66,20 +66,11 @@ export default function SimpleRooms() {
       setRooms(roomsList);
     };
 
-    const handleRoomCreated = (room: Room) => {
-      console.log('🏠 Комната создана:', room);
+    const handleRoomJoined = (room: Room) => {
+      console.log('🏠 Комната создана и присоединение:', room);
       setRooms(prev => [...prev, room]);
       setMessage('Комната создана успешно!');
       setShowCreateForm(false);
-      
-      // Автоматически присоединяемся к созданной комнате
-      console.log('🚪 Автоматически присоединяемся к комнате:', room.id);
-      const userData = JSON.parse(localStorage.getItem('user') || '{}');
-      socket.emit('join-room', {
-        roomId: room.id,
-        playerName: userData.name || 'Игрок',
-        playerEmail: userData.email || 'player@example.com'
-      });
       
       // Переходим в комнату
       setTimeout(() => {
@@ -99,14 +90,14 @@ export default function SimpleRooms() {
 
     // Подписываемся на события
     socket.on('rooms-list', handleRoomsList);
-    socket.on('room-created', handleRoomCreated);
+    socket.on('room-joined', handleRoomJoined);
     socket.on('rooms-updated', handleRoomsUpdated);
     socket.on('connect_error', handleConnectError);
 
     // Cleanup при размонтировании
     return () => {
       socket.off('rooms-list', handleRoomsList);
-      socket.off('room-created', handleRoomCreated);
+      socket.off('room-joined', handleRoomJoined);
       socket.off('rooms-updated', handleRoomsUpdated);
       socket.off('connect_error', handleConnectError);
     };
