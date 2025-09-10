@@ -562,7 +562,7 @@ export default function RoomPage() {
               justifyContent: 'center',
               gap: '8px'
             }}>
-              🎯 Выбранная мечта: {selectedDream ? DREAMS.find(d => d.id === selectedDream)?.name || selectedDream : ''}
+              🎯 Выбранная мечта: {selectedDream ? (DREAMS.find(d => d.id === selectedDream)?.name || selectedDream) : ''}
             </div>
           )}
 
