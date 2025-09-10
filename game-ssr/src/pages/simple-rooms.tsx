@@ -112,6 +112,18 @@ export default function SimpleRooms() {
     };
   }, [socket, isConnected, router]);
 
+  // Обновляем список комнат каждые 5 секунд
+  useEffect(() => {
+    if (!socket || !isConnected) return;
+
+    const interval = setInterval(() => {
+      console.log('🔄 Принудительное обновление списка комнат');
+      socket.emit('get-rooms');
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [socket, isConnected]);
+
   const handleCreateRoom = (e: React.FormEvent) => {
     e.preventDefault();
     if (!socket || !isConnected) {
@@ -264,6 +276,28 @@ export default function SimpleRooms() {
               }}
             >
               Создать комнату
+            </button>
+            <button
+              onClick={() => {
+                if (socket) {
+                  console.log('🔄 Ручное обновление списка комнат');
+                  socket.emit('get-rooms');
+                }
+              }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.2)',
+                color: 'white',
+                border: '2px solid rgba(255, 255, 255, 0.5)',
+                borderRadius: '8px',
+                padding: '12px 24px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                transition: 'all 0.3s ease',
+                marginRight: '10px'
+              }}
+            >
+              🔄 Обновить
             </button>
             <Link href="/hall-of-fame" style={{
               background: 'rgba(255, 255, 255, 0.2)',
