@@ -432,10 +432,28 @@ io.on('connection', (socket) => {
         return;
       }
       
-      // Проверяем, не присоединен ли уже игрок
-      const existingPlayer = room.players.find(p => p.socketId === socket.id);
+      // Проверяем, не присоединен ли уже игрок по socketId или email
+      const existingPlayer = room.players.find(p => p.socketId === socket.id || p.email === playerEmail);
       if (existingPlayer) {
-        socket.emit('join-room-error', { error: 'Already in room' });
+        console.log('⚠️ Игрок уже в комнате:', playerName, playerEmail);
+        // Если игрок уже есть, просто отправляем обновленную информацию
+        socket.join(roomId);
+        socket.emit('room-joined', {
+          id: room.id,
+          name: room.name,
+          maxPlayers: room.maxPlayers,
+          currentPlayers: room.players.length,
+          turnTime: room.turnTime || room.timing || 120,
+          status: room.started ? 'playing' : 'waiting',
+          players: room.players.map(p => ({
+            id: p.id,
+            name: p.name,
+            email: p.email,
+            isReady: p.isReady,
+            profession: p.profession,
+            dream: p.dream
+          }))
+        });
         return;
       }
       
@@ -467,12 +485,20 @@ io.on('connection', (socket) => {
       
       // Отправляем обновленную информацию о комнате
       socket.emit('room-joined', {
-        roomId: room.id,
-        roomName: room.name,
-        players: room.players,
+        id: room.id,
+        name: room.name,
         maxPlayers: room.maxPlayers,
-        professionSelectionMode: room.professionSelectionMode,
-        availableProfessions: room.availableProfessions
+        currentPlayers: room.players.length,
+        turnTime: room.turnTime || room.timing || 120,
+        status: room.started ? 'playing' : 'waiting',
+        players: room.players.map(p => ({
+          id: p.id,
+          name: p.name,
+          email: p.email,
+          isReady: p.isReady,
+          profession: p.profession,
+          dream: p.dream
+        }))
       });
       
       // Уведомляем всех в комнате
