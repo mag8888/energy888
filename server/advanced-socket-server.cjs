@@ -522,7 +522,7 @@ io.on('connection', (socket) => {
         }))
       });
       
-      // Уведомляем всех в комнате
+      // Уведомляем всех в комнате о новом игроке
       io.to(roomId).emit('player-joined', {
         player,
         players: room.players

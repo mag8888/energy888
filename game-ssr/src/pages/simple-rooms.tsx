@@ -24,10 +24,10 @@ export default function SimpleRooms() {
     name: '',
     maxPlayers: 4,
     timing: 120,
-    gameDuration: 60,
+    gameDuration: 180, // 3 часа по умолчанию
     professionSelectionMode: 'choice',
     assignProfessionToAll: false,
-    availableProfessions: PROFESSIONS.map(p => p.id)
+    availableProfessions: ['entrepreneur'] // По умолчанию только Предприниматель
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -186,12 +186,22 @@ export default function SimpleRooms() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-      padding: '20px',
-      fontFamily: 'Arial, sans-serif'
-    }}>
+    <>
+      <style jsx>{`
+        .profession-card:hover .profession-hover-effect {
+          opacity: 1 !important;
+        }
+        .profession-card:hover {
+          transform: translateY(-4px) !important;
+          box-shadow: 0 8px 25px rgba(255, 255, 255, 0.15) !important;
+        }
+      `}</style>
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        padding: '20px',
+        fontFamily: 'Arial, sans-serif'
+      }}>
       <div style={{
         maxWidth: '1400px',
         margin: '0 auto'
@@ -485,47 +495,122 @@ export default function SimpleRooms() {
                   </div>
                   <div style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-                    gap: '10px',
-                    maxHeight: '200px',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+                    gap: '12px',
+                    maxHeight: '300px',
                     overflowY: 'auto',
-                    padding: '10px',
+                    padding: '15px',
                     background: 'rgba(0, 0, 0, 0.3)',
-                    borderRadius: '10px'
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
                   }}>
                     {PROFESSIONS.map(profession => (
-                      <label
+                      <div
                         key={profession.id}
+                        className="profession-card"
+                        onClick={() => toggleProfession(profession.id)}
                         style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '10px',
+                          position: 'relative',
                           background: createForm.availableProfessions.includes(profession.id) 
-                            ? 'rgba(255, 255, 255, 0.2)' 
-                            : 'rgba(255, 255, 255, 0.05)',
-                          borderRadius: '8px',
+                            ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05))' 
+                            : 'linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02))',
+                          borderRadius: '12px',
+                          padding: '16px',
                           cursor: 'pointer',
                           border: createForm.availableProfessions.includes(profession.id) 
-                            ? '2px solid rgba(255, 255, 255, 0.5)' 
-                            : '2px solid transparent',
-                          transition: 'all 0.3s ease'
+                            ? '2px solid rgba(255, 255, 255, 0.4)' 
+                            : '2px solid rgba(255, 255, 255, 0.1)',
+                          transition: 'all 0.3s ease',
+                          boxShadow: createForm.availableProfessions.includes(profession.id) 
+                            ? '0 4px 15px rgba(255, 255, 255, 0.1)' 
+                            : '0 2px 8px rgba(0, 0, 0, 0.1)',
+                          transform: createForm.availableProfessions.includes(profession.id) 
+                            ? 'translateY(-2px)' 
+                            : 'translateY(0)'
                         }}
                       >
-                        <input
-                          type="checkbox"
-                          checked={createForm.availableProfessions.includes(profession.id)}
-                          onChange={() => toggleProfession(profession.id)}
-                          style={{ marginRight: '10px' }}
-                        />
-                        <div>
-                          <div style={{ color: 'white', fontWeight: 'bold', fontSize: '14px' }}>
-                            {profession.icon} {profession.name}
+                        {/* Checkbox indicator */}
+                        {createForm.availableProfessions.includes(profession.id) && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '8px',
+                            right: '8px',
+                            width: '20px',
+                            height: '20px',
+                            background: 'linear-gradient(45deg, #4CAF50, #45a049)',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '12px',
+                            color: 'white',
+                            fontWeight: 'bold'
+                          }}>
+                            ✓
                           </div>
-                          <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }}>
-                            {profession.startingMoney}₽ • {profession.monthlyIncome}₽/мес
+                        )}
+                        
+                        {/* Profession icon and name */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          marginBottom: '8px'
+                        }}>
+                          <div style={{
+                            fontSize: '24px',
+                            marginRight: '8px'
+                          }}>
+                            {profession.icon}
+                          </div>
+                          <div style={{
+                            color: 'white',
+                            fontWeight: 'bold',
+                            fontSize: '14px',
+                            flex: 1
+                          }}>
+                            {profession.name}
                           </div>
                         </div>
-                      </label>
+                        
+                        {/* Financial info */}
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          fontSize: '12px',
+                          lineHeight: '1.4'
+                        }}>
+                          <div style={{ marginBottom: '2px' }}>
+                            <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>
+                              {profession.startingMoney}₽
+                            </span>
+                            {' • '}
+                            <span style={{ color: '#FFC107', fontWeight: 'bold' }}>
+                              {profession.monthlyIncome}₽/мес
+                            </span>
+                          </div>
+                          {profession.cashFlow && (
+                            <div style={{ color: '#2196F3', fontSize: '11px' }}>
+                              Поток: {profession.cashFlow}₽
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Hover effect */}
+                        <div 
+                          className="profession-hover-effect"
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent)',
+                            borderRadius: '12px',
+                            opacity: 0,
+                            transition: 'opacity 0.3s ease',
+                            pointerEvents: 'none'
+                          }} 
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -649,6 +734,7 @@ export default function SimpleRooms() {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

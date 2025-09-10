@@ -72,15 +72,29 @@ export default function RoomPage() {
       setLoading(false);
     };
 
+    const handlePlayerJoined = (data: any) => {
+      console.log('👤 Игрок присоединился:', data);
+      // Обновляем список игроков
+      if (data.players) {
+        setRoom(prev => prev ? {
+          ...prev,
+          players: data.players,
+          currentPlayers: data.players.length
+        } : null);
+      }
+    };
+
     // Подписываемся на события
     socket.on('room-joined', handleRoomJoined);
     socket.on('room-updated', handleRoomUpdated);
+    socket.on('player-joined', handlePlayerJoined);
     socket.on('error', handleError);
 
     // Cleanup при размонтировании
     return () => {
       socket.off('room-joined', handleRoomJoined);
       socket.off('room-updated', handleRoomUpdated);
+      socket.off('player-joined', handlePlayerJoined);
       socket.off('error', handleError);
     };
   }, [socket, isConnected, id]);
