@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 interface Player {
   id: string;
   name: string;
-  position: number;
-  money: number;
+  position?: number;
+  money?: number;
   isReady: boolean;
   profession?: string;
   dream?: string;
@@ -83,10 +83,11 @@ export default function OriginalGameBoard({
   const getPlayerPositions = () => {
     const positions: { [key: number]: Player[] } = {};
     players.forEach(player => {
-      if (!positions[player.position || 0]) {
-        positions[player.position || 0] = [];
+      const pos = player.position || 0;
+      if (!positions[pos]) {
+        positions[pos] = [];
       }
-      positions[player.position || 0].push(player);
+      positions[pos].push(player);
     });
     return positions;
   };
