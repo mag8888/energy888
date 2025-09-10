@@ -432,14 +432,25 @@ io.on('connection', (socket) => {
       
       console.log('🏠 Комната создана:', roomId, 'создатель:', creatorPlayer.name);
       
-      socket.emit('room-created', {
+      // Отправляем создателю полную информацию о комнате (как при join-room)
+      const roomData = {
         id: room.id,
         name: room.name,
         maxPlayers: room.maxPlayers,
         currentPlayers: room.players.length,
-        started: room.started,
-        creator: room.creatorUsername
-      });
+        turnTime: room.turnTime || room.timing || 120,
+        status: room.started ? 'playing' : 'waiting',
+        players: room.players.map(p => ({
+          id: p.id,
+          name: p.name,
+          email: p.email,
+          isReady: p.isReady,
+          profession: p.profession,
+          dream: p.dream
+        }))
+      };
+      
+      socket.emit('room-joined', roomData);
       
       // Уведомляем всех о новой комнате
       io.emit('rooms-updated');
@@ -466,10 +477,15 @@ io.on('connection', (socket) => {
       
       console.log('✅ Комната найдена:', { id: room.id, name: room.name, players: room.players.length, maxPlayers: room.maxPlayers });
       
-      // Проверяем, не присоединен ли уже игрок по socketId или email
-      const existingPlayer = room.players.find(p => p.socketId === socket.id || p.email === playerEmail);
+      // Проверяем, не присоединен ли уже игрок по socketId, email или creatorId
+      const existingPlayer = room.players.find(p => 
+        p.socketId === socket.id || 
+        p.email === playerEmail || 
+        p.id === socket.id ||
+        (room.creatorId === socket.id && p.id === socket.id)
+      );
       if (existingPlayer) {
-        console.log('⚠️ Игрок уже в комнате:', playerName, playerEmail);
+        console.log('⚠️ Игрок уже в комнате:', playerName, playerEmail, 'как', existingPlayer.name);
         // Если игрок уже есть, просто отправляем обновленную информацию
         socket.join(roomId);
         socket.emit('room-joined', {
