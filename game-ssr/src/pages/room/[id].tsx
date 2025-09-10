@@ -34,6 +34,7 @@ export default function RoomPage() {
   const [currentPlayer, setCurrentPlayer] = useState<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showGameBoard, setShowGameBoard] = useState(false);
+  const [debugRooms, setDebugRooms] = useState<any[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -61,6 +62,9 @@ export default function RoomPage() {
       playerName: userData.name || 'Игрок',
       playerEmail: userData.email || 'player@example.com'
     });
+
+    // Загружаем список комнат для дебага
+    socket.emit('get-rooms');
 
     // Обработчики событий
     const handleRoomJoined = (roomData: Room) => {
@@ -183,6 +187,11 @@ export default function RoomPage() {
       } : null);
     };
 
+    const handleRoomsList = (rooms: any[]) => {
+      console.log('🏠 Получен список комнат для дебага:', rooms);
+      setDebugRooms(rooms);
+    };
+
     // Подписываемся на события
     socket.on('room-joined', handleRoomJoined);
     socket.on('room-updated', handleRoomUpdated);
@@ -193,6 +202,7 @@ export default function RoomPage() {
     socket.on('dice-rolled', handleDiceRolled);
     socket.on('turn-changed', handleTurnChanged);
     socket.on('card-bought', handleCardBought);
+    socket.on('rooms-list', handleRoomsList);
     socket.on('join-room-error', handleJoinRoomError);
     socket.on('error', handleError);
 
@@ -207,6 +217,7 @@ export default function RoomPage() {
       socket.off('dice-rolled', handleDiceRolled);
       socket.off('turn-changed', handleTurnChanged);
       socket.off('card-bought', handleCardBought);
+      socket.off('rooms-list', handleRoomsList);
       socket.off('join-room-error', handleJoinRoomError);
       socket.off('error', handleError);
     };
@@ -251,6 +262,16 @@ export default function RoomPage() {
     if (socket && room && id) {
       socket.emit('get-game-state', { roomId: id });
     }
+  };
+
+  const handleGetDebugRooms = () => {
+    if (socket) {
+      socket.emit('get-rooms');
+    }
+  };
+
+  const handleDebugRoomClick = (roomId: string) => {
+    router.push(`/room/${roomId}`);
   };
 
   if (loading) {
@@ -725,6 +746,136 @@ export default function RoomPage() {
               ⚠️ Нет подключения к серверу
             </div>
           )}
+        </div>
+
+        {/* Дебаг-панель с комнатами */}
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          left: '20px',
+          right: '20px',
+          background: 'rgba(0, 0, 0, 0.9)',
+          backdropFilter: 'blur(15px)',
+          borderRadius: '15px',
+          padding: '20px',
+          border: '2px solid rgba(255, 255, 255, 0.3)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+          zIndex: 1000
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '15px'
+          }}>
+            <h3 style={{ 
+              color: 'white', 
+              margin: 0, 
+              fontSize: '1.2rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              🔧 Дебаг-панель
+              <span style={{
+                background: 'rgba(255, 255, 255, 0.2)',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                fontSize: '12px'
+              }}>
+                {debugRooms.length} комнат
+              </span>
+            </h3>
+            <button
+              onClick={handleGetDebugRooms}
+              style={{
+                padding: '8px 16px',
+                background: 'linear-gradient(45deg, #2196F3, #1976D2)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(33, 150, 243, 0.4)',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              🔄 Обновить
+            </button>
+          </div>
+          
+          <div style={{
+            display: 'flex',
+            gap: '10px',
+            flexWrap: 'wrap',
+            maxHeight: '120px',
+            overflowY: 'auto'
+          }}>
+            {debugRooms.map((room) => (
+              <button
+                key={room.id}
+                onClick={() => handleDebugRoomClick(room.id)}
+                style={{
+                  padding: '8px 12px',
+                  background: room.id === id 
+                    ? 'linear-gradient(45deg, #4CAF50, #45a049)' 
+                    : 'rgba(255, 255, 255, 0.1)',
+                  color: 'white',
+                  border: room.id === id 
+                    ? '2px solid #4CAF50' 
+                    : '1px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  whiteSpace: 'nowrap',
+                  minWidth: '120px',
+                  textAlign: 'left'
+                }}
+                onMouseEnter={(e) => {
+                  if (room.id !== id) {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (room.id !== id) {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                  }
+                }}
+              >
+                <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>
+                  {room.id === id ? '📍 ' : '🏠 '}{room.name}
+                </div>
+                <div style={{ 
+                  fontSize: '10px', 
+                  opacity: 0.8,
+                  display: 'flex',
+                  gap: '8px'
+                }}>
+                  <span>👥 {room.players || 0}/{room.maxPlayers}</span>
+                  <span style={{
+                    color: room.started ? '#4CAF50' : '#ff9800'
+                  }}>
+                    {room.started ? '🎮 Игра' : '⏳ Ожидание'}
+                  </span>
+                </div>
+              </button>
+            ))}
+            
+            {debugRooms.length === 0 && (
+              <div style={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: '14px',
+                padding: '20px',
+                textAlign: 'center',
+                width: '100%'
+              }}>
+                Нет доступных комнат. Нажмите "Обновить" для загрузки.
+              </div>
+            )}
+          </div>
         </div>
 
       </div>
