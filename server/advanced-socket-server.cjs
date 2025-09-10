@@ -17,12 +17,15 @@ async function connectToMongoDB() {
     await client.connect();
     db = client.db('energy888');
     console.log('✅ MongoDB подключена');
+    
+    // Подключаем Mongoose
+    await mongoose.connect(MONGODB_URI);
+    console.log('✅ Mongoose подключен');
   } catch (err) {
     console.error('❌ Ошибка подключения к MongoDB:', err);
+    process.exit(1);
   }
 }
-
-connectToMongoDB();
 
 // Схемы Mongoose
 const playerSchema = new mongoose.Schema({
@@ -704,14 +707,25 @@ setInterval(async () => {
   }
 }, 60000); // Каждую минуту
 
-// Запуск сервера
-server.listen(PORT, HOST, () => {
-  console.log(`🚀 Advanced Socket Server listening on ${HOST}:${PORT}`);
-  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📱 Process ID: ${process.pid}`);
-  console.log(`🔌 Socket.IO enabled for real-time rooms`);
-  console.log(`🗄️ MongoDB: ${MONGODB_URI}`);
-});
+// Запуск сервера только после подключения к MongoDB
+async function startServer() {
+  try {
+    await connectToMongoDB();
+    
+    server.listen(PORT, HOST, () => {
+      console.log(`🚀 Advanced Socket Server listening on ${HOST}:${PORT}`);
+      console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`📱 Process ID: ${process.pid}`);
+      console.log(`🔌 Socket.IO enabled for real-time rooms`);
+      console.log(`🗄️ MongoDB: ${MONGODB_URI}`);
+    });
+  } catch (error) {
+    console.error('❌ Ошибка запуска сервера:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
