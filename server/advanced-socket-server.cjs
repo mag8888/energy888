@@ -240,6 +240,20 @@ const server = http.createServer((req, res) => {
         sendJSON(res, 500, { ok: false, error: err.message });
       });
   }
+  else if (path === '/clear-rooms' && method === 'POST') {
+    Room.deleteMany({})
+      .then(result => {
+        console.log('🧹 Очищено всех комнат:', result.deletedCount);
+        sendJSON(res, 200, { 
+          ok: true, 
+          message: `Cleared ${result.deletedCount} rooms`,
+          deletedCount: result.deletedCount
+        });
+      })
+      .catch(err => {
+        sendJSON(res, 500, { ok: false, error: err.message });
+      });
+  }
   else if (path === '/tg/new-token' && method === 'GET') {
     try {
       const token = `t_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
@@ -482,11 +496,17 @@ io.on('connection', (socket) => {
       const existingPlayer = room.players.find(p => 
         p.socketId === socket.id || 
         p.email === playerEmail || 
-        p.id === socket.id ||
-        (room.creatorId === socket.id && p.id === socket.id)
+        p.id === socket.id
       );
       if (existingPlayer) {
         console.log('⚠️ Игрок уже в комнате:', playerName, playerEmail, 'как', existingPlayer.name);
+        console.log('🔍 Детали существующего игрока:', {
+          socketId: existingPlayer.socketId,
+          email: existingPlayer.email,
+          id: existingPlayer.id,
+          currentSocketId: socket.id
+        });
+        
         // Если игрок уже есть, просто отправляем обновленную информацию
         socket.join(roomId);
         socket.emit('room-joined', {
