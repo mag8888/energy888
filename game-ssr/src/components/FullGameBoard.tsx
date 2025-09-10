@@ -118,7 +118,37 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           }}
           title={`${cell.name} (${cell.id})`}
         >
-          {cell.icon}
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            {/* Номер клетки в верхнем левом углу */}
+            <div style={{
+              position: 'absolute',
+              top: '2px',
+              left: '2px',
+              fontSize: '8px',
+              fontWeight: 'bold',
+              color: 'rgba(0, 0, 0, 0.8)',
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '50%',
+              width: '12px',
+              height: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: '1'
+            }}>
+              {cell.id}
+            </div>
+            {/* Иконка в центре */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%'
+            }}>
+              {cell.icon}
+            </div>
+          </div>
         </div>
       );
     });
@@ -161,7 +191,37 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           }}
           title={`${cell.name} (${cell.id})`}
         >
-          {cell.icon}
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            {/* Номер клетки в верхнем левом углу */}
+            <div style={{
+              position: 'absolute',
+              top: '1px',
+              left: '1px',
+              fontSize: '6px',
+              fontWeight: 'bold',
+              color: 'rgba(0, 0, 0, 0.8)',
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '50%',
+              width: '10px',
+              height: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: '1'
+            }}>
+              {cell.id}
+            </div>
+            {/* Иконка в центре */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%'
+            }}>
+              {cell.icon}
+            </div>
+          </div>
         </div>
       );
     }
@@ -195,7 +255,37 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           }}
           title={`${cell.name} (${cell.id})`}
         >
-          {cell.icon}
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            {/* Номер клетки в верхнем левом углу */}
+            <div style={{
+              position: 'absolute',
+              top: '1px',
+              left: '1px',
+              fontSize: '6px',
+              fontWeight: 'bold',
+              color: 'rgba(0, 0, 0, 0.8)',
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '50%',
+              width: '10px',
+              height: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: '1'
+            }}>
+              {cell.id}
+            </div>
+            {/* Иконка в центре */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%'
+            }}>
+              {cell.icon}
+            </div>
+          </div>
         </div>
       );
     }
@@ -229,7 +319,37 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           }}
           title={`${cell.name} (${cell.id})`}
         >
-          {cell.icon}
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            {/* Номер клетки в верхнем левом углу */}
+            <div style={{
+              position: 'absolute',
+              top: '1px',
+              left: '1px',
+              fontSize: '6px',
+              fontWeight: 'bold',
+              color: 'rgba(0, 0, 0, 0.8)',
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '50%',
+              width: '10px',
+              height: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: '1'
+            }}>
+              {cell.id}
+            </div>
+            {/* Иконка в центре */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%'
+            }}>
+              {cell.icon}
+            </div>
+          </div>
         </div>
       );
     }
@@ -263,7 +383,37 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           }}
           title={`${cell.name} (${cell.id})`}
         >
-          {cell.icon}
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            {/* Номер клетки в верхнем левом углу */}
+            <div style={{
+              position: 'absolute',
+              top: '1px',
+              left: '1px',
+              fontSize: '6px',
+              fontWeight: 'bold',
+              color: 'rgba(0, 0, 0, 0.8)',
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '50%',
+              width: '10px',
+              height: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: '1'
+            }}>
+              {cell.id}
+            </div>
+            {/* Иконка в центре */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%'
+            }}>
+              {cell.icon}
+            </div>
+          </div>
         </div>
       );
     }
