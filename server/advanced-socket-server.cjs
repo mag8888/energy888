@@ -5,7 +5,7 @@ const { MongoClient } = require('mongodb');
 const mongoose = require('mongoose');
 
 // Версия сервера
-const SERVER_VERSION = 'v2.1.3';
+const SERVER_VERSION = 'v2.1.3-ad4f113';
 
 const PORT = process.env.PORT || 4000;
 const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';

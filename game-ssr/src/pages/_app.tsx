@@ -8,7 +8,7 @@ function DebugInfo() {
   const [debugInfo, setDebugInfo] = useState<{ socketUrl: string; envUrl?: string; host: string; time: string } | null>(null);
   
   // Версия приложения
-  const APP_VERSION = 'v2.1.3';
+  const APP_VERSION = 'v2.1.3-ad4f113';
 
   useEffect(() => {
     try {

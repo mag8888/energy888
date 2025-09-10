@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSocket } from '../../contexts/SocketContext';
+import { DREAMS } from '../../data/professions';
 
 interface Room {
   id: string;
@@ -26,6 +27,8 @@ export default function RoomPage() {
   const [room, setRoom] = useState<Room | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDream, setSelectedDream] = useState<string>('');
+  const [showDreamSelection, setShowDreamSelection] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -142,8 +145,13 @@ export default function RoomPage() {
   };
 
   const handleReady = () => {
+    if (!selectedDream) {
+      setShowDreamSelection(true);
+      return;
+    }
+    
     if (socket && room && id) {
-      socket.emit('player-ready', { roomId: id });
+      socket.emit('player-ready', { roomId: id, dream: selectedDream });
     }
   };
 
@@ -491,6 +499,20 @@ export default function RoomPage() {
             </div>
           )}
 
+          {selectedDream && (
+            <div style={{ 
+              color: '#4CAF50', 
+              fontSize: '14px', 
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}>
+              🎯 Выбранная мечта: {DREAMS.find(d => d.id === selectedDream)?.name || selectedDream}
+            </div>
+          )}
+
           {room.status === 'playing' && (
             <div style={{
               color: '#4CAF50',
@@ -521,6 +543,138 @@ export default function RoomPage() {
             </div>
           )}
         </div>
+
+        {/* Dream Selection Modal */}
+        {showDreamSelection && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(15px)',
+              borderRadius: '20px',
+              padding: '30px',
+              maxWidth: '500px',
+              width: '90%',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}>
+              <h2 style={{ 
+                color: 'white', 
+                textAlign: 'center', 
+                marginTop: 0, 
+                marginBottom: '20px' 
+              }}>
+                🎯 Выберите мечту
+              </h2>
+              <p style={{ 
+                color: 'rgba(255, 255, 255, 0.8)', 
+                textAlign: 'center', 
+                marginBottom: '20px' 
+              }}>
+                Перед началом игры необходимо выбрать свою мечту
+              </p>
+              
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '15px',
+                marginBottom: '20px'
+              }}>
+                {DREAMS.map(dream => (
+                  <button
+                    key={dream.id}
+                    onClick={() => setSelectedDream(dream.id)}
+                    style={{
+                      padding: '15px',
+                      background: selectedDream === dream.id 
+                        ? 'rgba(76, 175, 80, 0.3)' 
+                        : 'rgba(255, 255, 255, 0.1)',
+                      color: 'white',
+                      border: selectedDream === dream.id 
+                        ? '2px solid #4CAF50' 
+                        : '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      textAlign: 'left'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedDream !== dream.id) {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedDream !== dream.id) {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                      }
+                    }}
+                  >
+                    <div style={{ fontSize: '18px', marginBottom: '5px' }}>
+                      {dream.icon} {dream.name}
+                    </div>
+                    <div style={{ 
+                      fontSize: '12px', 
+                      opacity: 0.8,
+                      lineHeight: '1.4'
+                    }}>
+                      {dream.description}
+                    </div>
+                  </button>
+                ))}
+              </div>
+              
+              <div style={{
+                display: 'flex',
+                gap: '10px',
+                justifyContent: 'center'
+              }}>
+                <button
+                  onClick={() => setShowDreamSelection(false)}
+                  style={{
+                    padding: '10px 20px',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    color: 'white',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: '8px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Отмена
+                </button>
+                <button
+                  onClick={() => {
+                    if (selectedDream) {
+                      setShowDreamSelection(false);
+                    }
+                  }}
+                  disabled={!selectedDream}
+                  style={{
+                    padding: '10px 20px',
+                    background: selectedDream 
+                      ? 'linear-gradient(45deg, #667eea, #764ba2)' 
+                      : 'rgba(255, 255, 255, 0.1)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: selectedDream ? 'pointer' : 'not-allowed',
+                    opacity: selectedDream ? 1 : 0.5
+                  }}
+                >
+                  Подтвердить
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
