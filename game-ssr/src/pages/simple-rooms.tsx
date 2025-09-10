@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useSocket } from '../contexts/SocketContext';
 import { PROFESSIONS, DREAMS, GAME_DURATIONS, TURN_TIMES } from '../data/professions';
+import DebugRoomsPanel from '../components/DebugRoomsPanel';
 
 interface Room {
   id: string;
@@ -827,6 +828,9 @@ export default function SimpleRooms() {
           )}
         </div>
       </div>
+      
+      {/* Дебаг-панель */}
+      <DebugRoomsPanel />
       </div>
     </>
   );

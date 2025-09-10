@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import DebugRoomsPanel from '../components/DebugRoomsPanel';
 
 export default function SimpleAuth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -368,6 +369,9 @@ export default function SimpleAuth() {
           <p>Telegram Bot: <a href="https://t.me/energy_m_bot" style={{color: 'white'}}>@energy_m_bot</a></p>
         </div>
       </div>
+      
+      {/* Дебаг-панель */}
+      <DebugRoomsPanel />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import DebugRoomsPanel from '../components/DebugRoomsPanel';
 
 export default function IndexPage() {
   const router = useRouter();
@@ -119,6 +120,9 @@ export default function IndexPage() {
           Для начала игры необходимо авторизоваться
         </div>
       </div>
+      
+      {/* Дебаг-панель */}
+      <DebugRoomsPanel />
     </div>
   );
 }

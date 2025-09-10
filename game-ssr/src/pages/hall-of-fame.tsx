@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSocket } from '../contexts/SocketContext';
 import Head from 'next/head';
 import Link from 'next/link';
+import DebugRoomsPanel from '../components/DebugRoomsPanel';
 
 interface HallOfFamePlayer {
   _id: string;
@@ -331,6 +332,9 @@ export default function HallOfFame() {
           </div>
         </div>
       </div>
+      
+      {/* Дебаг-панель */}
+      <DebugRoomsPanel />
     </>
   );
 }

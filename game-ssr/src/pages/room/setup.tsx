@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import DebugRoomsPanel from '../../components/DebugRoomsPanel';
 
 interface Player {
   id: string;
@@ -408,6 +409,9 @@ export default function RoomSetup() {
           </button>
         </div>
       </div>
+      
+      {/* Дебаг-панель */}
+      <DebugRoomsPanel currentRoomId={id as string} />
     </div>
   );
 }
