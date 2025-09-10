@@ -72,6 +72,12 @@ export default function RoomPage() {
       setLoading(false);
     };
 
+    const handleJoinRoomError = (error: any) => {
+      console.error('❌ Join room error:', error);
+      setError(`Ошибка присоединения к комнате: ${error.error || 'Неизвестная ошибка'}`);
+      setLoading(false);
+    };
+
     const handlePlayerJoined = (data: any) => {
       console.log('👤 Игрок присоединился:', data);
       // Обновляем список игроков
@@ -113,6 +119,7 @@ export default function RoomPage() {
     socket.on('player-joined', handlePlayerJoined);
     socket.on('player-left', handlePlayerLeft);
     socket.on('player-ready-updated', handlePlayerReadyUpdated);
+    socket.on('join-room-error', handleJoinRoomError);
     socket.on('error', handleError);
 
     // Cleanup при размонтировании
@@ -122,6 +129,7 @@ export default function RoomPage() {
       socket.off('player-joined', handlePlayerJoined);
       socket.off('player-left', handlePlayerLeft);
       socket.off('player-ready-updated', handlePlayerReadyUpdated);
+      socket.off('join-room-error', handleJoinRoomError);
       socket.off('error', handleError);
     };
   }, [socket, isConnected, id]);

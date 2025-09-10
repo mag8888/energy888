@@ -481,32 +481,64 @@ export default function SimpleRooms() {
                         type="button"
                         onClick={selectAllProfessions}
                         style={{
-                          background: 'rgba(255, 255, 255, 0.2)',
+                          background: 'rgba(255, 255, 255, 0.1)',
                           color: 'white',
-                          border: 'none',
-                          borderRadius: '5px',
-                          padding: '5px 10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          borderRadius: '10px',
+                          padding: '12px 20px',
                           marginRight: '10px',
                           cursor: 'pointer',
-                          fontSize: '12px'
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          transition: 'all 0.3s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          backdropFilter: 'blur(10px)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 4px 15px rgba(255, 255, 255, 0.2)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
                         }}
                       >
-                        Все
+                        ✅ Все
                       </button>
                       <button
                         type="button"
                         onClick={clearAllProfessions}
                         style={{
-                          background: 'rgba(255, 255, 255, 0.2)',
+                          background: 'rgba(255, 255, 255, 0.1)',
                           color: 'white',
-                          border: 'none',
-                          borderRadius: '5px',
-                          padding: '5px 10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          borderRadius: '10px',
+                          padding: '12px 20px',
                           cursor: 'pointer',
-                          fontSize: '12px'
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          transition: 'all 0.3s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          backdropFilter: 'blur(10px)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 4px 15px rgba(255, 255, 255, 0.2)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
                         }}
                       >
-                        Очистить
+                        🗑️ Очистить
                       </button>
                     </div>
                   </div>

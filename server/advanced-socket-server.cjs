@@ -521,16 +521,21 @@ io.on('connection', (socket) => {
         isActive: true
       };
       
+      console.log('👤 Создаем игрока:', player);
+      
       room.players.push(player);
       await room.save();
+      
+      console.log('💾 Комната сохранена, игроков в комнате:', room.players.length);
       
       // Присоединяемся к комнате
       socket.join(roomId);
       
+      console.log('🔗 Сокет присоединен к комнате:', roomId);
       console.log('👤 Игрок присоединился:', playerName, 'к комнате:', roomId);
       
       // Отправляем обновленную информацию о комнате
-      socket.emit('room-joined', {
+      const roomData = {
         id: room.id,
         name: room.name,
         maxPlayers: room.maxPlayers,
@@ -545,16 +550,23 @@ io.on('connection', (socket) => {
           profession: p.profession,
           dream: p.dream
         }))
-      });
+      };
+      
+      console.log('📤 Отправляем room-joined:', roomData);
+      socket.emit('room-joined', roomData);
       
       // Уведомляем всех в комнате о новом игроке
+      console.log('📢 Уведомляем всех о новом игроке в комнате:', roomId);
       io.to(roomId).emit('player-joined', {
         player,
         players: room.players
       });
       
       // Уведомляем всех о обновлении списка комнат
+      console.log('🔄 Уведомляем всех об обновлении списка комнат');
       io.emit('rooms-updated');
+      
+      console.log('✅ Игрок успешно присоединился:', playerName, 'в комнату', roomId);
       
     } catch (error) {
       console.error('❌ Ошибка присоединения к комнате:', error);
