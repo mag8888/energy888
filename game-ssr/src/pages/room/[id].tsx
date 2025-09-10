@@ -17,6 +17,8 @@ interface Room {
     isReady: boolean;
     profession?: string;
     dream?: string;
+    position?: number;
+    money?: number;
   }>;
 }
 
