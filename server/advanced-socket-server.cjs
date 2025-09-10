@@ -14,15 +14,27 @@ const client = new MongoClient(MONGODB_URI);
 
 async function connectToMongoDB() {
   try {
+    console.log('🔄 Подключаемся к MongoDB...');
+    console.log('🔗 URI:', MONGODB_URI);
+    
+    // Подключаем Mongoose
+    await mongoose.connect(MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+    });
+    console.log('✅ Mongoose подключен');
+    
+    // Подключаем MongoClient
     await client.connect();
     db = client.db('energy888');
     console.log('✅ MongoDB подключена');
     
-    // Подключаем Mongoose
-    await mongoose.connect(MONGODB_URI);
-    console.log('✅ Mongoose подключен');
   } catch (err) {
     console.error('❌ Ошибка подключения к MongoDB:', err);
+    console.error('❌ Детали ошибки:', err.message);
     process.exit(1);
   }
 }
