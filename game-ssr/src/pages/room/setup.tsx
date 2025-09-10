@@ -56,7 +56,7 @@ export default function RoomSetup() {
     }
 
     // Подключаемся к Socket.IO
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-1.onrender.com';
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-advanced-socket.onrender.com';
     console.log('🔌 Подключаемся к Socket.IO:', socketUrl);
 
     const newSocket = io(socketUrl, {

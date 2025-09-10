@@ -40,7 +40,7 @@ export default function RoomPage() {
     // Подключаемся к Socket.IO (debug-aware resolver)
     const qp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
     const overrideUrl = qp?.get('socket') || (typeof window !== 'undefined' ? localStorage.getItem('SOCKET_URL') || undefined : undefined);
-    const socketUrl = overrideUrl || process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-1.onrender.com';
+    const socketUrl = overrideUrl || process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-advanced-socket.onrender.com';
     if (overrideUrl && typeof window !== 'undefined') localStorage.setItem('SOCKET_URL', socketUrl);
     console.log('🔌 Подключаемся к Socket.IO:', socketUrl);
     console.log('🔍 NEXT_PUBLIC_SOCKET_URL:', process.env.NEXT_PUBLIC_SOCKET_URL);

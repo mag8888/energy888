@@ -11,7 +11,7 @@ export default function App({ Component, pageProps }: AppProps) {
       const qp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
       const qpUrl = qp?.get('socket') || undefined;
       const lsUrl = typeof window !== 'undefined' ? (localStorage.getItem('SOCKET_URL') || undefined) : undefined;
-      const socketUrl = qpUrl || lsUrl || envUrl || 'https://energy888-1.onrender.com';
+      const socketUrl = qpUrl || lsUrl || envUrl || 'https://energy888-advanced-socket.onrender.com';
       if (lsUrl !== socketUrl && typeof window !== 'undefined') {
         localStorage.setItem('SOCKET_URL', socketUrl);
       }
