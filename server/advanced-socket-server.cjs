@@ -388,16 +388,37 @@ io.on('connection', (socket) => {
       
       await room.save();
       
+      // Создаем игрока-создателя
+      const creatorPlayer = {
+        id: socket.id,
+        name: roomData.playerName || 'Игрок',
+        email: roomData.playerEmail || 'player@example.com',
+        socketId: socket.id,
+        isReady: false,
+        profession: roomData.creatorProfession || '',
+        dream: roomData.creatorDream || '',
+        selectedProfession: '',
+        professionConfirmed: false,
+        joinedAt: new Date(),
+        money: 0,
+        position: 0,
+        cards: [],
+        isActive: true
+      };
+      
+      room.players.push(creatorPlayer);
+      await room.save();
+      
       // Присоединяем создателя к комнате
       socket.join(roomId);
       
-      console.log('🏠 Комната создана:', roomId);
+      console.log('🏠 Комната создана:', roomId, 'создатель:', creatorPlayer.name);
       
       socket.emit('room-created', {
         id: room.id,
         name: room.name,
         maxPlayers: room.maxPlayers,
-        currentPlayers: 0,
+        currentPlayers: room.players.length,
         started: room.started,
         creator: room.creatorUsername
       });
