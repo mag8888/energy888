@@ -1,9 +1,38 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import DebugRoomsPanel from '../components/DebugRoomsPanel';
+import FullGameBoard from '../components/FullGameBoard';
 
-// Импортируем полный компонент игровой доски
-// import OriginalGameBoardFull from '../components/OriginalGameBoardFull';
+// Тестовые данные для демонстрации
+const DEMO_PLAYERS = [
+  {
+    id: 'player1',
+    name: 'MAG',
+    position: 0,
+    money: 2500,
+    isReady: true,
+    profession: 'Менеджер',
+    dream: 'Финансовая независимость'
+  },
+  {
+    id: 'player2',
+    name: 'Игрок 2',
+    position: 5,
+    money: 1800,
+    isReady: true,
+    profession: 'Инвестор',
+    dream: 'Собственный бизнес'
+  },
+  {
+    id: 'player3',
+    name: 'Игрок 3',
+    position: 10,
+    money: 2200,
+    isReady: true,
+    profession: 'Финансист',
+    dream: 'Инвестиционный портфель'
+  }
+];
 
 export default function OriginalBoardPage() {
   const router = useRouter();
@@ -17,6 +46,19 @@ export default function OriginalBoardPage() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Обработчики для демо-режима
+  const handleRollDice = () => {
+    console.log('🎲 Демо-бросок кубика');
+  };
+
+  const handleBuyCard = (cardId: string, price: number) => {
+    console.log('💳 Демо-покупка карты:', cardId, 'за', price);
+  };
+
+  const handleGetGameState = () => {
+    console.log('📊 Демо-статус игры');
+  };
 
   if (isLoading) {
     return (
@@ -190,88 +232,26 @@ export default function OriginalBoardPage() {
           </div>
         </div>
 
-        {/* Заглушка для полной доски */}
+        {/* Полная игровая доска */}
         <div style={{
           background: 'rgba(0, 0, 0, 0.8)',
           backdropFilter: 'blur(15px)',
           borderRadius: '15px',
-          padding: '40px',
-          textAlign: 'center',
+          padding: '20px',
           border: '2px solid rgba(255, 255, 255, 0.3)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center'
         }}>
-          <div style={{
-            color: 'white',
-            fontSize: '1.5rem',
-            marginBottom: '20px'
-          }}>
-            🚧 Полная игровая доска в разработке
-          </div>
-          <div style={{
-            color: 'rgba(255, 255, 255, 0.7)',
-            fontSize: '1rem',
-            marginBottom: '30px'
-          }}>
-            Компонент OriginalGameBoard.js найден и будет интегрирован
-          </div>
-          
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '20px',
-            marginBottom: '30px'
-          }}>
-            <div style={{
-              background: 'rgba(76, 175, 80, 0.2)',
-              padding: '20px',
-              borderRadius: '10px',
-              border: '1px solid rgba(76, 175, 80, 0.3)'
-            }}>
-              <div style={{ color: '#4CAF50', fontSize: '2rem', marginBottom: '10px' }}>🔵</div>
-              <div style={{ color: 'white', fontWeight: 'bold', marginBottom: '5px' }}>Внутренний круг</div>
-              <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px' }}>24 клетки</div>
-            </div>
-            
-            <div style={{
-              background: 'rgba(255, 152, 0, 0.2)',
-              padding: '20px',
-              borderRadius: '10px',
-              border: '1px solid rgba(255, 152, 0, 0.3)'
-            }}>
-              <div style={{ color: '#FF9800', fontSize: '2rem', marginBottom: '10px' }}>🔲</div>
-              <div style={{ color: 'white', fontWeight: 'bold', marginBottom: '5px' }}>Внешний квадрат</div>
-              <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px' }}>52 клетки</div>
-            </div>
-            
-            <div style={{
-              background: 'rgba(156, 39, 176, 0.2)',
-              padding: '20px',
-              borderRadius: '10px',
-              border: '1px solid rgba(156, 39, 176, 0.3)'
-            }}>
-              <div style={{ color: '#9C27B0', fontSize: '2rem', marginBottom: '10px' }}>🎮</div>
-              <div style={{ color: 'white', fontWeight: 'bold', marginBottom: '5px' }}>Всего клеток</div>
-              <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px' }}>76 клеток</div>
-            </div>
-          </div>
-          
-          <button
-            onClick={() => router.push('/game-board')}
-            style={{
-              padding: '15px 30px',
-              background: 'linear-gradient(45deg, #9C27B0, #7B1FA2)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '10px',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              boxShadow: '0 4px 15px rgba(156, 39, 176, 0.4)',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            🎯 Перейти к простой доске
-          </button>
+          <FullGameBoard
+            players={DEMO_PLAYERS}
+            currentPlayer={DEMO_PLAYERS[0]}
+            currentIndex={0}
+            onRollDice={handleRollDice}
+            onBuyCard={handleBuyCard}
+            onGetGameState={handleGetGameState}
+            isMyTurn={true}
+          />
         </div>
       </div>
 
