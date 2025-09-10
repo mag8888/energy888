@@ -2,6 +2,8 @@ import React from 'react';
 import { Transaction } from '../types/bank';
 
 declare module './bank-module/src/BankModule' {
+  import { Transaction } from '../types/bank';
+  
   interface BankModuleProps {
     playerData: any;
     gamePlayers: any[];

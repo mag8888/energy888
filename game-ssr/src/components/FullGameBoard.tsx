@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BankModule from './bank-module/src/BankModule';
-import type { Transaction } from '../types/bank';
+import type { Transaction } from './bank-module/src/BankModule';
 
 interface Player {
   id: string;
