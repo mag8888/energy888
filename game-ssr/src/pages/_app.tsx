@@ -2,6 +2,7 @@ import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { SocketProvider, useSocket } from '../contexts/SocketContext';
+import DebugRoomsPanel from '../components/DebugRoomsPanel';
 
 function DebugInfo() {
   const { socketUrl, isConnected } = useSocket();
@@ -74,6 +75,7 @@ export default function App({ Component, pageProps }: AppProps) {
       </Head>
       <DebugInfo />
       <Component {...pageProps} />
+      <DebugRoomsPanel />
     </SocketProvider>
   );
 }
