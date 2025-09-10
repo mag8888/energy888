@@ -27,7 +27,7 @@ export default function RoomPage() {
   const [room, setRoom] = useState<Room | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDream, setSelectedDream] = useState<string>('');
+  const [selectedDream, setSelectedDream] = useState<string | null>(null);
   const [showDreamSelection, setShowDreamSelection] = useState(false);
 
   useEffect(() => {
@@ -116,6 +116,21 @@ export default function RoomPage() {
       }
     };
 
+    const handleGameStarted = (data: any) => {
+      console.log('🎮 Игра началась:', data);
+      // Обновляем статус комнаты
+      setRoom(prev => prev ? {
+        ...prev,
+        started: true,
+        status: 'playing',
+        players: data.players,
+        order: data.order,
+        currentPlayer: data.currentPlayer,
+        turnEndAt: data.turnEndAt,
+        gameEndAt: data.gameEndAt
+      } : null);
+    };
+
     // Подписываемся на события
     socket.on('room-joined', handleRoomJoined);
     socket.on('room-updated', handleRoomUpdated);
@@ -157,6 +172,12 @@ export default function RoomPage() {
 
   const handleSetupCharacter = () => {
     router.push(`/room/setup?id=${id}`);
+  };
+
+  const handleStartGame = () => {
+    if (socket && room && id) {
+      socket.emit('start-game', { roomId: id });
+    }
   };
 
   if (loading) {
@@ -492,10 +513,42 @@ export default function RoomPage() {
               fontSize: '1.1rem',
               marginBottom: '20px'
             }}>
-              {room.currentPlayers < room.maxPlayers 
-                ? `Ожидаем еще ${room.maxPlayers - room.currentPlayers} игроков`
-                : 'Все игроки готовы! Нажмите "Начать игру"'
+              {room.currentPlayers < 2 
+                ? `Ожидаем еще ${2 - room.currentPlayers} игроков для старта`
+                : room.currentPlayers < room.maxPlayers 
+                  ? `Ожидаем еще ${room.maxPlayers - room.currentPlayers} игроков (можно начать с ${room.currentPlayers})`
+                  : 'Все игроки готовы! Нажмите "Начать игру"'
               }
+            </div>
+          )}
+
+          {room.status === 'waiting' && room.currentPlayers >= 2 && room.players.every(p => p.isReady) && (
+            <div style={{ marginBottom: '20px' }}>
+              <button
+                onClick={handleStartGame}
+                style={{
+                  padding: '15px 30px',
+                  background: 'linear-gradient(45deg, #4CAF50, #45a049)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 15px rgba(76, 175, 80, 0.4)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(76, 175, 80, 0.6)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(76, 175, 80, 0.4)';
+                }}
+              >
+                🎮 Начать игру
+              </button>
             </div>
           )}
 

@@ -711,6 +711,64 @@ io.on('connection', (socket) => {
       console.error('❌ Ошибка готовности игрока:', error);
     }
   });
+
+  // Принудительный старт игры
+  socket.on('start-game', async (data) => {
+    try {
+      const { roomId } = data;
+      
+      const room = await Room.findOne({ id: roomId, isActive: true });
+      if (!room) {
+        return;
+      }
+      
+      // Проверяем, что игрок - создатель комнаты
+      const player = room.players.find(p => p.socketId === socket.id);
+      if (!player || player.id !== room.creatorId) {
+        socket.emit('error', { message: 'Only room creator can start the game' });
+        return;
+      }
+      
+      // Проверяем, что есть минимум 2 игрока и все готовы
+      if (room.players.length < 2) {
+        socket.emit('error', { message: 'Need at least 2 players to start' });
+        return;
+      }
+      
+      const allReady = room.players.every(p => p.isReady);
+      if (!allReady) {
+        socket.emit('error', { message: 'All players must be ready to start' });
+        return;
+      }
+      
+      if (room.started) {
+        socket.emit('error', { message: 'Game already started' });
+        return;
+      }
+      
+      // Запускаем игру
+      room.started = true;
+      room.gameEndAt = new Date(Date.now() + room.gameDurationSec * 1000);
+      room.order = room.players.map(p => p.socketId);
+      room.currentIndex = 0;
+      room.turnEndAt = new Date(Date.now() + room.timing * 1000);
+      await room.save();
+      
+      console.log('🎮 Игра принудительно началась в комнате:', roomId);
+      
+      io.to(roomId).emit('game-started', {
+        players: room.players,
+        order: room.order,
+        currentPlayer: room.players[room.currentIndex],
+        turnEndAt: room.turnEndAt,
+        gameEndAt: room.gameEndAt
+      });
+      
+    } catch (error) {
+      console.error('❌ Ошибка принудительного старта игры:', error);
+      socket.emit('error', { message: 'Failed to start game' });
+    }
+  });
   
   // Получение информации о комнате
   socket.on('get-room-info', async (data) => {
