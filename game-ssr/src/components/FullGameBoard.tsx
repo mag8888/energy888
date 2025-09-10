@@ -855,6 +855,7 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           </div>
         </div>
       </div>
+      </div>
     </div>
   );
 };
