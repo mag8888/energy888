@@ -29,7 +29,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://energy888-unified-server.onrender.com https://energy888-socket.onrender.com https://api.telegram.org wss://energy888-unified-server.onrender.com wss://energy888-socket.onrender.com",
+              "connect-src 'self' https://energy888-advanced-socket.onrender.com https://api.telegram.org wss://energy888-advanced-socket.onrender.com",
               "frame-src https://telegram.org",
               "object-src 'none'",
               "base-uri 'self'",
@@ -44,7 +44,7 @@ const nextConfig = {
   
   // Environment variables
   env: {
-    NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-unified-server.onrender.com',
+    NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-advanced-socket.onrender.com',
     NEXT_PUBLIC_TELEGRAM_BOT: process.env.NEXT_PUBLIC_TELEGRAM_BOT || 'energy_m_bot',
   },
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { io, Socket } from 'socket.io-client';
+import { useSocket } from '../contexts/SocketContext';
 
 interface Room {
   id: string;
@@ -13,7 +13,7 @@ interface Room {
 }
 
 export default function SimpleRooms() {
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const { socket, isConnected } = useSocket();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [createForm, setCreateForm] = useState({
@@ -41,37 +41,23 @@ export default function SimpleRooms() {
     } catch (error) {
       console.error('❌ Ошибка парсинга данных пользователя:', error);
     }
+  }, [router]);
 
-    // Подключаемся к Socket.IO (debug-aware resolver)
-    const qp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-    const overrideUrl = qp?.get('socket') || (typeof window !== 'undefined' ? localStorage.getItem('SOCKET_URL') || undefined : undefined);
-    const socketUrl = overrideUrl || process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-advanced-socket.onrender.com';
-    if (overrideUrl && typeof window !== 'undefined') localStorage.setItem('SOCKET_URL', socketUrl);
-    console.log('🔌 Подключаемся к Socket.IO:', socketUrl);
-    console.log('🔍 NEXT_PUBLIC_SOCKET_URL:', process.env.NEXT_PUBLIC_SOCKET_URL);
-    console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
-    console.log('🔍 Override socket from:', overrideUrl ? 'query/localStorage' : 'env/default');
-    
-    const newSocket = io(socketUrl, {
-      transports: ['websocket', 'polling'],
-      timeout: 20000,
-      forceNew: true
-    });
+  useEffect(() => {
+    if (!socket || !isConnected) return;
 
-    newSocket.on('connect', () => {
-      console.log('🔌 Socket connected:', newSocket.connected);
-      setSocket(newSocket);
-      
-      // Запрашиваем список комнат
-      newSocket.emit('get-rooms');
-    });
+    console.log('🔌 Socket подключен, настраиваем обработчики');
 
-    newSocket.on('rooms-list', (roomsList: Room[]) => {
+    // Запрашиваем список комнат
+    socket.emit('get-rooms');
+
+    // Обработчики событий
+    const handleRoomsList = (roomsList: Room[]) => {
       console.log('📋 Получен список комнат:', roomsList);
       setRooms(roomsList);
-    });
+    };
 
-    newSocket.on('room-created', (room: Room) => {
+    const handleRoomCreated = (room: Room) => {
       console.log('🏠 Комната создана:', room);
       setRooms(prev => [...prev, room]);
       setMessage('Комната создана успешно!');
@@ -80,7 +66,7 @@ export default function SimpleRooms() {
       // Автоматически присоединяемся к созданной комнате
       console.log('🚪 Автоматически присоединяемся к комнате:', room.id);
       const userData = JSON.parse(localStorage.getItem('user') || '{}');
-      newSocket.emit('join-room', {
+      socket.emit('join-room', {
         roomId: room.id,
         playerName: userData.name || 'Игрок',
         playerEmail: userData.email || 'player@example.com'
@@ -90,26 +76,39 @@ export default function SimpleRooms() {
       setTimeout(() => {
         router.push(`/room/${room.id}`);
       }, 500);
-    });
+    };
 
-    newSocket.on('rooms-updated', () => {
+    const handleRoomsUpdated = () => {
       console.log('🔄 Список комнат обновлен');
-      newSocket.emit('get-rooms');
-    });
+      socket.emit('get-rooms');
+    };
 
-    newSocket.on('connect_error', (error) => {
+    const handleConnectError = (error: any) => {
       console.error('❌ Socket connection error:', error);
       setMessage('Ошибка подключения к серверу');
-    });
-
-    return () => {
-      newSocket.close();
     };
-  }, [router]);
+
+    // Подписываемся на события
+    socket.on('rooms-list', handleRoomsList);
+    socket.on('room-created', handleRoomCreated);
+    socket.on('rooms-updated', handleRoomsUpdated);
+    socket.on('connect_error', handleConnectError);
+
+    // Cleanup при размонтировании
+    return () => {
+      socket.off('rooms-list', handleRoomsList);
+      socket.off('room-created', handleRoomCreated);
+      socket.off('rooms-updated', handleRoomsUpdated);
+      socket.off('connect_error', handleConnectError);
+    };
+  }, [socket, isConnected, router]);
 
   const handleCreateRoom = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!socket) return;
+    if (!socket || !isConnected) {
+      setMessage('Нет подключения к серверу');
+      return;
+    }
 
     setLoading(true);
     setMessage('');
@@ -123,14 +122,19 @@ export default function SimpleRooms() {
       playerEmail: userData.email || 'player@example.com'
     };
 
+    console.log('🏠 Создаем комнату:', roomData);
     socket.emit('create-room', roomData);
     setLoading(false);
   };
 
   const handleJoinRoom = (roomId: string) => {
-    if (!socket) return;
+    if (!socket || !isConnected) {
+      setMessage('Нет подключения к серверу');
+      return;
+    }
 
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    console.log('🚪 Присоединяемся к комнате:', roomId);
     socket.emit('join-room', {
       roomId,
       playerName: userData.name || 'Игрок',
@@ -186,22 +190,31 @@ export default function SimpleRooms() {
             }}>
               Добро пожаловать, {userData?.name || 'Игрок'}!
             </div>
+            <div style={{
+              color: isConnected ? '#4CAF50' : '#f44336',
+              fontSize: '0.9rem',
+              marginTop: '5px'
+            }}>
+              {isConnected ? '🟢 Подключено' : '🔴 Отключено'}
+            </div>
           </div>
           <div>
             <button
               onClick={() => setShowCreateForm(true)}
+              disabled={!isConnected}
               style={{
-                background: 'linear-gradient(45deg, #ff6b6b, #ee5a24)',
+                background: isConnected ? 'linear-gradient(45deg, #ff6b6b, #ee5a24)' : 'rgba(255, 255, 255, 0.1)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
                 padding: '12px 24px',
                 marginRight: '10px',
-                cursor: 'pointer',
+                cursor: isConnected ? 'pointer' : 'not-allowed',
                 fontWeight: 'bold',
                 fontSize: '16px',
-                boxShadow: '0 4px 15px rgba(255, 107, 107, 0.4)',
-                transition: 'all 0.3s ease'
+                boxShadow: isConnected ? '0 4px 15px rgba(255, 107, 107, 0.4)' : 'none',
+                transition: 'all 0.3s ease',
+                opacity: isConnected ? 1 : 0.5
               }}
             >
               Создать комнату
@@ -327,18 +340,18 @@ export default function SimpleRooms() {
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !isConnected}
                   style={{
                     flex: 1,
                     padding: '15px',
                     border: 'none',
                     borderRadius: '10px',
-                    background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                    background: isConnected ? 'linear-gradient(45deg, #667eea, #764ba2)' : 'rgba(255, 255, 255, 0.1)',
                     color: 'white',
                     fontSize: '16px',
                     fontWeight: 'bold',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    opacity: loading ? 0.7 : 1
+                    cursor: (loading || !isConnected) ? 'not-allowed' : 'pointer',
+                    opacity: (loading || !isConnected) ? 0.7 : 1
                   }}
                 >
                   {loading ? 'Создание...' : 'Создать'}
@@ -381,7 +394,7 @@ export default function SimpleRooms() {
               color: 'rgba(255, 255, 255, 0.7)',
               padding: '40px'
             }}>
-              Нет доступных комнат. Создайте новую!
+              {isConnected ? 'Нет доступных комнат. Создайте новую!' : 'Подключение к серверу...'}
             </div>
           ) : (
             <div style={{ display: 'grid', gap: '15px' }}>
@@ -410,23 +423,24 @@ export default function SimpleRooms() {
                   </div>
                   <button
                     onClick={() => handleJoinRoom(room.id)}
-                    disabled={room.players >= room.maxPlayers || room.status !== 'waiting'}
+                    disabled={room.players >= room.maxPlayers || room.status !== 'waiting' || !isConnected}
                     style={{
                       padding: '10px 20px',
                       border: 'none',
                       borderRadius: '8px',
-                      background: room.players >= room.maxPlayers || room.status !== 'waiting' 
+                      background: (room.players >= room.maxPlayers || room.status !== 'waiting' || !isConnected)
                         ? 'rgba(255, 255, 255, 0.1)' 
                         : 'linear-gradient(45deg, #667eea, #764ba2)',
                       color: 'white',
-                      cursor: room.players >= room.maxPlayers || room.status !== 'waiting' 
+                      cursor: (room.players >= room.maxPlayers || room.status !== 'waiting' || !isConnected)
                         ? 'not-allowed' 
                         : 'pointer',
-                      opacity: room.players >= room.maxPlayers || room.status !== 'waiting' ? 0.5 : 1
+                      opacity: (room.players >= room.maxPlayers || room.status !== 'waiting' || !isConnected) ? 0.5 : 1
                     }}
                   >
                     {room.players >= room.maxPlayers ? 'Полная' : 
-                     room.status !== 'waiting' ? 'Недоступна' : 'Присоединиться'}
+                     room.status !== 'waiting' ? 'Недоступна' : 
+                     !isConnected ? 'Нет подключения' : 'Присоединиться'}
                   </button>
                 </div>
               ))}
