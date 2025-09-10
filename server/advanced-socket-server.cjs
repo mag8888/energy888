@@ -433,7 +433,7 @@ io.on('connection', (socket) => {
       console.log('🏠 Комната создана:', roomId, 'создатель:', creatorPlayer.name);
       
       // Отправляем создателю полную информацию о комнате (как при join-room)
-      const roomData = {
+      const roomInfo = {
         id: room.id,
         name: room.name,
         maxPlayers: room.maxPlayers,
@@ -450,7 +450,8 @@ io.on('connection', (socket) => {
         }))
       };
       
-      socket.emit('room-joined', roomData);
+      console.log('📤 Отправляем room-joined создателю:', roomInfo);
+      socket.emit('room-joined', roomInfo);
       
       // Уведомляем всех о новой комнате
       io.emit('rooms-updated');
