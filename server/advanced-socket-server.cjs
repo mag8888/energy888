@@ -836,6 +836,146 @@ io.on('connection', (socket) => {
       socket.emit('room-info-error', { error: 'Failed to get room info' });
     }
   });
+
+  // Получение игрового состояния
+  socket.on('get-game-state', async (data) => {
+    try {
+      const { roomId } = data;
+      
+      const room = await Room.findOne({ id: roomId, isActive: true });
+      if (!room) {
+        socket.emit('game-state-error', { error: 'Room not found' });
+        return;
+      }
+      
+      if (!room.started) {
+        socket.emit('game-state-error', { error: 'Game not started' });
+        return;
+      }
+      
+      socket.emit('game-state', {
+        roomId: room.id,
+        players: room.players,
+        currentPlayer: room.players[room.currentIndex],
+        currentIndex: room.currentIndex,
+        turnEndAt: room.turnEndAt,
+        gameEndAt: room.gameEndAt,
+        started: room.started
+      });
+      
+    } catch (error) {
+      console.error('❌ Ошибка получения игрового состояния:', error);
+      socket.emit('game-state-error', { error: 'Failed to get game state' });
+    }
+  });
+
+  // Бросок кубика
+  socket.on('roll-dice', async (data) => {
+    try {
+      const { roomId } = data;
+      
+      const room = await Room.findOne({ id: roomId, isActive: true });
+      if (!room || !room.started) {
+        socket.emit('dice-error', { error: 'Game not started' });
+        return;
+      }
+      
+      const player = room.players.find(p => p.socketId === socket.id);
+      if (!player) {
+        socket.emit('dice-error', { error: 'Player not found' });
+        return;
+      }
+      
+      // Проверяем, что это ход игрока
+      if (room.players[room.currentIndex].socketId !== socket.id) {
+        socket.emit('dice-error', { error: 'Not your turn' });
+        return;
+      }
+      
+      // Бросаем кубик
+      const dice1 = Math.floor(Math.random() * 6) + 1;
+      const dice2 = Math.floor(Math.random() * 6) + 1;
+      const total = dice1 + dice2;
+      
+      console.log('🎲 Игрок', player.name, 'бросил кубик:', dice1, '+', dice2, '=', total);
+      
+      // Обновляем позицию игрока
+      player.position = (player.position + total) % 40; // 40 клеток на доске
+      
+      // Сохраняем изменения
+      await room.save();
+      
+      // Уведомляем всех о результате
+      io.to(roomId).emit('dice-rolled', {
+        player: player.name,
+        dice1,
+        dice2,
+        total,
+        newPosition: player.position
+      });
+      
+      // Переходим к следующему игроку через 3 секунды
+      setTimeout(async () => {
+        room.currentIndex = (room.currentIndex + 1) % room.players.length;
+        room.turnEndAt = new Date(Date.now() + room.timing * 1000);
+        await room.save();
+        
+        io.to(roomId).emit('turn-changed', {
+          currentPlayer: room.players[room.currentIndex],
+          currentIndex: room.currentIndex,
+          turnEndAt: room.turnEndAt
+        });
+      }, 3000);
+      
+    } catch (error) {
+      console.error('❌ Ошибка броска кубика:', error);
+      socket.emit('dice-error', { error: 'Failed to roll dice' });
+    }
+  });
+
+  // Покупка карты/актива
+  socket.on('buy-card', async (data) => {
+    try {
+      const { roomId, cardId, price } = data;
+      
+      const room = await Room.findOne({ id: roomId, isActive: true });
+      if (!room || !room.started) {
+        socket.emit('buy-error', { error: 'Game not started' });
+        return;
+      }
+      
+      const player = room.players.find(p => p.socketId === socket.id);
+      if (!player) {
+        socket.emit('buy-error', { error: 'Player not found' });
+        return;
+      }
+      
+      if (player.money < price) {
+        socket.emit('buy-error', { error: 'Not enough money' });
+        return;
+      }
+      
+      // Покупаем карту
+      player.money -= price;
+      player.cards.push({ id: cardId, price, boughtAt: new Date() });
+      
+      await room.save();
+      
+      console.log('💳 Игрок', player.name, 'купил карту за', price, 'денег');
+      
+      // Уведомляем всех
+      io.to(roomId).emit('card-bought', {
+        player: player.name,
+        cardId,
+        price,
+        newMoney: player.money
+      });
+      
+    } catch (error) {
+      console.error('❌ Ошибка покупки карты:', error);
+      socket.emit('buy-error', { error: 'Failed to buy card' });
+    }
+  });
   
   // Обработка отключения
   socket.on('disconnect', async () => {

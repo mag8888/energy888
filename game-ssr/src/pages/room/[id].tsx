@@ -131,6 +131,43 @@ export default function RoomPage() {
       } : null);
     };
 
+    const handleDiceRolled = (data: any) => {
+      console.log('🎲 Кубик брошен:', data);
+      // Обновляем позицию игрока
+      setRoom(prev => prev ? {
+        ...prev,
+        players: prev.players.map(p => 
+          p.name === data.player 
+            ? { ...p, position: data.newPosition }
+            : p
+        )
+      } : null);
+    };
+
+    const handleTurnChanged = (data: any) => {
+      console.log('🔄 Ход изменился:', data);
+      // Обновляем текущего игрока
+      setRoom(prev => prev ? {
+        ...prev,
+        currentPlayer: data.currentPlayer,
+        currentIndex: data.currentIndex,
+        turnEndAt: data.turnEndAt
+      } : null);
+    };
+
+    const handleCardBought = (data: any) => {
+      console.log('💳 Карта куплена:', data);
+      // Обновляем деньги игрока
+      setRoom(prev => prev ? {
+        ...prev,
+        players: prev.players.map(p => 
+          p.name === data.player 
+            ? { ...p, money: data.newMoney }
+            : p
+        )
+      } : null);
+    };
+
     // Подписываемся на события
     socket.on('room-joined', handleRoomJoined);
     socket.on('room-updated', handleRoomUpdated);
@@ -138,6 +175,9 @@ export default function RoomPage() {
     socket.on('player-left', handlePlayerLeft);
     socket.on('player-ready-updated', handlePlayerReadyUpdated);
     socket.on('game-started', handleGameStarted);
+    socket.on('dice-rolled', handleDiceRolled);
+    socket.on('turn-changed', handleTurnChanged);
+    socket.on('card-bought', handleCardBought);
     socket.on('join-room-error', handleJoinRoomError);
     socket.on('error', handleError);
 
@@ -149,6 +189,9 @@ export default function RoomPage() {
       socket.off('player-left', handlePlayerLeft);
       socket.off('player-ready-updated', handlePlayerReadyUpdated);
       socket.off('game-started', handleGameStarted);
+      socket.off('dice-rolled', handleDiceRolled);
+      socket.off('turn-changed', handleTurnChanged);
+      socket.off('card-bought', handleCardBought);
       socket.off('join-room-error', handleJoinRoomError);
       socket.off('error', handleError);
     };
@@ -174,6 +217,24 @@ export default function RoomPage() {
   const handleStartGame = () => {
     if (socket && room && id) {
       socket.emit('start-game', { roomId: id });
+    }
+  };
+
+  const handleRollDice = () => {
+    if (socket && room && id) {
+      socket.emit('roll-dice', { roomId: id });
+    }
+  };
+
+  const handleBuyCard = (cardId: string, price: number) => {
+    if (socket && room && id) {
+      socket.emit('buy-card', { roomId: id, cardId, price });
+    }
+  };
+
+  const handleGetGameState = () => {
+    if (socket && room && id) {
+      socket.emit('get-game-state', { roomId: id });
     }
   };
 
@@ -608,12 +669,108 @@ export default function RoomPage() {
           )}
 
           {room.status === 'playing' && (
-            <div style={{
-              color: '#4CAF50',
-              fontSize: '1.1rem',
-              marginBottom: '20px'
-            }}>
-              🎮 Игра идет!
+            <div>
+              <div style={{
+                color: '#4CAF50',
+                fontSize: '1.1rem',
+                marginBottom: '20px'
+              }}>
+                🎮 Игра идет!
+              </div>
+              
+              {/* Игровой интерфейс */}
+              <div style={{
+                background: 'rgba(0, 0, 0, 0.3)',
+                borderRadius: '10px',
+                padding: '20px',
+                marginBottom: '20px'
+              }}>
+                <h3 style={{ color: 'white', marginTop: 0, marginBottom: '15px' }}>
+                  Игровые действия
+                </h3>
+                
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={handleRollDice}
+                    style={{
+                      padding: '10px 20px',
+                      background: 'linear-gradient(45deg, #4CAF50, #45a049)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 15px rgba(76, 175, 80, 0.4)',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    🎲 Бросить кубик
+                  </button>
+                  
+                  <button
+                    onClick={handleGetGameState}
+                    style={{
+                      padding: '10px 20px',
+                      background: 'linear-gradient(45deg, #2196F3, #1976D2)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 15px rgba(33, 150, 243, 0.4)',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    📊 Статус игры
+                  </button>
+                </div>
+              </div>
+              
+              {/* Информация об игроках */}
+              <div style={{
+                background: 'rgba(0, 0, 0, 0.3)',
+                borderRadius: '10px',
+                padding: '20px'
+              }}>
+                <h3 style={{ color: 'white', marginTop: 0, marginBottom: '15px' }}>
+                  Игроки и их позиции
+                </h3>
+                <div style={{ display: 'grid', gap: '10px' }}>
+                  {room.players.map((player, index) => (
+                    <div
+                      key={player.id}
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        borderRadius: '8px',
+                        padding: '15px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <div>
+                        <span style={{ color: 'white', fontWeight: 'bold' }}>
+                          {player.name}
+                        </span>
+                        <span style={{ color: 'rgba(255, 255, 255, 0.7)', marginLeft: '10px' }}>
+                          Позиция: {player.position || 0}
+                        </span>
+                        <span style={{ color: 'rgba(255, 255, 255, 0.7)', marginLeft: '10px' }}>
+                          Деньги: ${player.money || 0}
+                        </span>
+                      </div>
+                      <div style={{
+                        color: player.isReady ? '#4CAF50' : '#ff9800',
+                        fontSize: '12px'
+                      }}>
+                        {player.isReady ? '✅ Готов' : '⏳ Ожидает'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
