@@ -98,12 +98,24 @@ export default function OriginalBoardPage() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-      padding: '20px',
-      fontFamily: 'Arial, sans-serif'
-    }}>
+    <>
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes bounce {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-10px); }
+        }
+      `}</style>
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        padding: '20px',
+        fontFamily: 'Arial, sans-serif'
+      }}>
       <div style={{
         maxWidth: '1400px',
         margin: '0 auto'
@@ -257,6 +269,7 @@ export default function OriginalBoardPage() {
 
       {/* Дебаг-панель */}
       <DebugRoomsPanel />
-    </div>
+      </div>
+    </>
   );
 }

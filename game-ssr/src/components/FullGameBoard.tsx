@@ -84,11 +84,11 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
     }, 1000);
   };
 
-  // Рендер внутренних клеток (24 в круге)
+  // Рендер внутренних клеток (24 в круге) - УВЕЛИЧЕНЫ В 2 РАЗА
   const renderInnerCells = () => {
     return INNER_CELLS.map((cell, index) => {
       const angle = (index * 360) / 24;
-      const radius = 120;
+      const radius = 240; // Увеличено в 2 раза с 120 до 240
       const x = 400 + Math.cos((angle - 90) * Math.PI / 180) * radius;
       const y = 400 + Math.sin((angle - 90) * Math.PI / 180) * radius;
       
@@ -97,19 +97,19 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           key={cell.id}
           style={{
             position: 'absolute',
-            left: x - 20,
-            top: y - 20,
-            width: 40,
-            height: 40,
+            left: x - 40, // Увеличено в 2 раза с 20 до 40
+            top: y - 40,  // Увеличено в 2 раза с 20 до 40
+            width: 80,    // Увеличено в 2 раза с 40 до 80
+            height: 80,   // Увеличено в 2 раза с 40 до 80
             background: cell.color,
-            borderRadius: '8px',
+            borderRadius: '16px', // Увеличено в 2 раза с 8px до 16px
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '16px',
+            fontSize: '32px', // Увеличено в 2 раза с 16px до 32px
             color: 'white',
             fontWeight: 'bold',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.3)', // Увеличено в 2 раза
             cursor: 'pointer',
             transition: 'all 0.3s ease',
             zIndex: 2
@@ -165,10 +165,10 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
       );
     }
     
-    // Правый столбец (12 клеток)
+    // Правый столбец (12 клеток) - СМЕЩЕН ВЛЕВО НА ОДНУ КЛЕТКУ
     for (let i = 0; i < 12; i++) {
       const cell = OUTER_CELLS[14 + i];
-      const x = startX + 14 * (cellSize + spacing);
+      const x = startX + 13 * (cellSize + spacing); // Смещено влево на одну клетку
       const y = startY + (i + 1) * (cellSize + spacing);
       cells.push(
         <div
@@ -432,16 +432,22 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
 
   return (
     <div style={{
-      position: 'relative',
-      width: '800px',
-      height: '800px',
-      margin: '0 auto',
-      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-      borderRadius: '20px',
-      border: '3px solid rgba(255, 255, 255, 0.2)',
-      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
-      overflow: 'hidden'
+      display: 'flex',
+      gap: '20px',
+      maxWidth: '1200px',
+      margin: '0 auto'
     }}>
+      {/* Игровая доска */}
+      <div style={{
+        position: 'relative',
+        width: '800px',
+        height: '800px',
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        borderRadius: '20px',
+        border: '3px solid rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+        overflow: 'hidden'
+      }}>
       {/* Центральная область */}
       <div
         style={{
@@ -536,6 +542,317 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           >
             📊 Статус
           </button>
+        </div>
+      </div>
+
+      {/* Правое меню */}
+      <div style={{
+        width: '300px',
+        background: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(15px)',
+        borderRadius: '20px',
+        border: '2px solid rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+        padding: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px'
+      }}>
+        {/* 1. Очередность игроков */}
+        <div>
+          <h3 style={{ 
+            color: 'white', 
+            margin: '0 0 15px 0', 
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            Очередность игроков
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {players.map((player, index) => (
+              <div
+                key={player.id}
+                style={{
+                  background: index === currentIndex 
+                    ? 'linear-gradient(45deg, #4CAF50, #45a049)' 
+                    : 'rgba(255, 255, 255, 0.1)',
+                  padding: '12px',
+                  borderRadius: '10px',
+                  border: index === currentIndex ? '2px solid #4CAF50' : '1px solid rgba(255, 255, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <div style={{
+                  width: '30px',
+                  height: '30px',
+                  background: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][index % 5],
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: '14px'
+                }}>
+                  {index + 1}
+                </div>
+                <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
+                  {player.name}
+                </div>
+                {index === currentIndex && (
+                  <div style={{ marginLeft: 'auto', fontSize: '20px' }}>👑</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 2. Имя и профессия игрока */}
+        <div>
+          <h3 style={{ 
+            color: 'white', 
+            margin: '0 0 15px 0', 
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            Текущий игрок
+          </h3>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            padding: '15px',
+            borderRadius: '10px',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <div style={{ 
+              color: 'white', 
+              fontSize: '16px', 
+              fontWeight: 'bold',
+              marginBottom: '8px'
+            }}>
+              {currentPlayer?.name || 'Неизвестно'}
+            </div>
+            <div style={{ 
+              color: 'rgba(255, 255, 255, 0.7)', 
+              fontSize: '14px',
+              marginBottom: '5px'
+            }}>
+              Профессия: {currentPlayer?.profession || 'Не выбрана'}
+            </div>
+            <div style={{ 
+              color: 'rgba(255, 255, 255, 0.7)', 
+              fontSize: '14px'
+            }}>
+              Мечта: {currentPlayer?.dream || 'Не выбрана'}
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Банк */}
+        <div>
+          <h3 style={{ 
+            color: 'white', 
+            margin: '0 0 15px 0', 
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            Банк
+          </h3>
+          <div style={{
+            background: 'rgba(76, 175, 80, 0.2)',
+            padding: '15px',
+            borderRadius: '10px',
+            border: '1px solid rgba(76, 175, 80, 0.3)'
+          }}>
+            <div style={{ 
+              color: '#4CAF50', 
+              fontSize: '24px', 
+              fontWeight: 'bold',
+              textAlign: 'center',
+              marginBottom: '10px'
+            }}>
+              ${currentPlayer?.money?.toLocaleString() || '0'}
+            </div>
+            <div style={{ 
+              color: 'rgba(255, 255, 255, 0.7)', 
+              fontSize: '12px',
+              textAlign: 'center'
+            }}>
+              Доход: $1,200 | Расходы: $800
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Активы */}
+        <div>
+          <h3 style={{ 
+            color: 'white', 
+            margin: '0 0 15px 0', 
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            Активы
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              padding: '10px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span style={{ color: 'white', fontSize: '14px' }}>🏠 Дом</span>
+              <span style={{ color: '#4CAF50', fontSize: '14px', fontWeight: 'bold' }}>$150,000</span>
+            </div>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              padding: '10px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span style={{ color: 'white', fontSize: '14px' }}>📈 Акции</span>
+              <span style={{ color: '#4CAF50', fontSize: '14px', fontWeight: 'bold' }}>$25,000</span>
+            </div>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              padding: '10px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span style={{ color: 'white', fontSize: '14px' }}>💼 Бизнес</span>
+              <span style={{ color: '#4CAF50', fontSize: '14px', fontWeight: 'bold' }}>$80,000</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 5. Бросить кубик с анимацией */}
+        <div>
+          <h3 style={{ 
+            color: 'white', 
+            margin: '0 0 15px 0', 
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            Действия
+          </h3>
+          <button
+            onClick={handleRollDice}
+            disabled={!isMyTurn || isRolling}
+            style={{
+              width: '100%',
+              padding: '15px',
+              background: isMyTurn && !isRolling 
+                ? 'linear-gradient(45deg, #FF6B6B, #FF5252)' 
+                : 'rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              cursor: isMyTurn && !isRolling ? 'pointer' : 'not-allowed',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              transition: 'all 0.3s ease',
+              marginBottom: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px'
+            }}
+          >
+            {isRolling ? (
+              <>
+                <div style={{
+                  animation: 'spin 1s linear infinite',
+                  fontSize: '20px'
+                }}>
+                  🎲
+                </div>
+                Бросок...
+              </>
+            ) : (
+              <>
+                🎲 Бросить кубик
+                {diceValue && <span style={{ fontSize: '12px' }}>({diceValue})</span>}
+              </>
+            )}
+          </button>
+          
+          {/* Анимация кубика под кнопкой */}
+          {isRolling && (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '60px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '10px',
+              marginTop: '10px'
+            }}>
+              <div style={{
+                fontSize: '40px',
+                animation: 'bounce 0.5s ease-in-out infinite alternate'
+              }}>
+                🎲
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 6. Шкала тайминга */}
+        <div>
+          <h3 style={{ 
+            color: 'white', 
+            margin: '0 0 15px 0', 
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            Время хода
+          </h3>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            padding: '15px',
+            borderRadius: '10px',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <div style={{
+              width: '100%',
+              height: '8px',
+              background: 'rgba(255, 255, 255, 0.2)',
+              borderRadius: '4px',
+              overflow: 'hidden',
+              marginBottom: '10px'
+            }}>
+              <div style={{
+                width: '65%', // Примерное значение
+                height: '100%',
+                background: 'linear-gradient(90deg, #4CAF50, #FFC107, #FF5722)',
+                borderRadius: '4px',
+                transition: 'width 0.3s ease'
+              }} />
+            </div>
+            <div style={{ 
+              color: 'rgba(255, 255, 255, 0.7)', 
+              fontSize: '12px',
+              textAlign: 'center'
+            }}>
+              1:30 / 2:00
+            </div>
+          </div>
         </div>
       </div>
     </div>
