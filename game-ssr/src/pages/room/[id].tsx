@@ -2,6 +2,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSocket } from '../../contexts/SocketContext';
 import { DREAMS } from '../../data/professions';
+import OriginalGameBoard from '../../components/OriginalGameBoard';
 
 interface Room {
   id: string;
@@ -30,6 +31,9 @@ export default function RoomPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDream, setSelectedDream] = useState<string | null>(null);
+  const [currentPlayer, setCurrentPlayer] = useState<any>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showGameBoard, setShowGameBoard] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -131,6 +135,11 @@ export default function RoomPage() {
         turnEndAt: data.turnEndAt,
         gameEndAt: data.gameEndAt
       } : null);
+      
+      // Устанавливаем текущего игрока и показываем доску
+      setCurrentPlayer(data.currentPlayer);
+      setCurrentIndex(data.currentIndex || 0);
+      setShowGameBoard(true);
     };
 
     const handleDiceRolled = (data: any) => {
@@ -155,6 +164,10 @@ export default function RoomPage() {
         currentIndex: data.currentIndex,
         turnEndAt: data.turnEndAt
       } : null);
+      
+      // Обновляем состояние доски
+      setCurrentPlayer(data.currentPlayer);
+      setCurrentIndex(data.currentIndex);
     };
 
     const handleCardBought = (data: any) => {
@@ -670,109 +683,26 @@ export default function RoomPage() {
             </div>
           )}
 
-          {room.status === 'playing' && (
-            <div>
-              <div style={{
-                color: '#4CAF50',
-                fontSize: '1.1rem',
-                marginBottom: '20px'
-              }}>
-                🎮 Игра идет!
-              </div>
-              
-              {/* Игровой интерфейс */}
-              <div style={{
-                background: 'rgba(0, 0, 0, 0.3)',
-                borderRadius: '10px',
-                padding: '20px',
-                marginBottom: '20px'
-              }}>
-                <h3 style={{ color: 'white', marginTop: 0, marginBottom: '15px' }}>
-                  Игровые действия
-                </h3>
-                
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  <button
-                    onClick={handleRollDice}
-                    style={{
-                      padding: '10px 20px',
-                      background: 'linear-gradient(45deg, #4CAF50, #45a049)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 15px rgba(76, 175, 80, 0.4)',
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    🎲 Бросить кубик
-                  </button>
-                  
-                  <button
-                    onClick={handleGetGameState}
-                    style={{
-                      padding: '10px 20px',
-                      background: 'linear-gradient(45deg, #2196F3, #1976D2)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 15px rgba(33, 150, 243, 0.4)',
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    📊 Статус игры
-                  </button>
-                </div>
-              </div>
-              
-              {/* Информация об игроках */}
-              <div style={{
-                background: 'rgba(0, 0, 0, 0.3)',
-                borderRadius: '10px',
-                padding: '20px'
-              }}>
-                <h3 style={{ color: 'white', marginTop: 0, marginBottom: '15px' }}>
-                  Игроки и их позиции
-                </h3>
-                <div style={{ display: 'grid', gap: '10px' }}>
-                  {room.players.map((player, index) => (
-                    <div
-                      key={player.id}
-                      style={{
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        borderRadius: '8px',
-                        padding: '15px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}
-                    >
-                      <div>
-                        <span style={{ color: 'white', fontWeight: 'bold' }}>
-                          {player.name}
-                        </span>
-                        <span style={{ color: 'rgba(255, 255, 255, 0.7)', marginLeft: '10px' }}>
-                          Позиция: {player.position || 0}
-                        </span>
-                        <span style={{ color: 'rgba(255, 255, 255, 0.7)', marginLeft: '10px' }}>
-                          Деньги: ${player.money || 0}
-                        </span>
-                      </div>
-                      <div style={{
-                        color: player.isReady ? '#4CAF50' : '#ff9800',
-                        fontSize: '12px'
-                      }}>
-                        {player.isReady ? '✅ Готов' : '⏳ Ожидает'}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {room.status === 'playing' && showGameBoard && (
+            <OriginalGameBoard
+              players={room.players}
+              currentPlayer={currentPlayer}
+              currentIndex={currentIndex}
+              onRollDice={handleRollDice}
+              onBuyCard={handleBuyCard}
+              onGetGameState={handleGetGameState}
+              isMyTurn={currentPlayer?.socketId === socket?.id}
+            />
+          )}
+
+          {room.status === 'playing' && !showGameBoard && (
+            <div style={{
+              color: '#4CAF50',
+              fontSize: '1.1rem',
+              marginBottom: '20px',
+              textAlign: 'center'
+            }}>
+              🎮 Игра идет! Загружаем игровую доску...
             </div>
           )}
 
