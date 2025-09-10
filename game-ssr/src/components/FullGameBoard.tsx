@@ -69,6 +69,7 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
 }) => {
   const [diceValue, setDiceValue] = useState<number | null>(null);
   const [isRolling, setIsRolling] = useState(false);
+  const [showAssets, setShowAssets] = useState(false);
 
   const handleRollDice = () => {
     if (isRolling) return;
@@ -270,121 +271,121 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
     return cells;
   };
 
-  // Рендер угловых клеток
-  const renderCornerCells = () => {
-    const cornerSize = 80;
-    const cornerHeight = 100;
+  // Рендер карточек сделок в углах между внешними и внутренними клетками
+  const renderDealCards = () => {
+    const cardSize = 60;
+    const cardHeight = 80;
     
     return (
       <>
-        {/* Верхний левый - Большая сделка */}
+        {/* Верхний левый угол - Большая сделка */}
         <div
           style={{
             position: 'absolute',
-            left: 200,
-            top: 200,
-            width: cornerSize,
-            height: cornerHeight,
-            background: 'linear-gradient(135deg, #00BCD4 0%, #0097A7 100%)',
-            borderRadius: '16px',
-            border: '2px solid #EF4444',
+            left: 150,
+            top: 150,
+            width: cardSize,
+            height: cardHeight,
+            background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+            borderRadius: '12px',
+            border: '3px solid #FF6B35',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 25px rgba(0, 188, 212, 0.4)',
+            boxShadow: '0 8px 25px rgba(255, 215, 0, 0.6)',
             zIndex: 3,
             cursor: 'pointer',
             transition: 'all 0.3s ease'
           }}
           title="Большая сделка"
         >
-          <div style={{ fontSize: '20px', marginBottom: '4px' }}>💰</div>
-          <div style={{ fontSize: '10px', fontWeight: 'bold', textAlign: 'center', color: 'white' }}>
+          <div style={{ fontSize: '24px', marginBottom: '4px' }}>💰</div>
+          <div style={{ fontSize: '8px', fontWeight: 'bold', textAlign: 'center', color: '#8B4513' }}>
             Большая сделка
           </div>
         </div>
 
-        {/* Верхний правый - Малая сделка */}
+        {/* Верхний правый угол - Малая сделка */}
         <div
           style={{
             position: 'absolute',
-            right: 200,
-            top: 200,
-            width: cornerSize,
-            height: cornerHeight,
-            background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
-            borderRadius: '16px',
-            border: '2px solid #EF4444',
+            right: 150,
+            top: 150,
+            width: cardSize,
+            height: cardHeight,
+            background: 'linear-gradient(135deg, #32CD32 0%, #228B22 100%)',
+            borderRadius: '12px',
+            border: '3px solid #FF6B35',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 25px rgba(59, 130, 246, 0.4)',
+            boxShadow: '0 8px 25px rgba(50, 205, 50, 0.6)',
             zIndex: 3,
             cursor: 'pointer',
             transition: 'all 0.3s ease'
           }}
           title="Малая сделка"
         >
-          <div style={{ fontSize: '20px', marginBottom: '4px' }}>💼</div>
-          <div style={{ fontSize: '10px', fontWeight: 'bold', textAlign: 'center', color: 'white' }}>
+          <div style={{ fontSize: '24px', marginBottom: '4px' }}>💼</div>
+          <div style={{ fontSize: '8px', fontWeight: 'bold', textAlign: 'center', color: 'white' }}>
             Малая сделка
           </div>
         </div>
 
-        {/* Нижний правый - Рынок */}
+        {/* Нижний правый угол - Рынок */}
         <div
           style={{
             position: 'absolute',
-            right: 200,
-            bottom: 200,
-            width: cornerSize,
-            height: cornerHeight,
-            background: 'linear-gradient(135deg, #00BCD4 0%, #0097A7 100%)',
-            borderRadius: '16px',
-            border: '2px solid #EF4444',
+            right: 150,
+            bottom: 150,
+            width: cardSize,
+            height: cardHeight,
+            background: 'linear-gradient(135deg, #4169E1 0%, #0000CD 100%)',
+            borderRadius: '12px',
+            border: '3px solid #FF6B35',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 25px rgba(0, 188, 212, 0.4)',
+            boxShadow: '0 8px 25px rgba(65, 105, 225, 0.6)',
             zIndex: 3,
             cursor: 'pointer',
             transition: 'all 0.3s ease'
           }}
           title="Рынок"
         >
-          <div style={{ fontSize: '20px', marginBottom: '4px' }}>🏪</div>
-          <div style={{ fontSize: '10px', fontWeight: 'bold', textAlign: 'center', color: 'white' }}>
+          <div style={{ fontSize: '24px', marginBottom: '4px' }}>🏪</div>
+          <div style={{ fontSize: '8px', fontWeight: 'bold', textAlign: 'center', color: 'white' }}>
             Рынок
           </div>
         </div>
 
-        {/* Нижний левый - Расходы */}
+        {/* Нижний левый угол - Расходы */}
         <div
           style={{
             position: 'absolute',
-            left: 200,
-            bottom: 200,
-            width: cornerSize,
-            height: cornerHeight,
-            background: 'linear-gradient(135deg, #E91E63 0%, #C2185B 100%)',
-            borderRadius: '16px',
-            border: '2px solid #E91E63',
+            left: 150,
+            bottom: 150,
+            width: cardSize,
+            height: cardHeight,
+            background: 'linear-gradient(135deg, #DC143C 0%, #B22222 100%)',
+            borderRadius: '12px',
+            border: '3px solid #FF6B35',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 25px rgba(233, 30, 99, 0.4)',
+            boxShadow: '0 8px 25px rgba(220, 20, 60, 0.6)',
             zIndex: 3,
             cursor: 'pointer',
             transition: 'all 0.3s ease'
           }}
           title="Расходы"
         >
-          <div style={{ fontSize: '20px', marginBottom: '4px' }}>💸</div>
-          <div style={{ fontSize: '10px', fontWeight: 'bold', textAlign: 'center', color: 'white' }}>
+          <div style={{ fontSize: '24px', marginBottom: '4px' }}>💸</div>
+          <div style={{ fontSize: '8px', fontWeight: 'bold', textAlign: 'center', color: 'white' }}>
             Расходы
           </div>
         </div>
@@ -448,7 +449,7 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
         overflow: 'hidden'
       }}>
-      {/* Центральная область */}
+      {/* Центральная область с золотым логотипом */}
       <div
         style={{
           position: 'absolute',
@@ -462,14 +463,18 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '24px',
-          color: 'white',
-          fontWeight: 'bold',
           boxShadow: '0 10px 30px rgba(156, 39, 176, 0.4)',
           zIndex: 1
         }}
       >
-        ЦЕНТР
+        <div style={{
+          fontSize: '60px',
+          color: '#FFD700',
+          textShadow: '0 0 20px rgba(255, 215, 0, 0.8)',
+          fontWeight: 'bold'
+        }}>
+          💰
+        </div>
       </div>
 
       {/* Внутренний круг (24 клетки) - УМЕНЬШЕН НА 30% */}
@@ -478,8 +483,8 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
       {/* Внешний квадрат (52 клетки) - УВЕЛИЧЕНЫ НА 15% */}
       {renderOuterCells()}
 
-      {/* Угловые клетки */}
-      {renderCornerCells()}
+      {/* Карточки сделок в углах */}
+      {renderDealCards()}
 
       {/* Фишки игроков */}
       {renderPlayerTokens()}
@@ -498,62 +503,20 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         flexDirection: 'column',
         gap: '20px'
       }}>
-        {/* 1. Очередность игроков */}
-        <div style={{
-          background: 'rgba(76, 175, 80, 0.1)',
-          padding: '15px',
-          borderRadius: '12px',
-          border: '1px solid rgba(76, 175, 80, 0.3)'
-        }}>
-          <h3 style={{ 
-            color: '#4CAF50', 
-            margin: '0 0 15px 0', 
-            fontSize: '18px',
-            fontWeight: 'bold',
-            textAlign: 'center'
-          }}>
-            Очередность игроков
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {players.map((player, index) => (
-              <div
-                key={player.id}
-                style={{
-                  background: index === currentIndex 
-                    ? 'linear-gradient(45deg, #4CAF50, #45a049)' 
-                    : 'rgba(255, 255, 255, 0.1)',
-                  padding: '12px',
-                  borderRadius: '10px',
-                  border: index === currentIndex ? '2px solid #4CAF50' : '1px solid rgba(255, 255, 255, 0.2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                <div style={{
-                  width: '30px',
-                  height: '30px',
-                  background: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][index % 5],
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontWeight: 'bold',
-                  fontSize: '14px'
-                }}>
-                  {index + 1}
-                </div>
-                <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
-                  {player.name}
-                </div>
-                {index === currentIndex && (
-                  <div style={{ marginLeft: 'auto', fontSize: '20px' }}>👑</div>
-                )}
-              </div>
-            ))}
-          </div>
+        {/* 1. Модуль банка - ПОДНЯТ ВВЕРХ */}
+        <div>
+          <BankModule
+            playerData={currentPlayer}
+            gamePlayers={players}
+            socket={null}
+            bankBalance={currentPlayer?.money || 0}
+            playerCredit={0}
+            getMaxCredit={() => 10000}
+            getCashFlow={() => 1200}
+            setShowCreditModal={() => {}}
+            roomId="demo-room"
+            onBankBalanceChange={() => {}}
+          />
         </div>
 
         {/* 2. Текущий игрок */}
@@ -602,79 +565,83 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           </div>
         </div>
 
-        {/* 3. Модуль банка */}
-        <div>
-          <BankModule
-            playerData={currentPlayer}
-            gamePlayers={players}
-            socket={null}
-            bankBalance={currentPlayer?.money || 0}
-            playerCredit={0}
-            getMaxCredit={() => 10000}
-            getCashFlow={() => 1200}
-            setShowCreditModal={() => {}}
-            roomId="demo-room"
-            onBankBalanceChange={() => {}}
-          />
-        </div>
-
-        {/* 4. Активы */}
+        {/* 3. Активы - КНОПКА С РАСКРЫВАЕМЫМ СПИСКОМ */}
         <div style={{
           background: 'rgba(76, 175, 80, 0.1)',
           padding: '15px',
           borderRadius: '12px',
           border: '1px solid rgba(76, 175, 80, 0.3)'
         }}>
-          <h3 style={{ 
-            color: '#4CAF50', 
-            margin: '0 0 15px 0', 
-            fontSize: '18px',
-            fontWeight: 'bold',
-            textAlign: 'center'
-          }}>
-            Активы
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              padding: '10px',
-              borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+          <button
+            onClick={() => setShowAssets(!showAssets)}
+            style={{
+              width: '100%',
+              padding: '15px',
+              background: 'linear-gradient(45deg, #4CAF50, #45a049)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              transition: 'all 0.3s ease',
               display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px'
+            }}
+          >
+            💼 Активы {showAssets ? '▲' : '▼'}
+          </button>
+          
+          {showAssets && (
+            <div style={{ 
+              marginTop: '15px', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '8px' 
             }}>
-              <span style={{ color: 'white', fontSize: '14px' }}>🏠 Дом</span>
-              <span style={{ color: '#4CAF50', fontSize: '14px', fontWeight: 'bold' }}>$150,000</span>
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                padding: '10px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span style={{ color: 'white', fontSize: '14px' }}>🏠 Дом</span>
+                <span style={{ color: '#4CAF50', fontSize: '14px', fontWeight: 'bold' }}>$150,000</span>
+              </div>
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                padding: '10px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span style={{ color: 'white', fontSize: '14px' }}>📈 Акции</span>
+                <span style={{ color: '#4CAF50', fontSize: '14px', fontWeight: 'bold' }}>$25,000</span>
+              </div>
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                padding: '10px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span style={{ color: 'white', fontSize: '14px' }}>💼 Бизнес</span>
+                <span style={{ color: '#4CAF50', fontSize: '14px', fontWeight: 'bold' }}>$80,000</span>
+              </div>
             </div>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              padding: '10px',
-              borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <span style={{ color: 'white', fontSize: '14px' }}>📈 Акции</span>
-              <span style={{ color: '#4CAF50', fontSize: '14px', fontWeight: 'bold' }}>$25,000</span>
-            </div>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              padding: '10px',
-              borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <span style={{ color: 'white', fontSize: '14px' }}>💼 Бизнес</span>
-              <span style={{ color: '#4CAF50', fontSize: '14px', fontWeight: 'bold' }}>$80,000</span>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* 5. Бросить кубик с анимацией */}
+        {/* 4. Бросить кубик с анимацией */}
         <div style={{
           background: 'rgba(76, 175, 80, 0.1)',
           padding: '15px',
@@ -752,7 +719,7 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           )}
         </div>
 
-        {/* 6. Шкала тайминга */}
+        {/* 5. Шкала тайминга */}
         <div style={{
           background: 'rgba(76, 175, 80, 0.1)',
           padding: '15px',
@@ -797,6 +764,64 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
             }}>
               1:30 / 2:00
             </div>
+          </div>
+        </div>
+
+        {/* 6. Очередность игроков - СМЕЩЕНА ВНИЗ */}
+        <div style={{
+          background: 'rgba(76, 175, 80, 0.1)',
+          padding: '15px',
+          borderRadius: '12px',
+          border: '1px solid rgba(76, 175, 80, 0.3)'
+        }}>
+          <h3 style={{ 
+            color: '#4CAF50', 
+            margin: '0 0 15px 0', 
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            Очередность игроков
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {players.map((player, index) => (
+              <div
+                key={player.id}
+                style={{
+                  background: index === currentIndex 
+                    ? 'linear-gradient(45deg, #4CAF50, #45a049)' 
+                    : 'rgba(255, 255, 255, 0.1)',
+                  padding: '12px',
+                  borderRadius: '10px',
+                  border: index === currentIndex ? '2px solid #4CAF50' : '1px solid rgba(255, 255, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <div style={{
+                  width: '30px',
+                  height: '30px',
+                  background: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][index % 5],
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: '14px'
+                }}>
+                  {index + 1}
+                </div>
+                <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
+                  {player.name}
+                </div>
+                {index === currentIndex && (
+                  <div style={{ marginLeft: 'auto', fontSize: '20px' }}>👑</div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>
