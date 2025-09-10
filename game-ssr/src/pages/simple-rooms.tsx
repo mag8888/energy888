@@ -345,6 +345,25 @@ export default function SimpleRooms() {
               }}>
               🎮 Игровая доска
             </Link>
+            <Link
+              href="/original-board"
+              style={{
+                background: 'linear-gradient(45deg, #FF6B6B, #EE5A24)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '12px 24px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                transition: 'all 0.3s ease',
+                textDecoration: 'none',
+                display: 'inline-block',
+                marginRight: '10px',
+                boxShadow: '0 4px 15px rgba(255, 107, 107, 0.4)'
+              }}>
+              🎯 Полная доска (24+52)
+            </Link>
             <button
               onClick={handleLogout}
               style={{
