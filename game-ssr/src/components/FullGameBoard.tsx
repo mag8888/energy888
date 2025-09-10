@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import BankModule from './bank-module/src/BankModule';
 
 interface Player {
   id: string;
@@ -434,9 +435,300 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
     <div style={{
       display: 'flex',
       gap: '20px',
-      maxWidth: '1200px',
+      maxWidth: '1400px',
       margin: '0 auto'
     }}>
+      {/* Левое меню */}
+      <div style={{
+        width: '300px',
+        background: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(15px)',
+        borderRadius: '20px',
+        border: '2px solid rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+        padding: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px'
+      }}>
+        {/* 1. Очередность игроков */}
+        <div>
+          <h3 style={{ 
+            color: 'white', 
+            margin: '0 0 15px 0', 
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            Очередность игроков
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {players.map((player, index) => (
+              <div
+                key={player.id}
+                style={{
+                  background: index === currentIndex 
+                    ? 'linear-gradient(45deg, #4CAF50, #45a049)' 
+                    : 'rgba(255, 255, 255, 0.1)',
+                  padding: '12px',
+                  borderRadius: '10px',
+                  border: index === currentIndex ? '2px solid #4CAF50' : '1px solid rgba(255, 255, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <div style={{
+                  width: '30px',
+                  height: '30px',
+                  background: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][index % 5],
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: '14px'
+                }}>
+                  {index + 1}
+                </div>
+                <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
+                  {player.name}
+                </div>
+                {index === currentIndex && (
+                  <div style={{ marginLeft: 'auto', fontSize: '20px' }}>👑</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 2. Имя и профессия игрока */}
+        <div>
+          <h3 style={{ 
+            color: 'white', 
+            margin: '0 0 15px 0', 
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            Текущий игрок
+          </h3>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            padding: '15px',
+            borderRadius: '10px',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <div style={{ 
+              color: 'white', 
+              fontSize: '16px', 
+              fontWeight: 'bold',
+              marginBottom: '8px'
+            }}>
+              {currentPlayer?.name || 'Неизвестно'}
+            </div>
+            <div style={{ 
+              color: 'rgba(255, 255, 255, 0.7)', 
+              fontSize: '14px',
+              marginBottom: '5px'
+            }}>
+              Профессия: {currentPlayer?.profession || 'Не выбрана'}
+            </div>
+            <div style={{ 
+              color: 'rgba(255, 255, 255, 0.7)', 
+              fontSize: '14px'
+            }}>
+              Мечта: {currentPlayer?.dream || 'Не выбрана'}
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Модуль банка */}
+        <div>
+          <BankModule
+            playerData={currentPlayer}
+            gamePlayers={players}
+            socket={null}
+            bankBalance={currentPlayer?.money || 0}
+            playerCredit={0}
+            getMaxCredit={() => 10000}
+            getCashFlow={() => 1200}
+            setShowCreditModal={() => {}}
+            roomId="demo-room"
+            onBankBalanceChange={() => {}}
+          />
+        </div>
+
+        {/* 4. Активы */}
+        <div>
+          <h3 style={{ 
+            color: 'white', 
+            margin: '0 0 15px 0', 
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            Активы
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              padding: '10px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span style={{ color: 'white', fontSize: '14px' }}>🏠 Дом</span>
+              <span style={{ color: '#4CAF50', fontSize: '14px', fontWeight: 'bold' }}>$150,000</span>
+            </div>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              padding: '10px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span style={{ color: 'white', fontSize: '14px' }}>📈 Акции</span>
+              <span style={{ color: '#4CAF50', fontSize: '14px', fontWeight: 'bold' }}>$25,000</span>
+            </div>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              padding: '10px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span style={{ color: 'white', fontSize: '14px' }}>💼 Бизнес</span>
+              <span style={{ color: '#4CAF50', fontSize: '14px', fontWeight: 'bold' }}>$80,000</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 5. Бросить кубик с анимацией */}
+        <div>
+          <h3 style={{ 
+            color: 'white', 
+            margin: '0 0 15px 0', 
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            Действия
+          </h3>
+          <button
+            onClick={handleRollDice}
+            disabled={!isMyTurn || isRolling}
+            style={{
+              width: '100%',
+              padding: '15px',
+              background: isMyTurn && !isRolling 
+                ? 'linear-gradient(45deg, #FF6B6B, #FF5252)' 
+                : 'rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              cursor: isMyTurn && !isRolling ? 'pointer' : 'not-allowed',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              transition: 'all 0.3s ease',
+              marginBottom: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px'
+            }}
+          >
+            {isRolling ? (
+              <>
+                <div style={{
+                  animation: 'spin 1s linear infinite',
+                  fontSize: '20px'
+                }}>
+                  🎲
+                </div>
+                Бросок...
+              </>
+            ) : (
+              <>
+                🎲 Бросить кубик
+                {diceValue && <span style={{ fontSize: '12px' }}>({diceValue})</span>}
+              </>
+            )}
+          </button>
+          
+          {/* Анимация кубика под кнопкой */}
+          {isRolling && (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '60px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '10px',
+              marginTop: '10px'
+            }}>
+              <div style={{
+                fontSize: '40px',
+                animation: 'bounce 0.5s ease-in-out infinite alternate'
+              }}>
+                🎲
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 6. Шкала тайминга */}
+        <div>
+          <h3 style={{ 
+            color: 'white', 
+            margin: '0 0 15px 0', 
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            Время хода
+          </h3>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            padding: '15px',
+            borderRadius: '10px',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <div style={{
+              width: '100%',
+              height: '8px',
+              background: 'rgba(255, 255, 255, 0.2)',
+              borderRadius: '4px',
+              overflow: 'hidden',
+              marginBottom: '10px'
+            }}>
+              <div style={{
+                width: '65%', // Примерное значение
+                height: '100%',
+                background: 'linear-gradient(90deg, #4CAF50, #FFC107, #FF5722)',
+                borderRadius: '4px',
+                transition: 'width 0.3s ease'
+              }} />
+            </div>
+            <div style={{ 
+              color: 'rgba(255, 255, 255, 0.7)', 
+              fontSize: '12px',
+              textAlign: 'center'
+            }}>
+              1:30 / 2:00
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Игровая доска */}
       <div style={{
         position: 'relative',
@@ -483,66 +775,6 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
 
       {/* Фишки игроков */}
       {renderPlayerTokens()}
-
-      {/* Панель управления */}
-      <div style={{
-        position: 'absolute',
-        bottom: '20px',
-        left: '20px',
-        right: '20px',
-        background: 'rgba(0, 0, 0, 0.8)',
-        backdropFilter: 'blur(10px)',
-        borderRadius: '15px',
-        padding: '15px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        zIndex: 5
-      }}>
-        <div style={{ color: 'white', fontSize: '14px' }}>
-          <div>Текущий игрок: {currentPlayer?.name || 'Неизвестно'}</div>
-          <div>Позиция: {currentPlayer?.position || 0}</div>
-          <div>Деньги: ${currentPlayer?.money?.toLocaleString() || 0}</div>
-        </div>
-        
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <button
-            onClick={handleRollDice}
-            disabled={!isMyTurn || isRolling}
-            style={{
-              padding: '10px 20px',
-              background: isMyTurn && !isRolling 
-                ? 'linear-gradient(45deg, #4CAF50, #45a049)' 
-                : 'rgba(255, 255, 255, 0.2)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: isMyTurn && !isRolling ? 'pointer' : 'not-allowed',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            {isRolling ? '🎲 Бросок...' : `🎲 Бросить кубик${diceValue ? ` (${diceValue})` : ''}`}
-          </button>
-          
-          <button
-            onClick={() => onGetGameState()}
-            style={{
-              padding: '10px 20px',
-              background: 'rgba(255, 255, 255, 0.2)',
-              color: 'white',
-              border: '2px solid rgba(255, 255, 255, 0.5)',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            📊 Статус
-          </button>
-        </div>
       </div>
 
       {/* Правое меню */}
