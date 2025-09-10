@@ -19,8 +19,6 @@ async function connectToMongoDB() {
     
     // Подключаем Mongoose
     await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
       connectTimeoutMS: 10000,
       socketTimeoutMS: 45000,
