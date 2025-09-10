@@ -2,6 +2,7 @@ const http = require('http');
 const url = require('url');
 const { Server } = require('socket.io');
 const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
 
 const PORT = process.env.PORT || 4000;
 const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
