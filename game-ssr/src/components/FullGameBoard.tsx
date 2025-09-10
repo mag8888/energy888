@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BankModule from './bank-module/src/BankModule';
+import type { Transaction } from './bank-module/src/BankModule';
 
 interface Player {
   id: string;
@@ -669,13 +670,13 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
             transferHistory={[
               {
                 id: 'initial_1',
-                type: 'initial',
+                type: 'initial' as const,
                 amount: currentPlayer?.money || 0,
                 description: 'Начальный баланс профессии',
                 timestamp: new Date().toLocaleString('ru-RU'),
                 from: 'Банк',
                 to: currentPlayer?.name || 'Игрок',
-                status: 'completed',
+                status: 'completed' as const,
                 balanceAfter: currentPlayer?.money || 0
               }
             ]}
