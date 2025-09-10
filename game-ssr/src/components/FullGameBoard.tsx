@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import BankModule from './bank-module/src/BankModule';
-import type { Transaction } from './bank-module/src/BankModule';
+// import type { Transaction } from './bank-module/src/BankModule';
+
+interface Transaction {
+  id: string;
+  type: 'initial' | 'transfer' | 'received' | 'expense' | 'credit' | 'payday' | 'charity';
+  amount: number;
+  description: string;
+  timestamp: string;
+  from: string;
+  to: string;
+  status: 'completed' | 'pending' | 'failed';
+  balanceAfter: number;
+}
 
 interface Player {
   id: string;
@@ -716,19 +728,6 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
             setShowCreditModal={() => {}}
             roomId="demo-room"
             onBankBalanceChange={() => {}}
-            transferHistory={[
-              {
-                id: 'initial_1',
-                type: 'initial' as const,
-                amount: currentPlayer?.money || 0,
-                description: 'Начальный баланс профессии',
-                timestamp: new Date().toLocaleString('ru-RU'),
-                from: 'Банк',
-                to: currentPlayer?.name || 'Игрок',
-                status: 'completed' as const,
-                balanceAfter: currentPlayer?.money || 0
-              }
-            ]}
           />
         </div>
 
@@ -767,13 +766,17 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
               fontSize: '14px',
               marginBottom: '5px'
             }}>
-              Профессия: {currentPlayer?.profession?.name || currentPlayer?.profession || 'Не выбрана'}
+              Профессия: {typeof currentPlayer?.profession === 'object' && currentPlayer.profession && 'name' in currentPlayer.profession
+                ? (currentPlayer.profession as any).name 
+                : currentPlayer?.profession || 'Не выбрана'}
             </div>
             <div style={{ 
               color: 'rgba(255, 255, 255, 0.7)', 
               fontSize: '14px'
             }}>
-              Мечта: {currentPlayer?.dream?.name || currentPlayer?.dream || 'Не выбрана'}
+              Мечта: {typeof currentPlayer?.dream === 'object' && currentPlayer.dream && 'name' in currentPlayer.dream
+                ? (currentPlayer.dream as any).name 
+                : currentPlayer?.dream || 'Не выбрана'}
             </div>
           </div>
         </div>
