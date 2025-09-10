@@ -84,10 +84,35 @@ export default function RoomPage() {
       }
     };
 
+    const handlePlayerLeft = (data: any) => {
+      console.log('👋 Игрок покинул комнату:', data);
+      // Обновляем список игроков
+      if (data.players) {
+        setRoom(prev => prev ? {
+          ...prev,
+          players: data.players,
+          currentPlayers: data.players.length
+        } : null);
+      }
+    };
+
+    const handlePlayerReadyUpdated = (data: any) => {
+      console.log('✅ Готовность игрока обновлена:', data);
+      // Обновляем список игроков
+      if (data.players) {
+        setRoom(prev => prev ? {
+          ...prev,
+          players: data.players
+        } : null);
+      }
+    };
+
     // Подписываемся на события
     socket.on('room-joined', handleRoomJoined);
     socket.on('room-updated', handleRoomUpdated);
     socket.on('player-joined', handlePlayerJoined);
+    socket.on('player-left', handlePlayerLeft);
+    socket.on('player-ready-updated', handlePlayerReadyUpdated);
     socket.on('error', handleError);
 
     // Cleanup при размонтировании
@@ -95,6 +120,8 @@ export default function RoomPage() {
       socket.off('room-joined', handleRoomJoined);
       socket.off('room-updated', handleRoomUpdated);
       socket.off('player-joined', handlePlayerJoined);
+      socket.off('player-left', handlePlayerLeft);
+      socket.off('player-ready-updated', handlePlayerReadyUpdated);
       socket.off('error', handleError);
     };
   }, [socket, isConnected, id]);
