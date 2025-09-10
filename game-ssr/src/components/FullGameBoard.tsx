@@ -72,12 +72,17 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
   const [diceValue, setDiceValue] = useState<number | null>(null);
   const [isRolling, setIsRolling] = useState(false);
   const [showAssets, setShowAssets] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(120); // 2 минуты в секундах
+  const [hasRolled, setHasRolled] = useState(false);
+  const [rollTime, setRollTime] = useState(0);
 
   const handleRollDice = () => {
     if (isRolling) return;
     
     setIsRolling(true);
     setDiceValue(null);
+    setHasRolled(true);
+    setRollTime(Date.now());
     
     // Анимация броска кубика
     setTimeout(() => {
@@ -87,6 +92,47 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
       onRollDice();
     }, 1000);
   };
+
+  const handleEndTurn = () => {
+    // Логика завершения хода
+    setHasRolled(false);
+    setTimeLeft(120);
+    setRollTime(0);
+    // Здесь должна быть логика перехода к следующему игроку
+  };
+
+  // Таймер хода
+  useEffect(() => {
+    if (!isMyTurn) {
+      setTimeLeft(120);
+      setHasRolled(false);
+      setRollTime(0);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 0) {
+          // Время вышло - автоматический переход хода
+          handleEndTurn();
+          return 120;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isMyTurn]);
+
+  // Проверка на переход кнопки в "переход хода"
+  useEffect(() => {
+    if (hasRolled && rollTime > 0) {
+      const timeSinceRoll = Date.now() - rollTime;
+      if (timeSinceRoll >= 10000) { // 10 секунд после броска
+        // Кнопка должна стать "переход хода"
+      }
+    }
+  }, [hasRolled, rollTime]);
 
   // Рендер внутренних клеток (24 в круге) - УМЕНЬШЕН НА 30%
   const renderInnerCells = () => {
@@ -823,13 +869,15 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
             Действия
           </h3>
           <button
-            onClick={handleRollDice}
+            onClick={hasRolled && (Date.now() - rollTime) >= 10000 ? handleEndTurn : handleRollDice}
             disabled={!isMyTurn || isRolling}
             style={{
               width: '100%',
               padding: '15px',
               background: isMyTurn && !isRolling 
-                ? 'linear-gradient(45deg, #4CAF50, #45a049)' 
+                ? hasRolled && (Date.now() - rollTime) >= 10000
+                  ? 'linear-gradient(45deg, #FF9800, #F57C00)'
+                  : 'linear-gradient(45deg, #4CAF50, #45a049)'
                 : 'rgba(255, 255, 255, 0.2)',
               color: 'white',
               border: 'none',
@@ -854,6 +902,11 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
                   🎲
                 </div>
                 Бросок...
+              </>
+            ) : hasRolled && (Date.now() - rollTime) >= 10000 ? (
+              <>
+                ⏭️ Переход хода
+                {diceValue && <span style={{ fontSize: '12px' }}>({diceValue})</span>}
               </>
             ) : (
               <>
@@ -915,20 +968,40 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
               marginBottom: '10px'
             }}>
               <div style={{
-                width: '65%', // Примерное значение
+                width: `${(timeLeft / 120) * 100}%`,
                 height: '100%',
-                background: 'linear-gradient(90deg, #4CAF50, #FFC107, #FF5722)',
+                background: timeLeft > 60 
+                  ? 'linear-gradient(90deg, #4CAF50, #8BC34A)' // Зеленая полоса (первая минута)
+                  : timeLeft > 20 
+                    ? 'linear-gradient(90deg, #FFC107, #FF9800)' // Желтая полоса (вторая минута)
+                    : 'linear-gradient(90deg, #F44336, #E91E63)', // Красная полоса (последние 20 сек)
                 borderRadius: '4px',
-                transition: 'width 0.3s ease'
+                transition: 'width 0.3s ease, background 0.3s ease'
               }} />
             </div>
             <div style={{ 
-              color: 'rgba(255, 255, 255, 0.7)', 
+              color: timeLeft > 60 
+                ? 'rgba(255, 255, 255, 0.8)' 
+                : timeLeft > 20 
+                  ? '#FFC107' 
+                  : '#F44336',
               fontSize: '12px',
-              textAlign: 'center'
+              textAlign: 'center',
+              fontWeight: 'bold'
             }}>
-              1:30 / 2:00
+              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')} / 2:00
             </div>
+            {timeLeft <= 20 && (
+              <div style={{
+                color: '#F44336',
+                fontSize: '10px',
+                textAlign: 'center',
+                marginTop: '5px',
+                animation: 'blink 1s infinite'
+              }}>
+                ⚠️ ВНИМАНИЕ!
+              </div>
+            )}
           </div>
         </div>
 
@@ -990,6 +1063,13 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           </div>
         </div>
       </div>
+      
+      <style jsx>{`
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0.3; }
+        }
+      `}</style>
     </div>
   );
 };

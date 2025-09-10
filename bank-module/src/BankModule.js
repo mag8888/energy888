@@ -135,6 +135,26 @@ const BankModule = ({
     return { salary: 0, totalExpenses: 0 };
   }, [getCurrentPlayer, playerData?.profession]);
 
+  // Расчет денежного потока с учетом кредитов
+  const calculateCashFlow = useCallback(() => {
+    const financialInfo = getFinancialInfo();
+    const currentCredit = playerCredit || 0;
+    
+    // Денежный поток = доход - расходы - кредитные платежи
+    // Кредитные платежи = 10% от суммы кредита
+    const creditPayments = currentCredit * 0.1;
+    const cashFlow = financialInfo.salary - financialInfo.totalExpenses - creditPayments;
+    
+    return Math.max(0, cashFlow); // Не может быть отрицательным
+  }, [getFinancialInfo, playerCredit]);
+
+  // Расчет максимального кредита
+  const calculateMaxCredit = useCallback(() => {
+    const cashFlow = calculateCashFlow();
+    // Максимальный кредит = денежный поток * 10 (каждые 1000 кредита = 100$ платежа)
+    return Math.floor(cashFlow * 10);
+  }, [calculateCashFlow]);
+
   const financialInfo = getFinancialInfo();
 
   return (
@@ -264,7 +284,7 @@ const BankModule = ({
                 </Typography>
               </Box>
               <Typography variant="body2" sx={{ color: '#EAB308', fontWeight: 'bold', fontSize: '0.8rem' }}>
-                ${(getCashFlow() ?? 0).toLocaleString()}/мес
+                ${calculateCashFlow().toLocaleString()}/мес
               </Typography>
             </Box>
           </Box>
@@ -298,7 +318,7 @@ const BankModule = ({
                 Макс. кредит:
               </Typography>
               <Typography variant="body2" sx={{ color: '#8B5CF6', fontWeight: 'bold', fontSize: '0.8rem' }}>
-                ${(getMaxCredit() ?? 0).toLocaleString()}
+                ${calculateMaxCredit().toLocaleString()}
               </Typography>
             </Box>
             
@@ -312,7 +332,7 @@ const BankModule = ({
                 overflow: 'hidden'
               }}>
                 <Box sx={{ 
-                  width: `${Math.min((playerCredit / getMaxCredit()) * 100, 100)}%`, 
+                  width: `${Math.min((playerCredit / calculateMaxCredit()) * 100, 100)}%`, 
                   height: '100%', 
                   backgroundColor: playerCredit > 0 ? '#EF4444' : '#10B981',
                   transition: 'width 0.3s ease'
@@ -325,7 +345,7 @@ const BankModule = ({
                 textAlign: 'center',
                 mt: 0.5
               }}>
-                {Math.round((playerCredit / getMaxCredit()) * 100)}% использовано
+                {Math.round((playerCredit / calculateMaxCredit()) * 100)}% использовано
               </Typography>
             </Box>
             
