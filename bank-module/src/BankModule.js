@@ -14,7 +14,8 @@ const BankModule = ({
   getCashFlow,
   setShowCreditModal,
   roomId,
-  onBankBalanceChange
+  onBankBalanceChange,
+  transferHistory = []
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -268,12 +269,13 @@ const BankModule = ({
             </Box>
           </Box>
           
-          {/* Информация о кредитах */}
+          {/* Кредитный модуль */}
           <Box sx={{ 
             background: 'rgba(255, 255, 255, 0.05)',
             borderRadius: '12px',
             p: 2,
-            border: `1px solid ${playerCredit > 0 ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`
+            border: `1px solid ${playerCredit > 0 ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
+            mb: 2
           }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -297,6 +299,33 @@ const BankModule = ({
               </Typography>
               <Typography variant="body2" sx={{ color: '#8B5CF6', fontWeight: 'bold', fontSize: '0.8rem' }}>
                 ${(getMaxCredit() ?? 0).toLocaleString()}
+              </Typography>
+            </Box>
+            
+            {/* Прогресс-бар кредита */}
+            <Box sx={{ mb: 1.5 }}>
+              <Box sx={{ 
+                width: '100%', 
+                height: '6px', 
+                backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+                borderRadius: '3px',
+                overflow: 'hidden'
+              }}>
+                <Box sx={{ 
+                  width: `${Math.min((playerCredit / getMaxCredit()) * 100, 100)}%`, 
+                  height: '100%', 
+                  backgroundColor: playerCredit > 0 ? '#EF4444' : '#10B981',
+                  transition: 'width 0.3s ease'
+                }} />
+              </Box>
+              <Typography variant="caption" sx={{ 
+                color: 'rgba(255, 255, 255, 0.6)', 
+                fontSize: '0.7rem',
+                display: 'block',
+                textAlign: 'center',
+                mt: 0.5
+              }}>
+                {Math.round((playerCredit / getMaxCredit()) * 100)}% использовано
               </Typography>
             </Box>
             
@@ -381,6 +410,89 @@ const BankModule = ({
               )}
             </Box>
           </Box>
+
+          {/* Список последних транзакций */}
+          <Box sx={{ 
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+            p: 2,
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <History sx={{ color: '#8B5CF6', fontSize: '1rem' }} />
+              <Typography variant="body2" sx={{ 
+                color: 'rgba(255, 255, 255, 0.8)', 
+                fontSize: '0.8rem',
+                fontWeight: 'bold'
+              }}>
+                Последние операции:
+              </Typography>
+            </Box>
+            
+            {/* Список транзакций */}
+            <Box sx={{ maxHeight: '120px', overflow: 'auto' }}>
+              {transferHistory && transferHistory.length > 0 ? (
+                transferHistory.slice(0, 3).map((transaction, index) => (
+                  <Box key={transaction.id} sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    py: 0.5,
+                    borderBottom: index < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
+                      <Box sx={{ 
+                        width: '6px', 
+                        height: '6px', 
+                        borderRadius: '50%', 
+                        backgroundColor: transaction.type === 'received' || transaction.type === 'initial' ? '#10B981' : '#EF4444'
+                      }} />
+                      <Typography variant="caption" sx={{ 
+                        color: 'rgba(255, 255, 255, 0.7)', 
+                        fontSize: '0.7rem',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {transaction.description}
+                      </Typography>
+                    </Box>
+                    <Typography variant="caption" sx={{ 
+                      color: transaction.type === 'received' || transaction.type === 'initial' ? '#10B981' : '#EF4444',
+                      fontWeight: 'bold',
+                      fontSize: '0.7rem'
+                    }}>
+                      {transaction.type === 'received' || transaction.type === 'initial' ? '+' : '-'}${transaction.amount.toLocaleString()}
+                    </Typography>
+                  </Box>
+                ))
+              ) : (
+                <Typography variant="caption" sx={{ 
+                  color: 'rgba(255, 255, 255, 0.5)', 
+                  fontSize: '0.7rem',
+                  textAlign: 'center',
+                  display: 'block',
+                  py: 1
+                }}>
+                  Нет операций
+                </Typography>
+              )}
+            </Box>
+            
+            {transferHistory && transferHistory.length > 3 && (
+              <Typography variant="caption" sx={{ 
+                color: '#8B5CF6', 
+                fontSize: '0.7rem',
+                textAlign: 'center',
+                display: 'block',
+                mt: 1,
+                cursor: 'pointer',
+                '&:hover': { textDecoration: 'underline' }
+              }}>
+                Показать все ({transferHistory.length})
+              </Typography>
+            )}
+          </Box>
           
           {/* Индикатор клика */}
           <Box sx={{ 
@@ -408,6 +520,7 @@ const BankModule = ({
         roomId={roomId}
         bankBalance={currentBalance}
         onBankBalanceChange={handleBankBalanceChange}
+        transferHistory={transferHistory}
       />
     </motion.div>
   );

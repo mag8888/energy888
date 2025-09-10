@@ -666,6 +666,19 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
             setShowCreditModal={() => {}}
             roomId="demo-room"
             onBankBalanceChange={() => {}}
+            transferHistory={[
+              {
+                id: 'initial_1',
+                type: 'initial',
+                amount: currentPlayer?.money || 0,
+                description: 'Начальный баланс профессии',
+                timestamp: new Date().toLocaleString('ru-RU'),
+                from: 'Банк',
+                to: currentPlayer?.name || 'Игрок',
+                status: 'completed',
+                balanceAfter: currentPlayer?.money || 0
+              }
+            ]}
           />
         </div>
 

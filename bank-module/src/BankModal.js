@@ -54,7 +54,8 @@ const BankModal = ({
   socket, 
   roomId,
   bankBalance: externalBankBalance = 0,
-  onBankBalanceChange
+  onBankBalanceChange,
+  transferHistory: externalTransferHistory = []
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -314,15 +315,20 @@ const BankModal = ({
       onBankBalanceChange(balanceToSet);
     }
     
-    // Загружаем историю транзакций из localStorage
+    // Загружаем историю транзакций из внешнего источника или localStorage
     let history = [];
-    if (playerData?.id && roomId) {
+    
+    // Приоритет: внешняя история > localStorage
+    if (externalTransferHistory && externalTransferHistory.length > 0) {
+      history = externalTransferHistory;
+      console.log('📜 [BankModal] Используем внешнюю историю транзакций:', history.length, 'записей');
+    } else if (playerData?.id && roomId) {
       const savedHistory = localStorage.getItem(`bank_history_${playerData.id}_${roomId}`);
       
       if (savedHistory) {
         try {
           history = JSON.parse(savedHistory);
-          console.log('📜 [BankModal] Загружена история транзакций:', history.length, 'записей для пользователя', playerData.id);
+          console.log('📜 [BankModal] Загружена история транзакций из localStorage:', history.length, 'записей для пользователя', playerData.id);
         } catch (error) {
           console.error('❌ [BankModal] Ошибка загрузки истории:', error);
           history = [];

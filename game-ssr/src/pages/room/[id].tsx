@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSocket } from '../../contexts/SocketContext';
 import { DREAMS } from '../../data/professions';
-import OriginalGameBoard from '../../components/OriginalGameBoard';
+import FullGameBoard from '../../components/FullGameBoard';
 import DebugRoomsPanel from '../../components/DebugRoomsPanel';
 
 interface Room {
@@ -687,7 +687,7 @@ export default function RoomPage() {
           )}
 
           {room.status === 'playing' && showGameBoard && (
-            <OriginalGameBoard
+            <FullGameBoard
               players={room.players}
               currentPlayer={currentPlayer}
               currentIndex={currentIndex}
