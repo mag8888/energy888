@@ -87,6 +87,9 @@ export default function RoomPage() {
           }
           if (gameState.currentPlayer) {
             setCurrentPlayer(gameState.currentPlayer);
+          } else if (gameState.room?.players && gameState.currentIndex !== undefined) {
+            // Если currentPlayer не сохранен, но есть индекс, восстанавливаем из массива игроков
+            setCurrentPlayer(gameState.room.players[gameState.currentIndex]);
           }
           if (gameState.currentIndex !== undefined) {
             setCurrentIndex(gameState.currentIndex);
@@ -140,6 +143,11 @@ export default function RoomPage() {
         console.log('🎮 Игра уже идет, показываем игровое поле');
         setShowGameBoard(true);
         
+        // Восстанавливаем currentPlayer из массива игроков, если он не был установлен
+        if (!currentPlayer && roomData.players.length > 0) {
+          setCurrentPlayer(roomData.players[currentIndex] || roomData.players[0]);
+        }
+        
         // Запрашиваем детальное состояние игры
         socket.emit('get-game-state', { roomId: id });
       }
@@ -161,6 +169,11 @@ export default function RoomPage() {
       
       // Обновляем статус хоста
       setIsHost(myPlayerData && roomData.players.length > 0 && roomData.players[0].id === myPlayerData.id);
+      
+      // Восстанавливаем currentPlayer, если он не установлен
+      if (!currentPlayer && roomData.players.length > 0 && roomData.status === 'playing') {
+        setCurrentPlayer(roomData.players[currentIndex] || roomData.players[0]);
+      }
     };
 
     const handleError = (error: any) => {
@@ -284,6 +297,9 @@ export default function RoomPage() {
       }
       if (data.currentPlayer) {
         setCurrentPlayer(data.currentPlayer);
+      } else if (data.room?.players && data.currentIndex !== undefined) {
+        // Если currentPlayer не пришел, но есть индекс, восстанавливаем из массива игроков
+        setCurrentPlayer(data.room.players[data.currentIndex]);
       }
       if (data.currentIndex !== undefined) {
         setCurrentIndex(data.currentIndex);
@@ -369,6 +385,14 @@ export default function RoomPage() {
       console.error('❌ Ошибка сохранения состояния игры:', error);
     }
   }, [id, room, showGameBoard, currentPlayer, currentIndex, myPlayer, isHost]);
+
+  // Дополнительный эффект для восстановления currentPlayer после обновления страницы
+  useEffect(() => {
+    if (room && room.status === 'playing' && !currentPlayer && room.players.length > 0) {
+      console.log('🔄 Восстанавливаем currentPlayer после обновления страницы');
+      setCurrentPlayer(room.players[currentIndex] || room.players[0]);
+    }
+  }, [room, currentPlayer, currentIndex]);
 
   const handleLeaveRoom = () => {
     if (socket && id) {
@@ -907,12 +931,12 @@ export default function RoomPage() {
           {room.status === 'playing' && showGameBoard && (
             <FullGameBoard
               players={room.players}
-              currentPlayer={currentPlayer}
+              currentPlayer={room.players[currentIndex] || currentPlayer}
               currentIndex={currentIndex}
               onRollDice={handleRollDice}
               onBuyCard={handleBuyCard}
               onGetGameState={handleGetGameState}
-              isMyTurn={currentPlayer?.socketId === socket?.id}
+              isMyTurn={room.players[currentIndex]?.socketId === socket?.id || currentPlayer?.socketId === socket?.id}
             />
           )}
 
