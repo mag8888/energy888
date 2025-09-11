@@ -618,7 +618,7 @@ const BankModal = ({
         overflow: 'hidden'
       }}>
         <Grid container spacing={2} sx={{ height: '100%' }}>
-          {/* Левая панель - Финансовая сводка и кредиты */}
+          {/* Левая панель - Финансовая информация */}
           <Grid item xs={12} md={4} sx={{ height: '100%' }}>
             <Card sx={{ 
               background: 'rgba(255, 255, 255, 0.05)',
@@ -629,16 +629,21 @@ const BankModal = ({
               display: 'flex',
               flexDirection: 'column'
             }}>
-              <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <CardContent sx={{ 
+                height: '100%', 
+                display: 'flex', 
+                flexDirection: 'column',
+                p: 3
+              }}>
                 {/* Текущий баланс */}
-                <Box sx={{ textAlign: 'center', mb: 3 }}>
+                <Box sx={{ textAlign: 'center', mb: 4 }}>
                   <Typography variant="h3" sx={{ 
-                    color: '#4CAF50', 
-                    fontWeight: 'bold',
+                    color: '#10B981', 
+                    fontWeight: 'bold', 
                     mb: 1,
-                    textShadow: '0 0 20px rgba(76, 175, 80, 0.5)'
+                    textShadow: '0 0 20px rgba(16, 185, 129, 0.5)'
                   }}>
-                    ${balance.toLocaleString()}
+                    ${displayBalance}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                     Доступно для операций
@@ -646,84 +651,86 @@ const BankModal = ({
                 </Box>
 
                 {/* Финансовая сводка */}
-                <Box sx={{ mb: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <TrendingUp sx={{ color: '#4CAF50', mr: 1 }} />
-                    <Typography variant="body1" sx={{ color: '#4CAF50', fontWeight: 'bold' }}>
+                <Box sx={{ mb: 4 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <TrendingUp sx={{ color: '#10B981' }} />
+                    <Typography variant="body1" sx={{ color: '#10B981', fontWeight: 'bold' }}>
                       Доход: $10,000
                     </Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <TrendingDown sx={{ color: '#f44336', mr: 1 }} />
-                    <Typography variant="body1" sx={{ color: '#f44336', fontWeight: 'bold' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <TrendingDown sx={{ color: '#EF4444' }} />
+                    <Typography variant="body1" sx={{ color: '#EF4444', fontWeight: 'bold' }}>
                       Расходы: $6,200
                     </Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <AttachMoney sx={{ color: '#FFC107', mr: 1 }} />
-                    <Typography variant="body1" sx={{ color: '#FFC107', fontWeight: 'bold' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                    <AttachMoney sx={{ color: '#F59E0B' }} />
+                    <Typography variant="body1" sx={{ color: '#F59E0B', fontWeight: 'bold' }}>
                       PAYDAY: $3,800/мес
                     </Typography>
                   </Box>
                 </Box>
 
                 {/* Кредитная информация */}
-                <Box sx={{ mb: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Box sx={{ 
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '12px',
+                  p: 2,
+                  mb: 3
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <Box sx={{ 
-                      width: 12, 
-                      height: 12, 
-                      backgroundColor: '#4CAF50', 
-                      borderRadius: '2px', 
-                      mr: 1 
+                      width: 8, 
+                      height: 8, 
+                      backgroundColor: '#10B981', 
+                      borderRadius: '50%' 
                     }} />
                     <Typography variant="body2" sx={{ color: 'white' }}>
                       Кредит: $0
                     </Typography>
                   </Box>
-                  <Typography variant="body2" sx={{ color: '#9C27B0', ml: 2 }}>
+                  <Typography variant="body2" sx={{ color: '#8B5CF6', fontWeight: 'bold' }}>
                     Макс. кредит: $38,000
                   </Typography>
                 </Box>
 
                 {/* Кнопки кредитов */}
-                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                <Box sx={{ display: 'flex', gap: 1, flex: 1, alignItems: 'flex-end' }}>
                   <Button
                     variant="contained"
-                    size="small"
+                    startIcon={<CheckCircle />}
                     sx={{
-                      background: '#4CAF50',
-                      color: 'white',
                       flex: 1,
-                      '&:hover': { background: '#45a049' }
+                      background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                      color: 'white',
+                      py: 1,
+                      borderRadius: '8px',
+                      fontWeight: 'bold',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+                      }
                     }}
                   >
-                    <CheckCircle sx={{ mr: 0.5, fontSize: 16 }} />
                     БЕЗ КРЕДИТОВ
                   </Button>
                   <Button
                     variant="contained"
-                    size="small"
+                    startIcon={<CreditCard />}
                     sx={{
-                      background: '#f44336',
-                      color: 'white',
                       flex: 1,
-                      '&:hover': { background: '#d32f2f' }
+                      background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+                      color: 'white',
+                      py: 1,
+                      borderRadius: '8px',
+                      fontWeight: 'bold',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)'
+                      }
                     }}
                   >
-                    <CreditCard sx={{ mr: 0.5, fontSize: 16 }} />
                     ВЗЯТЬ
                   </Button>
-                </Box>
-
-                {/* Версия */}
-                <Box sx={{ mt: 'auto', textAlign: 'center' }}>
-                  <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.3)' }}>
-                    Versic
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.3)', display: 'block' }}>
-                    ENV: production
-                  </Typography>
                 </Box>
               </CardContent>
             </Card>
@@ -738,49 +745,33 @@ const BankModal = ({
                   background: 'rgba(255, 255, 255, 0.05)',
                   backdropFilter: 'blur(10px)',
                   borderRadius: '16px',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column'
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
-                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 3 }}>
-                    <Typography variant="h6" sx={{ 
-                      mb: 3, 
-                      fontWeight: 'bold', 
-                      color: 'white',
-                      textAlign: 'center',
-                      fontSize: '18px'
-                    }}>
-                      перевод средств
+                  <CardContent sx={{ p: 3 }}>
+                    <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: 'white' }}>
+                      Перевод средств
                     </Typography>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
-                      {/* Поле получателя */}
-                      <Box sx={{ 
-                        border: '2px solid rgba(255, 255, 255, 0.2)',
-                        borderRadius: '8px',
-                        p: 2,
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)'
-                      }}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
                         <FormControl fullWidth>
                           <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                            игроку
+                            Получатель
                           </InputLabel>
                           <Select
                             value={selectedRecipient}
                             onChange={(e) => setSelectedRecipient(e.target.value)}
                             sx={{
                               color: 'white',
+                              borderRadius: '12px',
                               '& .MuiOutlinedInput-notchedOutline': {
-                                border: 'none',
+                                borderColor: 'rgba(255, 255, 255, 0.2)'
                               },
                               '&:hover .MuiOutlinedInput-notchedOutline': {
-                                border: 'none',
+                                borderColor: 'rgba(255, 255, 255, 0.4)'
                               },
                               '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                border: 'none',
-                              },
-                              '& .MuiSvgIcon-root': {
-                                color: 'rgba(255, 255, 255, 0.7)',
+                                borderColor: '#10B981',
+                                borderWidth: '2px'
                               }
                             }}
                           >
@@ -796,15 +787,8 @@ const BankModal = ({
                             ))}
                           </Select>
                         </FormControl>
-                      </Box>
-
-                      {/* Поле суммы */}
-                      <Box sx={{ 
-                        border: '2px solid rgba(255, 255, 255, 0.2)',
-                        borderRadius: '8px',
-                        p: 2,
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)'
-                      }}>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
                         <TextField
                           fullWidth
                           label="Сумма ($)"
@@ -908,15 +892,11 @@ const BankModal = ({
                     flexDirection: 'column',
                     p: 2
                   }}>
-                    <Typography variant="h6" sx={{ 
-                      fontWeight: 'bold', 
-                      color: 'white',
-                      textAlign: 'center',
-                      fontSize: '18px',
-                      mb: 2
-                    }}>
-                      история
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                      <History sx={{ color: '#8B5CF6' }} />
+                      <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'white' }}>
+                        История операций
+                      </Typography>
                       <Chip 
                         label={transferHistory.length} 
                         size="small" 
@@ -934,66 +914,76 @@ const BankModal = ({
                     </Box>
                     
                     {transferHistory.length === 0 ? (
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
-                        {[1, 2, 3, 4].map((i) => (
-                          <Box key={i} sx={{ 
-                            border: '2px solid rgba(255, 255, 255, 0.2)',
-                            borderRadius: '8px',
-                            p: 2,
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            height: '60px'
-                          }} />
-                        ))}
+                      <Box sx={{ textAlign: 'center', py: 4 }}>
+                        <Typography variant="body1" sx={{ opacity: 0.7, color: '#94A3B8' }}>
+                          История операций пуста
+                        </Typography>
                       </Box>
                     ) : (
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1, overflow: 'auto' }}>
-                        {transferHistory.slice(0, 4).map((transaction, index) => (
-                          <Box key={transaction.id} sx={{ 
-                            border: '2px solid rgba(255, 255, 255, 0.2)',
-                            borderRadius: '8px',
-                            p: 2,
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            minHeight: '60px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between'
-                          }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                              <Box sx={{ 
-                                width: 40,
-                                height: 40,
-                                borderRadius: '50%',
-                                backgroundColor: (getTransactionColor ? getTransactionColor(transaction.type, transaction.amount) : '#10B981') + '20',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: getTransactionColor ? getTransactionColor(transaction.type, transaction.amount) : '#10B981'
-                              }}>
-                                {getTransactionIcon ? getTransactionIcon(transaction.type) : <CreditCard />}
-                              </Box>
-                              <Box>
-                                <Typography variant="body2" sx={{ color: 'white', fontWeight: 'bold' }}>
-                                  {transaction.description}
-                                </Typography>
-                                <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                                  {transaction.from} → {transaction.to}
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box sx={{ textAlign: 'right' }}>
-                              <Typography variant="h6" sx={{ 
-                                color: getTransactionColor ? getTransactionColor(transaction.type, transaction.amount) : '#10B981',
-                                fontWeight: 'bold'
-                              }}>
-                                {(getAmountSign ? getAmountSign(transaction.type) : '+')}${transaction.amount.toLocaleString()}
-                              </Typography>
-                              <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.5)' }}>
-                                {transaction.timestamp}
-                              </Typography>
-                            </Box>
-                          </Box>
+                      <List sx={{ maxHeight: 400, overflow: 'auto' }}>
+                        {transferHistory.map((transaction, index) => (
+                          <React.Fragment key={transaction.id}>
+                            <ListItem sx={{ 
+                              py: 2,
+                              backgroundColor: index % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.05)',
+                              borderRadius: 1,
+                              mb: 1
+                            }}>
+                              <ListItemIcon>
+                                <Box sx={{ 
+                                  p: 1, 
+                                  borderRadius: '50%', 
+                                  backgroundColor: (getTransactionColor ? getTransactionColor(transaction.type, transaction.amount) : '#10B981') + '20',
+                                  color: getTransactionColor ? getTransactionColor(transaction.type, transaction.amount) : '#10B981'
+                                }}>
+                                  {getTransactionIcon ? getTransactionIcon(transaction.type) : <CreditCard />}
+                                </Box>
+                              </ListItemIcon>
+                              <ListItemText
+                                primary={
+                                  <Box component="span" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Box component="span" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
+                                      {transaction.description}
+                                    </Box>
+                                    <Box 
+                                      component="span" 
+                                      sx={{ 
+                                        fontWeight: 'bold',
+                                        fontSize: '1.25rem',
+                                        color: getTransactionColor ? getTransactionColor(transaction.type, transaction.amount) : '#10B981'
+                                      }}
+                                    >
+                                      {(getAmountSign ? getAmountSign(transaction.type) : '+')}${transaction.amount.toLocaleString()}
+                                    </Box>
+                                  </Box>
+                                }
+                                secondary={
+                                  <Box component="span" sx={{ display: 'block' }}>
+                                    <Box component="span" sx={{ opacity: 0.7, fontSize: '0.875rem', display: 'block' }}>
+                                      {transaction.from} → {transaction.to}
+                                    </Box>
+                                    <Box component="span" sx={{ opacity: 0.5, fontSize: '0.875rem', display: 'block' }}>
+                                      {transaction.timestamp}
+                                    </Box>
+                                  </Box>
+                                }
+                              />
+                              <ListItemSecondaryAction>
+                                <Chip
+                                  label={transaction.status === 'completed' ? 'Завершено' : 'В процессе'}
+                                  size="small"
+                                  sx={{
+                                    backgroundColor: transaction.status === 'completed' ? '#10B981' : '#F59E0B',
+                                    color: 'white',
+                                    fontWeight: 'bold'
+                                  }}
+                                />
+                              </ListItemSecondaryAction>
+                            </ListItem>
+                            {index < transferHistory.length - 1 && <Divider sx={{ opacity: 0.1 }} />}
+                          </React.Fragment>
                         ))}
-                      </Box>
+                      </List>
                     )}
                   </CardContent>
                 </Card>
