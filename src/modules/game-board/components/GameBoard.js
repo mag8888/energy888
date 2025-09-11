@@ -406,7 +406,7 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           }}
           style={{
             position: 'absolute',
-            top: '20%',
+            top: '5%',
             left: '5%',
             width: '100px',
             height: '80px',
@@ -485,7 +485,7 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           }}
           style={{
             position: 'absolute',
-            top: '10%',
+            top: '5%',
             right: '5%',
             width: '90px',
             height: '70px',
@@ -562,7 +562,7 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           }}
           style={{
             position: 'absolute',
-            bottom: '20%',
+            bottom: '5%',
             left: '5%',
             width: '90px',
             height: '70px',
@@ -639,7 +639,7 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           }}
           style={{
             position: 'absolute',
-            bottom: '10%',
+            bottom: '5%',
             right: '5%',
             width: '90px',
             height: '70px',

@@ -38,7 +38,7 @@ export default function RoomPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDream, setSelectedDream] = useState<string | null>(null);
-  const [selectedProfession, setSelectedProfession] = useState<string | null>(null);
+  const [selectedProfession, setSelectedProfession] = useState<string>('Предприниматель'); // Дефолтная профессия для всех
   const [currentPlayer, setCurrentPlayer] = useState<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showGameBoard, setShowGameBoard] = useState(false);
@@ -72,29 +72,43 @@ export default function RoomPage() {
         const gameState = JSON.parse(savedGameState);
         console.log('🎮 Восстанавливаем состояние игры:', gameState);
         
-        // Восстанавливаем состояние игры
-        if (gameState.room) {
-          setRoom(gameState.room);
-        }
-        if (gameState.showGameBoard) {
-          setShowGameBoard(true);
-        }
-        if (gameState.currentPlayer) {
-          setCurrentPlayer(gameState.currentPlayer);
-        }
-        if (gameState.currentIndex !== undefined) {
-          setCurrentIndex(gameState.currentIndex);
-        }
-        if (gameState.myPlayer) {
-          setMyPlayer(gameState.myPlayer);
-        }
-        if (gameState.isHost !== undefined) {
-          setIsHost(gameState.isHost);
-        }
+        // Проверяем, не устарело ли состояние (больше 5 минут)
+        const now = Date.now();
+        const stateAge = now - (gameState.timestamp || 0);
+        const maxAge = 5 * 60 * 1000; // 5 минут
         
-        setLoading(false);
+        if (stateAge < maxAge) {
+          // Восстанавливаем состояние игры
+          if (gameState.room) {
+            setRoom(gameState.room);
+          }
+          if (gameState.showGameBoard) {
+            setShowGameBoard(true);
+          }
+          if (gameState.currentPlayer) {
+            setCurrentPlayer(gameState.currentPlayer);
+          }
+          if (gameState.currentIndex !== undefined) {
+            setCurrentIndex(gameState.currentIndex);
+          }
+          if (gameState.myPlayer) {
+            setMyPlayer(gameState.myPlayer);
+          }
+          if (gameState.isHost !== undefined) {
+            setIsHost(gameState.isHost);
+          }
+          
+          setLoading(false);
+          console.log('✅ Состояние игры восстановлено из localStorage');
+        } else {
+          console.log('⏰ Сохраненное состояние устарело, запрашиваем с сервера');
+          // Очищаем устаревшее состояние
+          localStorage.removeItem(`game_state_${id}`);
+        }
       } catch (error) {
         console.error('❌ Ошибка восстановления состояния игры:', error);
+        // Очищаем поврежденное состояние
+        localStorage.removeItem(`game_state_${id}`);
       }
     }
     
@@ -121,9 +135,12 @@ export default function RoomPage() {
       // Определяем, является ли игрок хостом (первый игрок в комнате)
       setIsHost(myPlayerData && roomData.players.length > 0 && roomData.players[0].id === myPlayerData.id);
       
-      // Если игра уже идет, запрашиваем состояние игры
+      // Если игра уже идет, показываем игровое поле
       if (roomData.status === 'playing') {
-        console.log('🎮 Игра уже идет, запрашиваем состояние игры');
+        console.log('🎮 Игра уже идет, показываем игровое поле');
+        setShowGameBoard(true);
+        
+        // Запрашиваем детальное состояние игры
         socket.emit('get-game-state', { roomId: id });
       }
       
@@ -278,6 +295,24 @@ export default function RoomPage() {
         setIsHost(data.isHost);
       }
       
+      // Обновляем сохраненное состояние
+      const gameState = {
+        room: data.room || room,
+        showGameBoard: data.showGameBoard !== undefined ? data.showGameBoard : showGameBoard,
+        currentPlayer: data.currentPlayer || currentPlayer,
+        currentIndex: data.currentIndex !== undefined ? data.currentIndex : currentIndex,
+        myPlayer: data.myPlayer || myPlayer,
+        isHost: data.isHost !== undefined ? data.isHost : isHost,
+        timestamp: Date.now()
+      };
+      
+      try {
+        localStorage.setItem(`game_state_${id}`, JSON.stringify(gameState));
+        console.log('💾 Состояние игры обновлено с сервера');
+      } catch (error) {
+        console.error('❌ Ошибка сохранения обновленного состояния:', error);
+      }
+      
       setLoading(false);
     };
 
@@ -349,23 +384,13 @@ export default function RoomPage() {
     router.push('/simple-rooms');
   };
 
-  const handleProfessionSelect = (profession: string) => {
-    setSelectedProfession(profession);
-    if (socket && room && id) {
-      socket.emit('player-setup', { 
-        roomId: id, 
-        profession: profession,
-        dream: selectedDream 
-      });
-    }
-  };
 
   const handleReady = () => {
-    if (socket && room && id && selectedDream && selectedProfession) {
+    if (socket && room && id && selectedDream) {
       socket.emit('player-ready', { 
         roomId: id, 
         dream: selectedDream,
-        profession: selectedProfession 
+        profession: 'Предприниматель' // Всегда отправляем дефолтную профессию
       });
     }
   };
@@ -694,40 +719,17 @@ export default function RoomPage() {
                           }}>
                             💼 Профессия:
                           </span>
-                          {player.profession ? (
-                            <span style={{
-                              color: 'white',
-                              fontSize: '12px',
-                              fontWeight: 'bold',
-                              padding: '4px 8px',
-                              background: 'rgba(76, 175, 80, 0.2)',
-                              borderRadius: '4px',
-                              border: '1px solid rgba(76, 175, 80, 0.5)'
-                            }}>
-                              {player.profession}
-                            </span>
-                          ) : (
-                            <select
-                              value={selectedProfession || ''}
-                              onChange={(e) => handleProfessionSelect(e.target.value)}
-                              style={{
-                                padding: '4px 8px',
-                                borderRadius: '4px',
-                                background: 'rgba(255, 255, 255, 0.1)',
-                                color: 'white',
-                                border: '1px solid rgba(255, 255, 255, 0.3)',
-                                fontSize: '12px',
-                                minWidth: '120px'
-                              }}
-                            >
-                              <option value="">Выберите профессию</option>
-                              {PROFESSIONS.map(profession => (
-                                <option key={profession} value={profession} style={{ background: '#1a1a2e', color: 'white' }}>
-                                  {profession}
-                                </option>
-                              ))}
-                            </select>
-                          )}
+                          <span style={{
+                            color: 'white',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            padding: '4px 8px',
+                            background: 'rgba(76, 175, 80, 0.2)',
+                            borderRadius: '4px',
+                            border: '1px solid rgba(76, 175, 80, 0.5)'
+                          }}>
+                            Предприниматель
+                          </span>
                         </div>
                         
                         {/* Мечта */}
@@ -803,17 +805,17 @@ export default function RoomPage() {
                       {myPlayer && myPlayer.id === player.id && (
                         <button
                           onClick={handleReady}
-                          disabled={player.isReady || !isConnected || !selectedDream || !selectedProfession}
+                          disabled={player.isReady || !isConnected || !selectedDream}
                           style={{
                             padding: '8px 16px',
                             border: 'none',
                             borderRadius: '6px',
-                            background: (player.isReady || !isConnected || !selectedDream || !selectedProfession)
+                            background: (player.isReady || !isConnected || !selectedDream)
                               ? 'rgba(255, 255, 255, 0.1)'
                               : 'linear-gradient(45deg, #667eea, #764ba2)',
                             color: 'white',
-                            cursor: (player.isReady || !isConnected || !selectedDream || !selectedProfession) ? 'not-allowed' : 'pointer',
-                            opacity: (player.isReady || !isConnected || !selectedDream || !selectedProfession) ? 0.5 : 1,
+                            cursor: (player.isReady || !isConnected || !selectedDream) ? 'not-allowed' : 'pointer',
+                            opacity: (player.isReady || !isConnected || !selectedDream) ? 0.5 : 1,
                             fontSize: '14px'
                           }}
                         >
