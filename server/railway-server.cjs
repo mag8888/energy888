@@ -3,6 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
+const path = require('path');
 
 // Конфигурация для Railway
 const PORT = process.env.PORT || 8080;
@@ -33,7 +34,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Обслуживание статических файлов
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Socket.IO с CORS
 const io = new Server(server, {
@@ -395,7 +396,14 @@ process.on('SIGINT', () => {
   });
 });
 
+// Обработка ошибок сервера
+server.on('error', (error) => {
+  console.error('❌ Ошибка сервера:', error);
+});
+
 // Запуск сервера
 server.listen(PORT, HOST, () => {
   console.log(`🚀 Socket.IO сервер запущен на ${HOST}:${PORT}`);
+  console.log(`📁 Статические файлы из: ${path.join(__dirname, 'public')}`);
+  console.log(`🌐 Откройте: http://${HOST}:${PORT}`);
 });
