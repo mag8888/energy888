@@ -98,6 +98,10 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
   const [playerPositions, setPlayerPositions] = useState<{[key: string]: number}>({});
   const [isMoving, setIsMoving] = useState(false);
   const [canPassTurn, setCanPassTurn] = useState(false);
+  
+  // Состояния для попапа клетки
+  const [selectedCell, setSelectedCell] = useState<any>(null);
+  const [showCellPopup, setShowCellPopup] = useState(false);
 
   // Адаптивные размеры
   const getBoardSize = () => {
@@ -174,6 +178,48 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
       initialPositions[player.id] = 0; // Все начинают с клетки 0
     });
     setPlayerPositions(initialPositions);
+  };
+
+  // Функция для обработки клика по клетке
+  const handleCellClick = (cell: any) => {
+    setSelectedCell(cell);
+    setShowCellPopup(true);
+  };
+
+  // Функция для закрытия попапа
+  const closeCellPopup = () => {
+    setShowCellPopup(false);
+    setSelectedCell(null);
+  };
+
+  // Функция для получения описания клетки
+  const getCellDescription = (cell: any) => {
+    const descriptions: {[key: string]: string} = {
+      'opportunity': 'Это клетка возможностей! Здесь вы можете получить шанс на дополнительный доход или инвестиции.',
+      'expenses': 'Клетка расходов. Будьте готовы к неожиданным тратам и обязательным платежам.',
+      'charity': 'Клетка благотворительности. Поделитесь частью своего дохода с теми, кто в этом нуждается.',
+      'payday': 'День зарплаты! Получите свой ежемесячный доход и пополните свой баланс.',
+      'market': 'Рынок недвижимости. Здесь можно купить или продать недвижимость для пассивного дохода.',
+      'child': 'Рождение ребенка. Это радостное событие, но оно также увеличивает ваши расходы.',
+      'loss': 'Неожиданная потеря. Иногда жизнь преподносит неприятные сюрпризы.'
+    };
+    
+    return descriptions[cell.type] || 'Это специальная клетка игрового поля.';
+  };
+
+  // Функция для получения действий клетки
+  const getCellActions = (cell: any) => {
+    const actions: {[key: string]: string} = {
+      'opportunity': '• Получите карточку возможностей\n• Выберите подходящую инвестицию\n• Увеличьте свой пассивный доход',
+      'expenses': '• Оплатите обязательные расходы\n• Пересмотрите свой бюджет\n• Найдите способы экономии',
+      'charity': '• Пожертвуйте часть дохода\n• Получите благословение\n• Улучшите свою карму',
+      'payday': '• Получите зарплату\n• Пополните банковский счет\n• Планируйте следующие расходы',
+      'market': '• Изучите рынок недвижимости\n• Купите доходную недвижимость\n• Продайте нерентабельные активы',
+      'child': '• Поздравьте с рождением\n• Увеличьте семейные расходы\n• Планируйте будущее ребенка',
+      'loss': '• Примите потерю\n• Пересмотрите стратегию\n• Найдите новые возможности'
+    };
+    
+    return actions[cell.type] || '• Изучите возможности клетки\n• Примите решение\n• Продолжайте игру';
   };
 
   const handleRollDice = async () => {
@@ -301,7 +347,8 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
             transition: 'all 0.3s ease',
             zIndex: 2
           }}
-          title={`${cell.name} (${cell.id})`}
+          title={`${cell.name} (${cell.id}) - Нажмите для подробностей`}
+          onClick={() => handleCellClick(cell)}
         >
           <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             {/* Номер клетки в левом нижнем углу */}
@@ -1360,6 +1407,146 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           100% { transform: rotate(360deg) scale(1); }
         }
       `}</style>
+      
+      {/* Попап с информацией о клетке */}
+      {showCellPopup && selectedCell && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }} onClick={closeCellPopup}>
+          <div style={{
+            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+            borderRadius: '20px',
+            padding: '30px',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            border: '3px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+            position: 'relative'
+          }} onClick={(e) => e.stopPropagation()}>
+            {/* Кнопка закрытия */}
+            <button
+              onClick={closeCellPopup}
+              style={{
+                position: 'absolute',
+                top: '15px',
+                right: '15px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '30px',
+                height: '30px',
+                color: 'white',
+                fontSize: '18px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              ×
+            </button>
+            
+            {/* Заголовок */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '15px',
+              marginBottom: '20px'
+            }}>
+              <div style={{
+                width: '60px',
+                height: '60px',
+                background: selectedCell.color,
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '30px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
+              }}>
+                {selectedCell.icon}
+              </div>
+              <div>
+                <h2 style={{
+                  color: 'white',
+                  margin: '0 0 5px 0',
+                  fontSize: '24px',
+                  fontWeight: 'bold'
+                }}>
+                  {selectedCell.name}
+                </h2>
+                <p style={{
+                  color: '#ccc',
+                  margin: '0',
+                  fontSize: '16px'
+                }}>
+                  Клетка #{selectedCell.id}
+                </p>
+              </div>
+            </div>
+            
+            {/* Описание */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              padding: '20px',
+              borderRadius: '12px',
+              marginBottom: '20px'
+            }}>
+              <h3 style={{
+                color: '#4CAF50',
+                margin: '0 0 15px 0',
+                fontSize: '18px',
+                fontWeight: 'bold'
+              }}>
+                Описание
+              </h3>
+              <p style={{
+                color: 'white',
+                margin: '0',
+                lineHeight: '1.6',
+                fontSize: '14px'
+              }}>
+                {getCellDescription(selectedCell)}
+              </p>
+            </div>
+            
+            {/* Действия */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              padding: '20px',
+              borderRadius: '12px'
+            }}>
+              <h3 style={{
+                color: '#FFC107',
+                margin: '0 0 15px 0',
+                fontSize: '18px',
+                fontWeight: 'bold'
+              }}>
+                Действия
+              </h3>
+              <p style={{
+                color: 'white',
+                margin: '0',
+                lineHeight: '1.6',
+                fontSize: '14px'
+              }}>
+                {getCellActions(selectedCell)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
