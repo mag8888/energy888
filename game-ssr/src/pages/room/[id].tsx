@@ -65,6 +65,39 @@ export default function RoomPage() {
     const user = localStorage.getItem('user');
     const userData = user ? JSON.parse(user) : { name: 'Игрок', email: 'player@example.com' };
     
+    // Проверяем, есть ли сохраненное состояние игры
+    const savedGameState = localStorage.getItem(`game_state_${id}`);
+    if (savedGameState) {
+      try {
+        const gameState = JSON.parse(savedGameState);
+        console.log('🎮 Восстанавливаем состояние игры:', gameState);
+        
+        // Восстанавливаем состояние игры
+        if (gameState.room) {
+          setRoom(gameState.room);
+        }
+        if (gameState.showGameBoard) {
+          setShowGameBoard(true);
+        }
+        if (gameState.currentPlayer) {
+          setCurrentPlayer(gameState.currentPlayer);
+        }
+        if (gameState.currentIndex !== undefined) {
+          setCurrentIndex(gameState.currentIndex);
+        }
+        if (gameState.myPlayer) {
+          setMyPlayer(gameState.myPlayer);
+        }
+        if (gameState.isHost !== undefined) {
+          setIsHost(gameState.isHost);
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('❌ Ошибка восстановления состояния игры:', error);
+      }
+    }
+    
     // Присоединяемся к комнате
     socket.emit('join-room', { 
       roomId: id, 
@@ -87,6 +120,12 @@ export default function RoomPage() {
       
       // Определяем, является ли игрок хостом (первый игрок в комнате)
       setIsHost(myPlayerData && roomData.players.length > 0 && roomData.players[0].id === myPlayerData.id);
+      
+      // Если игра уже идет, запрашиваем состояние игры
+      if (roomData.status === 'playing') {
+        console.log('🎮 Игра уже идет, запрашиваем состояние игры');
+        socket.emit('get-game-state', { roomId: id });
+      }
       
       setLoading(false);
     };
@@ -216,6 +255,32 @@ export default function RoomPage() {
       } : null);
     };
 
+    const handleGameStateReceived = (data: any) => {
+      console.log('🎮 Получено состояние игры с сервера:', data);
+      
+      // Восстанавливаем состояние игры
+      if (data.room) {
+        setRoom(data.room);
+      }
+      if (data.showGameBoard !== undefined) {
+        setShowGameBoard(data.showGameBoard);
+      }
+      if (data.currentPlayer) {
+        setCurrentPlayer(data.currentPlayer);
+      }
+      if (data.currentIndex !== undefined) {
+        setCurrentIndex(data.currentIndex);
+      }
+      if (data.myPlayer) {
+        setMyPlayer(data.myPlayer);
+      }
+      if (data.isHost !== undefined) {
+        setIsHost(data.isHost);
+      }
+      
+      setLoading(false);
+    };
+
 
     // Подписываемся на события
     socket.on('room-joined', handleRoomJoined);
@@ -227,6 +292,7 @@ export default function RoomPage() {
     socket.on('dice-rolled', handleDiceRolled);
     socket.on('turn-changed', handleTurnChanged);
     socket.on('card-bought', handleCardBought);
+    socket.on('game-state-received', handleGameStateReceived);
     socket.on('join-room-error', handleJoinRoomError);
     socket.on('error', handleError);
 
@@ -241,15 +307,45 @@ export default function RoomPage() {
       socket.off('dice-rolled', handleDiceRolled);
       socket.off('turn-changed', handleTurnChanged);
       socket.off('card-bought', handleCardBought);
+      socket.off('game-state-received', handleGameStateReceived);
       socket.off('join-room-error', handleJoinRoomError);
       socket.off('error', handleError);
     };
   }, [socket, isConnected, id]);
 
+  // Сохраняем состояние игры в localStorage при изменении
+  useEffect(() => {
+    if (!id || !room) return;
+
+    const gameState = {
+      room,
+      showGameBoard,
+      currentPlayer,
+      currentIndex,
+      myPlayer,
+      isHost,
+      timestamp: Date.now()
+    };
+
+    try {
+      localStorage.setItem(`game_state_${id}`, JSON.stringify(gameState));
+      console.log('💾 Состояние игры сохранено:', gameState);
+    } catch (error) {
+      console.error('❌ Ошибка сохранения состояния игры:', error);
+    }
+  }, [id, room, showGameBoard, currentPlayer, currentIndex, myPlayer, isHost]);
+
   const handleLeaveRoom = () => {
     if (socket && id) {
       socket.emit('leave-room', { roomId: id });
     }
+    
+    // Очищаем сохраненное состояние игры
+    if (id) {
+      localStorage.removeItem(`game_state_${id}`);
+      console.log('🗑️ Состояние игры очищено для комнаты:', id);
+    }
+    
     router.push('/simple-rooms');
   };
 
