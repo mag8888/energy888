@@ -841,55 +841,6 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           />
         </div>
 
-        {/* 2. Текущий игрок */}
-        <div style={{
-          background: 'rgba(76, 175, 80, 0.1)',
-          padding: '15px',
-          borderRadius: '12px',
-          border: '1px solid rgba(76, 175, 80, 0.3)'
-        }}>
-          <h3 style={{ 
-            color: '#4CAF50', 
-            margin: '0 0 15px 0', 
-            fontSize: '18px',
-            fontWeight: 'bold',
-            textAlign: 'center'
-          }}>
-            Текущий игрок
-          </h3>
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            padding: '15px',
-            borderRadius: '10px',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
-          }}>
-            <div style={{ 
-              color: 'white', 
-              fontSize: '16px', 
-              fontWeight: 'bold',
-              marginBottom: '8px'
-            }}>
-              {currentPlayer?.name || 'Неизвестно'}
-            </div>
-            <div style={{ 
-              color: 'rgba(255, 255, 255, 0.7)', 
-              fontSize: '14px',
-              marginBottom: '5px'
-            }}>
-              Профессия: {typeof currentPlayer?.profession === 'object' && currentPlayer.profession && 'name' in currentPlayer.profession
-                ? (currentPlayer.profession as any).name 
-                : currentPlayer?.profession || 'Не выбрана'}
-            </div>
-            <div style={{ 
-              color: 'rgba(255, 255, 255, 0.7)', 
-              fontSize: '14px'
-            }}>
-              Мечта: {typeof currentPlayer?.dream === 'object' && currentPlayer.dream && 'name' in currentPlayer.dream
-                ? (currentPlayer.dream as any).name 
-                : currentPlayer?.dream || 'Не выбрана'}
-            </div>
-          </div>
-        </div>
 
         {/* 3. Активы - КНОПКА С РАСКРЫВАЕМЫМ СПИСКОМ */}
         <div style={{
@@ -1175,6 +1126,52 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
                 )}
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* 7. Текущий игрок - ПЕРЕМЕЩЕН В САМЫЙ НИЗ */}
+        <div style={{
+          background: 'rgba(76, 175, 80, 0.1)',
+          padding: '15px',
+          borderRadius: '12px',
+          border: '1px solid rgba(76, 175, 80, 0.3)'
+        }}>
+          <h3 style={{ 
+            color: '#4CAF50', 
+            margin: '0 0 15px 0', 
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            Текущий игрок
+          </h3>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            padding: '15px',
+            borderRadius: '10px',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <div style={{ 
+              color: 'white', 
+              fontSize: '16px', 
+              fontWeight: 'bold',
+              marginBottom: '8px'
+            }}>
+              {players[currentIndex]?.name || currentPlayer?.name || 'Неизвестно'}
+            </div>
+            <div style={{ 
+              color: 'rgba(255, 255, 255, 0.7)', 
+              fontSize: '14px',
+              marginBottom: '5px'
+            }}>
+              Профессия: {players[currentIndex]?.profession || currentPlayer?.profession || 'Предприниматель'}
+            </div>
+            <div style={{ 
+              color: 'rgba(255, 255, 255, 0.7)', 
+              fontSize: '14px'
+            }}>
+              Мечта: {players[currentIndex]?.dream || currentPlayer?.dream || 'Не выбрана'}
+            </div>
           </div>
         </div>
       </div>
