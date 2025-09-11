@@ -577,52 +577,110 @@ export default function RoomPage() {
                     <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px' }}>
                       Email: {player.email}
                     </div>
-                    {/* Выбор профессии - только для своего игрока */}
+                    {/* Выбор профессии и мечты - только для своего игрока */}
                     {!player.isReady && myPlayer && myPlayer.id === player.id && (
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px',
-                        marginTop: '8px'
+                        gap: '20px',
+                        marginTop: '8px',
+                        flexWrap: 'wrap'
                       }}>
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.7)',
-                          fontSize: '12px'
+                        {/* Профессия */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
                         }}>
-                          💼 Профессия:
-                        </span>
-                        <select
-                          value={selectedProfession || player.profession || ''}
-                          onChange={(e) => handleProfessionSelect(e.target.value)}
-                          style={{
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            color: 'white',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
-                            fontSize: '12px',
-                            minWidth: '120px'
-                          }}
-                        >
-                          <option value="">Выберите профессию</option>
-                          {PROFESSIONS.map(profession => (
-                            <option key={profession} value={profession} style={{ background: '#1a1a2e', color: 'white' }}>
-                              {profession}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                    {/* Отображение выбранной профессии */}
-                    {player.profession && (
-                      <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px', marginTop: '4px' }}>
-                        💼 Профессия: {player.profession}
-                      </div>
-                    )}
-                    {/* Отображение выбранной мечты */}
-                    {player.dream && (
-                      <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px', marginTop: '4px' }}>
-                        🎯 Мечта: {player.dream}
+                          <span style={{
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontSize: '12px'
+                          }}>
+                            💼 Профессия:
+                          </span>
+                          {player.profession ? (
+                            <span style={{
+                              color: 'white',
+                              fontSize: '12px',
+                              fontWeight: 'bold',
+                              padding: '4px 8px',
+                              background: 'rgba(76, 175, 80, 0.2)',
+                              borderRadius: '4px',
+                              border: '1px solid rgba(76, 175, 80, 0.5)'
+                            }}>
+                              {player.profession}
+                            </span>
+                          ) : (
+                            <select
+                              value={selectedProfession || ''}
+                              onChange={(e) => handleProfessionSelect(e.target.value)}
+                              style={{
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                background: 'rgba(255, 255, 255, 0.1)',
+                                color: 'white',
+                                border: '1px solid rgba(255, 255, 255, 0.3)',
+                                fontSize: '12px',
+                                minWidth: '120px'
+                              }}
+                            >
+                              <option value="">Выберите профессию</option>
+                              {PROFESSIONS.map(profession => (
+                                <option key={profession} value={profession} style={{ background: '#1a1a2e', color: 'white' }}>
+                                  {profession}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
+                        
+                        {/* Мечта */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}>
+                          <span style={{
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontSize: '12px'
+                          }}>
+                            🎯 Мечта:
+                          </span>
+                          {player.dream ? (
+                            <span style={{
+                              color: 'white',
+                              fontSize: '12px',
+                              fontWeight: 'bold',
+                              padding: '4px 8px',
+                              background: 'rgba(76, 175, 80, 0.2)',
+                              borderRadius: '4px',
+                              border: '1px solid rgba(76, 175, 80, 0.5)'
+                            }}>
+                              {player.dream}
+                            </span>
+                          ) : (
+                            <select
+                              value={selectedDream || ''}
+                              onChange={(e) => setSelectedDream(e.target.value)}
+                              style={{
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                background: 'rgba(255, 255, 255, 0.1)',
+                                color: 'white',
+                                border: '1px solid rgba(255, 255, 255, 0.3)',
+                                fontSize: '12px',
+                                minWidth: '150px'
+                              }}
+                            >
+                              <option value="">Выберите мечту</option>
+                              {DREAMS.map(dream => (
+                                <option key={dream.id} value={dream.id} style={{ background: '#1a1a2e', color: 'white' }}>
+                                  {dream.icon} {dream.name}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -632,42 +690,6 @@ export default function RoomPage() {
                     alignItems: 'flex-end',
                     gap: '10px'
                   }}>
-                    {/* Выбор мечты - только для своего игрока */}
-                    {!player.isReady && myPlayer && myPlayer.id === player.id && (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        marginBottom: '10px'
-                      }}>
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.7)',
-                          fontSize: '12px'
-                        }}>
-                          🎯 Мечта:
-                        </span>
-                        <select
-                          value={selectedDream || ''}
-                          onChange={(e) => setSelectedDream(e.target.value)}
-                          style={{
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            color: 'white',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
-                            fontSize: '12px',
-                            minWidth: '150px'
-                          }}
-                        >
-                          <option value="">Выберите мечту</option>
-                          {DREAMS.map(dream => (
-                            <option key={dream.id} value={dream.id} style={{ background: '#1a1a2e', color: 'white' }}>
-                              {dream.icon} {dream.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
                     
                     <div style={{
                       display: 'flex',
@@ -731,14 +753,16 @@ export default function RoomPage() {
             }}>
               {room.currentPlayers < 2 
                 ? `Ожидаем еще ${2 - room.currentPlayers} игроков для старта`
-                : room.currentPlayers < room.maxPlayers 
-                  ? `Ожидаем еще ${room.maxPlayers - room.currentPlayers} игроков (можно начать с ${room.currentPlayers})`
-                  : 'Все игроки готовы! Нажмите "Начать игру"'
+                : room.players.filter(p => p.isReady).length < 2
+                  ? `Готово: ${room.players.filter(p => p.isReady).length}/${room.currentPlayers} игроков (минимум 2)`
+                  : room.players.filter(p => !p.isReady).length === 0
+                    ? 'Все игроки готовы! Можно начинать игру'
+                    : `Готово: ${room.players.filter(p => p.isReady).length}/${room.currentPlayers} игроков (можно начать)`
               }
             </div>
           )}
 
-          {room.status === 'waiting' && room.currentPlayers >= 2 && room.players.filter(p => !p.isReady).length === 0 && isHost && (
+          {room.status === 'waiting' && room.currentPlayers >= 2 && room.players.filter(p => p.isReady).length >= 2 && isHost && (
             <div style={{ marginBottom: '20px' }}>
               <button
                 onClick={handleStartGame}
@@ -763,7 +787,7 @@ export default function RoomPage() {
                   e.currentTarget.style.boxShadow = '0 4px 15px rgba(76, 175, 80, 0.4)';
                 }}
               >
-                🎮 Начать игру
+                🚀 Старт ({room.players.filter(p => p.isReady).length}/{room.currentPlayers} готовы)
               </button>
             </div>
           )}
