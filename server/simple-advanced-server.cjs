@@ -25,7 +25,6 @@ const client = new MongoClient(MONGODB_URI, {
   maxPoolSize: isRailway ? 5 : 10, // Меньше соединений на Railway
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
-  bufferMaxEntries: 0,
   useUnifiedTopology: true
 });
 
