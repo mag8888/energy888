@@ -494,8 +494,8 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         <div
           style={{
             position: 'absolute',
-            left: 280,
-            top: 280,
+            left: 130,
+            top: 130,
             width: cardSize,
             height: cardHeight,
             background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
@@ -522,8 +522,8 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         <div
           style={{
             position: 'absolute',
-            right: 280,
-            top: 280,
+            right: 130,
+            top: 130,
             width: cardSize,
             height: cardHeight,
             background: 'linear-gradient(135deg, #32CD32 0%, #228B22 100%)',
@@ -550,8 +550,8 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         <div
           style={{
             position: 'absolute',
-            right: 280,
-            bottom: 280,
+            right: 130,
+            bottom: 130,
             width: cardSize,
             height: cardHeight,
             background: 'linear-gradient(135deg, #4169E1 0%, #0000CD 100%)',
@@ -578,8 +578,8 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         <div
           style={{
             position: 'absolute',
-            left: 280,
-            bottom: 280,
+            left: 130,
+            bottom: 130,
             width: cardSize,
             height: cardHeight,
             background: 'linear-gradient(135deg, #DC143C 0%, #B22222 100%)',
