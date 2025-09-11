@@ -89,6 +89,22 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
   const [hasRolled, setHasRolled] = useState(false);
   const [rollTime, setRollTime] = useState(0);
 
+  // Адаптивные размеры
+  const getBoardSize = () => {
+    if (typeof window === 'undefined') return 800;
+    if (window.innerWidth < 768) return Math.min(window.innerWidth * 0.9, 400);
+    if (window.innerWidth < 1024) return 600;
+    return 800;
+  };
+
+  const getScale = () => {
+    const boardSize = getBoardSize();
+    return boardSize / 800; // Базовый размер 800px
+  };
+
+  const boardSize = getBoardSize();
+  const scale = getScale();
+
   const handleRollDice = () => {
     if (isRolling) return;
     
@@ -147,32 +163,34 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
     }
   }, [hasRolled, rollTime]);
 
-  // Рендер внутренних клеток (24 в круге) - УМЕНЬШЕН НА 30%
+  // Рендер внутренних клеток (24 в круге) - АДАПТИВНЫЕ РАЗМЕРЫ
   const renderInnerCells = () => {
     return INNER_CELLS.map((cell, index) => {
       const angle = (index * 360) / 24;
-      const radius = 168; // Уменьшено на 30% с 240 до 168
-      const x = 400 + Math.cos((angle - 90) * Math.PI / 180) * radius;
-      const y = 400 + Math.sin((angle - 90) * Math.PI / 180) * radius;
+      const radius = 168 * scale; // Адаптивный радиус
+      const centerX = boardSize / 2;
+      const centerY = boardSize / 2;
+      const x = centerX + Math.cos((angle - 90) * Math.PI / 180) * radius;
+      const y = centerY + Math.sin((angle - 90) * Math.PI / 180) * radius;
       
       return (
         <div
           key={cell.id}
           style={{
             position: 'absolute',
-            left: x - 28, // Уменьшено на 30% с 40 до 28
-            top: y - 28,  // Уменьшено на 30% с 40 до 28
-            width: 56,    // Уменьшено на 30% с 80 до 56
-            height: 56,   // Уменьшено на 30% с 80 до 56
+            left: x - (28 * scale),
+            top: y - (28 * scale),
+            width: 56 * scale,
+            height: 56 * scale,
             background: cell.color,
-            borderRadius: '11px', // Уменьшено на 30% с 16px до 11px
+            borderRadius: `${11 * scale}px`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '22px', // Уменьшено на 30% с 32px до 22px
+            fontSize: `${22 * scale}px`,
             color: 'white',
             fontWeight: 'bold',
-            boxShadow: '0 3px 11px rgba(0,0,0,0.3)', // Уменьшено на 30%
+            boxShadow: `0 ${3 * scale}px ${11 * scale}px rgba(0,0,0,0.3)`,
             cursor: 'pointer',
             transition: 'all 0.3s ease',
             zIndex: 2
@@ -183,15 +201,15 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
             {/* Номер клетки в левом нижнем углу */}
             <div style={{
               position: 'absolute',
-              bottom: '2px',
-              left: '2px',
-              fontSize: '8px',
+              bottom: `${2 * scale}px`,
+              left: `${2 * scale}px`,
+              fontSize: `${8 * scale}px`,
               fontWeight: 'bold',
               color: 'rgba(0, 0, 0, 0.8)',
               background: 'rgba(255, 255, 255, 0.9)',
               borderRadius: '50%',
-              width: '12px',
-              height: '12px',
+              width: `${12 * scale}px`,
+              height: `${12 * scale}px`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -486,8 +504,8 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
 
   // Рендер карточек сделок в углах между внешними и внутренними клетками
   const renderDealCards = () => {
-    const cardSize = 60;
-    const cardHeight = 80;
+    const cardSize = 60 * scale;
+    const cardHeight = 80 * scale;
     
     return (
       <>
@@ -495,26 +513,26 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         <div
           style={{
             position: 'absolute',
-            left: 130,
-            top: 130,
+            left: 130 * scale,
+            top: 130 * scale,
             width: cardSize,
             height: cardHeight,
             background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
-            borderRadius: '12px',
-            border: '3px solid #FF6B35',
+            borderRadius: `${12 * scale}px`,
+            border: `${3 * scale}px solid #FF6B35`,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 25px rgba(255, 215, 0, 0.6)',
+            boxShadow: `0 ${8 * scale}px ${25 * scale}px rgba(255, 215, 0, 0.6)`,
             zIndex: 3,
             cursor: 'pointer',
             transition: 'all 0.3s ease'
           }}
           title="Большая сделка"
         >
-          <div style={{ fontSize: '24px', marginBottom: '4px' }}>💰</div>
-          <div style={{ fontSize: '8px', fontWeight: 'bold', textAlign: 'center', color: '#8B4513' }}>
+          <div style={{ fontSize: `${24 * scale}px`, marginBottom: `${4 * scale}px` }}>💰</div>
+          <div style={{ fontSize: `${8 * scale}px`, fontWeight: 'bold', textAlign: 'center', color: '#8B4513' }}>
             Большая сделка
           </div>
         </div>
@@ -523,26 +541,26 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         <div
           style={{
             position: 'absolute',
-            right: 130,
-            top: 130,
+            right: 130 * scale,
+            top: 130 * scale,
             width: cardSize,
             height: cardHeight,
             background: 'linear-gradient(135deg, #32CD32 0%, #228B22 100%)',
-            borderRadius: '12px',
-            border: '3px solid #FF6B35',
+            borderRadius: `${12 * scale}px`,
+            border: `${3 * scale}px solid #FF6B35`,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 25px rgba(50, 205, 50, 0.6)',
+            boxShadow: `0 ${8 * scale}px ${25 * scale}px rgba(50, 205, 50, 0.6)`,
             zIndex: 3,
             cursor: 'pointer',
             transition: 'all 0.3s ease'
           }}
           title="Малая сделка"
         >
-          <div style={{ fontSize: '24px', marginBottom: '4px' }}>💼</div>
-          <div style={{ fontSize: '8px', fontWeight: 'bold', textAlign: 'center', color: 'white' }}>
+          <div style={{ fontSize: `${24 * scale}px`, marginBottom: `${4 * scale}px` }}>💼</div>
+          <div style={{ fontSize: `${8 * scale}px`, fontWeight: 'bold', textAlign: 'center', color: 'white' }}>
             Малая сделка
           </div>
         </div>
@@ -551,26 +569,26 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         <div
           style={{
             position: 'absolute',
-            right: 130,
-            bottom: 130,
+            right: 130 * scale,
+            bottom: 130 * scale,
             width: cardSize,
             height: cardHeight,
             background: 'linear-gradient(135deg, #4169E1 0%, #0000CD 100%)',
-            borderRadius: '12px',
-            border: '3px solid #FF6B35',
+            borderRadius: `${12 * scale}px`,
+            border: `${3 * scale}px solid #FF6B35`,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 25px rgba(65, 105, 225, 0.6)',
+            boxShadow: `0 ${8 * scale}px ${25 * scale}px rgba(65, 105, 225, 0.6)`,
             zIndex: 3,
             cursor: 'pointer',
             transition: 'all 0.3s ease'
           }}
           title="Рынок"
         >
-          <div style={{ fontSize: '24px', marginBottom: '4px' }}>🏪</div>
-          <div style={{ fontSize: '8px', fontWeight: 'bold', textAlign: 'center', color: 'white' }}>
+          <div style={{ fontSize: `${24 * scale}px`, marginBottom: `${4 * scale}px` }}>🏪</div>
+          <div style={{ fontSize: `${8 * scale}px`, fontWeight: 'bold', textAlign: 'center', color: 'white' }}>
             Рынок
           </div>
         </div>
@@ -579,26 +597,26 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         <div
           style={{
             position: 'absolute',
-            left: 130,
-            bottom: 130,
+            left: 130 * scale,
+            bottom: 130 * scale,
             width: cardSize,
             height: cardHeight,
             background: 'linear-gradient(135deg, #DC143C 0%, #B22222 100%)',
-            borderRadius: '12px',
-            border: '3px solid #FF6B35',
+            borderRadius: `${12 * scale}px`,
+            border: `${3 * scale}px solid #FF6B35`,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 25px rgba(220, 20, 60, 0.6)',
+            boxShadow: `0 ${8 * scale}px ${25 * scale}px rgba(220, 20, 60, 0.6)`,
             zIndex: 3,
             cursor: 'pointer',
             transition: 'all 0.3s ease'
           }}
           title="Расходы"
         >
-          <div style={{ fontSize: '24px', marginBottom: '4px' }}>💸</div>
-          <div style={{ fontSize: '8px', fontWeight: 'bold', textAlign: 'center', color: 'white' }}>
+          <div style={{ fontSize: `${24 * scale}px`, marginBottom: `${4 * scale}px` }}>💸</div>
+          <div style={{ fontSize: `${8 * scale}px`, fontWeight: 'bold', textAlign: 'center', color: 'white' }}>
             Расходы
           </div>
         </div>
@@ -649,17 +667,20 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
       display: 'flex',
       gap: '20px',
       maxWidth: '1200px',
-      margin: '0 auto'
+      margin: '0 auto',
+      flexDirection: window.innerWidth < 1024 ? 'column' : 'row',
+      alignItems: 'center',
+      padding: '20px'
     }}>
       {/* Игровая доска */}
       <div style={{
         position: 'relative',
-        width: '800px',
-        height: '800px',
+        width: `${boardSize}px`,
+        height: `${boardSize}px`,
         background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-        borderRadius: '20px',
-        border: '3px solid rgba(255, 255, 255, 0.2)',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+        borderRadius: `${20 * scale}px`,
+        border: `${3 * scale}px solid rgba(255, 255, 255, 0.2)`,
+        boxShadow: `0 ${20 * scale}px ${40 * scale}px rgba(0, 0, 0, 0.5)`,
         overflow: 'hidden'
       }}>
       {/* Центральный логотип с анимацией */}
@@ -674,14 +695,14 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
       >
         <div
           style={{
-            width: '160px',
-            height: '160px',
+            width: `${160 * scale}px`,
+            height: `${160 * scale}px`,
             background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 32px rgba(255, 215, 0, 0.4), 0 0 0 4px rgba(255, 215, 0, 0.2)',
+            boxShadow: `0 ${8 * scale}px ${32 * scale}px rgba(255, 215, 0, 0.4), 0 0 0 ${4 * scale}px rgba(255, 215, 0, 0.2)`,
             position: 'relative',
             overflow: 'hidden'
           }}
@@ -689,8 +710,8 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
           {/* Внутренний круг с градиентом */}
           <div
             style={{
-              width: '140px',
-              height: '140px',
+              width: `${140 * scale}px`,
+              height: `${140 * scale}px`,
               background: 'radial-gradient(circle, #000000 0%, #1a1a1a 100%)',
               borderRadius: '50%',
               display: 'flex',
@@ -702,10 +723,10 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
             {/* Центральный результат броска кубика */}
             <div
               style={{
-                fontSize: '48px',
+                fontSize: `${48 * scale}px`,
                 fontWeight: 'bold',
                 color: '#FFD700',
-                textShadow: '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 165, 0, 0.6)',
+                textShadow: `0 0 ${20 * scale}px rgba(255, 215, 0, 0.8), 0 0 ${40 * scale}px rgba(255, 165, 0, 0.6)`,
                 zIndex: 3,
                 position: 'relative',
                 animation: isRolling ? 'diceRoll 0.1s infinite' : 'none'
@@ -742,8 +763,8 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
                   key={index}
                   style={{
                     position: 'absolute',
-                    width: '6px',
-                    height: '6px',
+                    width: `${6 * scale}px`,
+                    height: `${6 * scale}px`,
                     background: '#FFD700',
                     borderRadius: '50%',
                     top: '50%',
