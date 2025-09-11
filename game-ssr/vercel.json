@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "name": "energy888-frontend",
   "builds": [
     {
       "src": "package.json",
