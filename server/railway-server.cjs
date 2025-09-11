@@ -32,6 +32,9 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Обслуживание статических файлов
+app.use(express.static('public'));
+
 // Socket.IO с CORS
 const io = new Server(server, {
   cors: corsOptions,
@@ -83,8 +86,32 @@ app.get('/', (req, res) => {
     host: HOST,
     endpoints: {
       health: '/health',
+      stats: '/stats',
       main: '/'
     }
+  });
+});
+
+// Статистика сервера
+app.get('/stats', (req, res) => {
+  res.json({
+    ok: true,
+    server: {
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      platform: process.platform,
+      nodeVersion: process.version,
+      railway: isRailway
+    },
+    database: {
+      connected: !!db,
+      name: 'energy888'
+    },
+    rooms: {
+      total: rooms.size,
+      active: Array.from(rooms.values()).filter(room => room.players.length > 0).length
+    },
+    timestamp: new Date().toISOString()
   });
 });
 
