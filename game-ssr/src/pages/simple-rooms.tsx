@@ -36,6 +36,7 @@ export default function SimpleRooms() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [userData, setUserData] = useState<any>(null);
+  const [playerRooms, setPlayerRooms] = useState<Set<string>>(new Set());
   const router = useRouter();
 
   useEffect(() => {
@@ -50,6 +51,18 @@ export default function SimpleRooms() {
     try {
       const userData = JSON.parse(user);
       setUserData(userData);
+      
+      // Загружаем комнаты игрока из localStorage
+      const savedRooms = localStorage.getItem(`player_rooms_${userData.email || userData.name}`);
+      if (savedRooms) {
+        try {
+          const rooms = JSON.parse(savedRooms);
+          setPlayerRooms(new Set(rooms));
+          console.log('🏠 Загружены комнаты игрока:', rooms);
+        } catch (error) {
+          console.error('❌ Ошибка загрузки комнат игрока:', error);
+        }
+      }
     } catch (error) {
       console.error('❌ Ошибка парсинга данных пользователя:', error);
     }
@@ -91,6 +104,19 @@ export default function SimpleRooms() {
       setRooms(prev => [...prev, room]);
       setMessage('Комната создана успешно!');
       setShowCreateForm(false);
+      
+      // Сохраняем комнату для игрока
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      const userKey = userData.email || userData.name;
+      if (userKey) {
+        const currentRooms = Array.from(playerRooms);
+        if (!currentRooms.includes(room.id)) {
+          currentRooms.push(room.id);
+          setPlayerRooms(new Set(currentRooms));
+          localStorage.setItem(`player_rooms_${userKey}`, JSON.stringify(currentRooms));
+          console.log('💾 Созданная комната сохранена для игрока:', room.id);
+        }
+      }
       
       // Переходим в комнату
       setTimeout(() => {
@@ -171,6 +197,19 @@ export default function SimpleRooms() {
 
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
     console.log('🚪 Присоединяемся к комнате:', roomId);
+    
+    // Сохраняем комнату игрока
+    const userKey = userData.email || userData.name;
+    if (userKey) {
+      const currentRooms = Array.from(playerRooms);
+      if (!currentRooms.includes(roomId)) {
+        currentRooms.push(roomId);
+        setPlayerRooms(new Set(currentRooms));
+        localStorage.setItem(`player_rooms_${userKey}`, JSON.stringify(currentRooms));
+        console.log('💾 Комната сохранена для игрока:', roomId);
+      }
+    }
+    
     socket.emit('join-room', {
       roomId,
       playerName: userData.name || 'Игрок',
@@ -824,9 +863,23 @@ export default function SimpleRooms() {
                   }}
                 >
                   <div style={{ flex: 1 }}>
-                    <h3 style={{ color: 'white', margin: '0 0 10px 0' }}>
-                      {room.name}
-                    </h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                      <h3 style={{ color: 'white', margin: 0 }}>
+                        {room.name}
+                      </h3>
+                      {playerRooms.has(room.id) && (
+                        <span style={{
+                          background: 'linear-gradient(45deg, #4CAF50, #45a049)',
+                          color: 'white',
+                          padding: '4px 8px',
+                          borderRadius: '12px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          МОЯ КОМНАТА
+                        </span>
+                      )}
+                    </div>
                     <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px', marginBottom: '5px' }}>
                       Игроков: {room.players}/{room.maxPlayers} • 
                       Время хода: {room.timing / 60} мин • 
@@ -841,24 +894,28 @@ export default function SimpleRooms() {
                   </div>
                   <button
                     onClick={() => handleJoinRoom(room.id)}
-                    disabled={room.players >= room.maxPlayers || room.status !== 'waiting' || !isConnected}
+                    disabled={(!playerRooms.has(room.id) && (room.players >= room.maxPlayers || room.status !== 'waiting')) || !isConnected}
                     style={{
                       padding: '10px 20px',
                       border: 'none',
                       borderRadius: '8px',
-                      background: (room.players >= room.maxPlayers || room.status !== 'waiting' || !isConnected)
+                      background: ((!playerRooms.has(room.id) && (room.players >= room.maxPlayers || room.status !== 'waiting')) || !isConnected)
                         ? 'rgba(255, 255, 255, 0.1)' 
-                        : 'linear-gradient(45deg, #667eea, #764ba2)',
+                        : playerRooms.has(room.id) && room.status === 'playing'
+                        ? 'linear-gradient(45deg, #4CAF50, #45a049)' // Зеленая для повторного входа
+                        : 'linear-gradient(45deg, #667eea, #764ba2)', // Синяя для обычного входа
                       color: 'white',
-                      cursor: (room.players >= room.maxPlayers || room.status !== 'waiting' || !isConnected)
+                      cursor: ((!playerRooms.has(room.id) && (room.players >= room.maxPlayers || room.status !== 'waiting')) || !isConnected)
                         ? 'not-allowed' 
                         : 'pointer',
-                      opacity: (room.players >= room.maxPlayers || room.status !== 'waiting' || !isConnected) ? 0.5 : 1
+                      opacity: ((!playerRooms.has(room.id) && (room.players >= room.maxPlayers || room.status !== 'waiting')) || !isConnected) ? 0.5 : 1
                     }}
                   >
-                    {room.players >= room.maxPlayers ? 'Полная' : 
-                     room.status !== 'waiting' ? 'Недоступна' : 
-                     !isConnected ? 'Нет подключения' : 'Присоединиться'}
+                    {!isConnected ? 'Нет подключения' :
+                     playerRooms.has(room.id) && room.status === 'playing' ? 'Войти' :
+                     playerRooms.has(room.id) && room.status !== 'playing' ? 'Войти' :
+                     room.players >= room.maxPlayers ? 'Полная' : 
+                     room.status !== 'waiting' ? 'Недоступна' : 'Присоединиться'}
                   </button>
                 </div>
               ))}
