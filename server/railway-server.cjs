@@ -4,6 +4,7 @@ const { Server } = require('socket.io');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 // Конфигурация для Railway
 const PORT = process.env.PORT || 8080;
@@ -35,6 +36,22 @@ app.use(cors(corsOptions));
 
 // Обслуживание статических файлов
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Fallback: serve exported Next.js pages for directory paths without trailing slash
+app.get('*', (req, res, next) => {
+  // Skip API and Socket.IO paths explicitly
+  if (req.path.startsWith('/health') || req.path.startsWith('/stats') || req.path.startsWith('/socket.io')) {
+    return next();
+  }
+
+  const normalizedPath = req.path.endsWith('/') ? req.path.slice(0, -1) : req.path;
+  const candidate = path.join(__dirname, 'public', normalizedPath, 'index.html');
+
+  fs.access(candidate, fs.constants.F_OK, (err) => {
+    if (err) return next();
+    res.sendFile(candidate);
+  });
+});
 
 // Socket.IO с CORS
 const io = new Server(server, {
