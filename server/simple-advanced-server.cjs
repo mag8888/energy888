@@ -4,20 +4,45 @@ const { Server } = require('socket.io');
 const { MongoClient } = require('mongodb');
 
 const PORT = process.env.PORT || 4000;
-const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+const HOST = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost');
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/energy888';
 
-// Подключение к MongoDB
+// Railway оптимизации
+const isRailway = process.env.RAILWAY_ENVIRONMENT === 'production';
+const isProduction = process.env.NODE_ENV === 'production';
+
+console.log('🚀 Запуск сервера:', {
+  environment: process.env.NODE_ENV,
+  railway: isRailway,
+  port: PORT,
+  host: HOST
+});
+
+// Подключение к MongoDB с оптимизацией для Railway
 let db;
-const client = new MongoClient(MONGODB_URI);
+const client = new MongoClient(MONGODB_URI, {
+  // Оптимизации для Railway (ограниченная память)
+  maxPoolSize: isRailway ? 5 : 10, // Меньше соединений на Railway
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  bufferMaxEntries: 0,
+  useUnifiedTopology: true
+});
 
 async function connectToMongoDB() {
   try {
     await client.connect();
     db = client.db('energy888');
-    console.log('✅ MongoDB подключена');
+    console.log('✅ MongoDB подключена', {
+      railway: isRailway,
+      maxPoolSize: isRailway ? 5 : 10
+    });
   } catch (err) {
     console.error('❌ Ошибка подключения к MongoDB:', err);
+    // На Railway не падаем, пытаемся переподключиться
+    if (isRailway) {
+      setTimeout(connectToMongoDB, 5000);
+    }
   }
 }
 
@@ -28,7 +53,7 @@ const tokens = new Map();
 
 // CORS headers
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': process.env.CORS_ORIGIN || '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
   'Content-Type': 'application/json'
@@ -117,6 +142,29 @@ const DREAMS = [
   'Благотворительный фонд', 'Технологический стартап'
 ];
 
+// Graceful shutdown для Railway
+process.on('SIGTERM', () => {
+  console.log('🛑 Получен SIGTERM, завершаем работу...');
+  server.close(() => {
+    console.log('✅ HTTP сервер закрыт');
+    client.close(() => {
+      console.log('✅ MongoDB соединение закрыто');
+      process.exit(0);
+    });
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('🛑 Получен SIGINT, завершаем работу...');
+  server.close(() => {
+    console.log('✅ HTTP сервер закрыт');
+    client.close(() => {
+      console.log('✅ MongoDB соединение закрыто');
+      process.exit(0);
+    });
+  });
+});
+
 // Создание HTTP сервера
 const server = http.createServer((req, res) => {
   const parsedUrl = url.parse(req.url, true);
@@ -157,9 +205,12 @@ const server = http.createServer((req, res) => {
     sendJSON(res, 200, {
       ok: true,
       status: 'healthy',
+      environment: process.env.NODE_ENV || 'development',
+      railway: isRailway,
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       memory: process.memoryUsage(),
+      mongoConnected: !!db,
       tokens: tokens.size,
       connectedClients: io.engine.clientsCount
     });
