@@ -422,8 +422,8 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           }}
           style={{
             position: 'absolute',
-            top: '2%',
-            left: '2%',
+            top: '8%',
+            left: '8%',
             width: '100px',
             height: '80px',
             background: 'linear-gradient(145deg, #10B981 0%, #059669 30%, #047857 60%, #065F46 100%)',
@@ -501,8 +501,8 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           }}
           style={{
             position: 'absolute',
-            top: '2%',
-            right: '2%',
+            top: '8%',
+            right: '8%',
             width: '90px',
             height: '70px',
             background: 'linear-gradient(145deg, #3B82F6 0%, #2563EB 50%, #1D4ED8 100%)',
@@ -578,8 +578,8 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           }}
           style={{
             position: 'absolute',
-            bottom: '2%',
-            left: '2%',
+            bottom: '8%',
+            left: '8%',
             width: '90px',
             height: '70px',
             background: 'linear-gradient(145deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%)',
@@ -655,8 +655,8 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           }}
           style={{
             position: 'absolute',
-            bottom: '2%',
-            right: '2%',
+            bottom: '8%',
+            right: '8%',
             width: '90px',
             height: '70px',
             background: 'linear-gradient(145deg, #F59E0B 0%, #D97706 50%, #B45309 100%)',
