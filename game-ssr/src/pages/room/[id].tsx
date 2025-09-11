@@ -42,6 +42,8 @@ export default function RoomPage() {
   const [currentPlayer, setCurrentPlayer] = useState<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showGameBoard, setShowGameBoard] = useState(false);
+  const [myPlayer, setMyPlayer] = useState<any>(null);
+  const [isHost, setIsHost] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -74,12 +76,35 @@ export default function RoomPage() {
     const handleRoomJoined = (roomData: Room) => {
       console.log('📋 Получена информация о комнате:', roomData);
       setRoom(roomData);
+      
+      // Определяем своего игрока
+      const user = localStorage.getItem('user');
+      const userData = user ? JSON.parse(user) : { name: 'Игрок', email: 'player@example.com' };
+      const myPlayerData = roomData.players.find(p => 
+        p.email === userData.email || p.name === userData.name
+      );
+      setMyPlayer(myPlayerData);
+      
+      // Определяем, является ли игрок хостом (первый игрок в комнате)
+      setIsHost(myPlayerData && roomData.players.length > 0 && roomData.players[0].id === myPlayerData.id);
+      
       setLoading(false);
     };
 
     const handleRoomUpdated = (roomData: Room) => {
       console.log('📋 Комната обновлена:', roomData);
       setRoom(roomData);
+      
+      // Обновляем данные своего игрока
+      const user = localStorage.getItem('user');
+      const userData = user ? JSON.parse(user) : { name: 'Игрок', email: 'player@example.com' };
+      const myPlayerData = roomData.players.find(p => 
+        p.email === userData.email || p.name === userData.name
+      );
+      setMyPlayer(myPlayerData);
+      
+      // Обновляем статус хоста
+      setIsHost(myPlayerData && roomData.players.length > 0 && roomData.players[0].id === myPlayerData.id);
     };
 
     const handleError = (error: any) => {
@@ -552,8 +577,8 @@ export default function RoomPage() {
                     <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px' }}>
                       Email: {player.email}
                     </div>
-                    {/* Выбор профессии */}
-                    {!player.isReady && (
+                    {/* Выбор профессии - только для своего игрока */}
+                    {!player.isReady && myPlayer && myPlayer.id === player.id && (
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -607,8 +632,8 @@ export default function RoomPage() {
                     alignItems: 'flex-end',
                     gap: '10px'
                   }}>
-                    {/* Выбор мечты */}
-                    {!player.isReady && (
+                    {/* Выбор мечты - только для своего игрока */}
+                    {!player.isReady && myPlayer && myPlayer.id === player.id && (
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -656,24 +681,27 @@ export default function RoomPage() {
                       }}>
                         {player.isReady ? '✅ Готов' : '⏳ Ожидает'}
                       </div>
-                      <button
-                        onClick={handleReady}
-                        disabled={player.isReady || !isConnected || !selectedDream || !selectedProfession}
-                        style={{
-                          padding: '8px 16px',
-                          border: 'none',
-                          borderRadius: '6px',
-                          background: (player.isReady || !isConnected || !selectedDream || !selectedProfession)
-                            ? 'rgba(255, 255, 255, 0.1)'
-                            : 'linear-gradient(45deg, #667eea, #764ba2)',
-                          color: 'white',
-                          cursor: (player.isReady || !isConnected || !selectedDream || !selectedProfession) ? 'not-allowed' : 'pointer',
-                          opacity: (player.isReady || !isConnected || !selectedDream || !selectedProfession) ? 0.5 : 1,
-                          fontSize: '14px'
-                        }}
-                      >
-                        {player.isReady ? 'Готов' : 'Готовность'}
-                      </button>
+                      {/* Кнопка Готов - только для своего игрока */}
+                      {myPlayer && myPlayer.id === player.id && (
+                        <button
+                          onClick={handleReady}
+                          disabled={player.isReady || !isConnected || !selectedDream || !selectedProfession}
+                          style={{
+                            padding: '8px 16px',
+                            border: 'none',
+                            borderRadius: '6px',
+                            background: (player.isReady || !isConnected || !selectedDream || !selectedProfession)
+                              ? 'rgba(255, 255, 255, 0.1)'
+                              : 'linear-gradient(45deg, #667eea, #764ba2)',
+                            color: 'white',
+                            cursor: (player.isReady || !isConnected || !selectedDream || !selectedProfession) ? 'not-allowed' : 'pointer',
+                            opacity: (player.isReady || !isConnected || !selectedDream || !selectedProfession) ? 0.5 : 1,
+                            fontSize: '14px'
+                          }}
+                        >
+                          {player.isReady ? 'Готов' : 'Готовность'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -710,7 +738,7 @@ export default function RoomPage() {
             </div>
           )}
 
-          {room.status === 'waiting' && room.currentPlayers >= 2 && room.players.every(p => p.isReady) && (
+          {room.status === 'waiting' && room.currentPlayers >= 2 && room.players.filter(p => !p.isReady).length === 0 && isHost && (
             <div style={{ marginBottom: '20px' }}>
               <button
                 onClick={handleStartGame}
