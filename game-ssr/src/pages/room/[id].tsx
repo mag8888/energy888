@@ -5,6 +5,12 @@ import { DREAMS } from '../../data/professions';
 import FullGameBoard from '../../components/FullGameBoard';
 import DebugRoomsPanel from '../../components/DebugRoomsPanel';
 
+const PROFESSIONS = [
+  'Врач', 'Учитель', 'Инженер', 'Программист', 'Дизайнер',
+  'Менеджер', 'Юрист', 'Бухгалтер', 'Повар', 'Архитектор',
+  'Психолог', 'Журналист', 'Фотограф', 'Музыкант', 'Художник'
+];
+
 interface Room {
   id: string;
   name: string;
@@ -32,6 +38,7 @@ export default function RoomPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDream, setSelectedDream] = useState<string | null>(null);
+  const [selectedProfession, setSelectedProfession] = useState<string | null>(null);
   const [currentPlayer, setCurrentPlayer] = useState<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showGameBoard, setShowGameBoard] = useState(false);
@@ -221,9 +228,24 @@ export default function RoomPage() {
     router.push('/simple-rooms');
   };
 
+  const handleProfessionSelect = (profession: string) => {
+    setSelectedProfession(profession);
+    if (socket && room && id) {
+      socket.emit('player-setup', { 
+        roomId: id, 
+        profession: profession,
+        dream: selectedDream 
+      });
+    }
+  };
+
   const handleReady = () => {
-    if (socket && room && id && selectedDream) {
-      socket.emit('player-ready', { roomId: id, dream: selectedDream });
+    if (socket && room && id && selectedDream && selectedProfession) {
+      socket.emit('player-ready', { 
+        roomId: id, 
+        dream: selectedDream,
+        profession: selectedProfession 
+      });
     }
   };
 
@@ -529,9 +551,55 @@ export default function RoomPage() {
                     </h3>
                     <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px' }}>
                       Email: {player.email}
-                      {player.profession && ` • Профессия: ${player.profession}`}
-                      {player.dream && ` • Мечта: ${player.dream}`}
                     </div>
+                    {/* Выбор профессии */}
+                    {!player.isReady && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginTop: '8px'
+                      }}>
+                        <span style={{
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontSize: '12px'
+                        }}>
+                          💼 Профессия:
+                        </span>
+                        <select
+                          value={selectedProfession || player.profession || ''}
+                          onChange={(e) => handleProfessionSelect(e.target.value)}
+                          style={{
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            color: 'white',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            fontSize: '12px',
+                            minWidth: '120px'
+                          }}
+                        >
+                          <option value="">Выберите профессию</option>
+                          {PROFESSIONS.map(profession => (
+                            <option key={profession} value={profession} style={{ background: '#1a1a2e', color: 'white' }}>
+                              {profession}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                    {/* Отображение выбранной профессии */}
+                    {player.profession && (
+                      <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px', marginTop: '4px' }}>
+                        💼 Профессия: {player.profession}
+                      </div>
+                    )}
+                    {/* Отображение выбранной мечты */}
+                    {player.dream && (
+                      <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px', marginTop: '4px' }}>
+                        🎯 Мечта: {player.dream}
+                      </div>
+                    )}
                   </div>
                   <div style={{
                     display: 'flex',
@@ -590,17 +658,17 @@ export default function RoomPage() {
                       </div>
                       <button
                         onClick={handleReady}
-                        disabled={player.isReady || !isConnected || !selectedDream}
+                        disabled={player.isReady || !isConnected || !selectedDream || !selectedProfession}
                         style={{
                           padding: '8px 16px',
                           border: 'none',
                           borderRadius: '6px',
-                          background: (player.isReady || !isConnected || !selectedDream)
+                          background: (player.isReady || !isConnected || !selectedDream || !selectedProfession)
                             ? 'rgba(255, 255, 255, 0.1)'
                             : 'linear-gradient(45deg, #667eea, #764ba2)',
                           color: 'white',
-                          cursor: (player.isReady || !isConnected || !selectedDream) ? 'not-allowed' : 'pointer',
-                          opacity: (player.isReady || !isConnected || !selectedDream) ? 0.5 : 1,
+                          cursor: (player.isReady || !isConnected || !selectedDream || !selectedProfession) ? 'not-allowed' : 'pointer',
+                          opacity: (player.isReady || !isConnected || !selectedDream || !selectedProfession) ? 0.5 : 1,
                           fontSize: '14px'
                         }}
                       >
