@@ -16,7 +16,7 @@ const corsOptions = {
     
     const allowedOrigins = [
       'https://energy-of-money-1game.onrender.com',
-      'https://energy888-1.onrender.com',
+      'https://energy888-advanced-socket.onrender.com',
       'https://energy888-unified-server.onrender.com',
       'http://localhost:3000',
       'http://localhost:3001'
@@ -50,7 +50,7 @@ const io = new Server(server, {
   cors: {
     origin: [
       'https://energy-of-money-1game.onrender.com',
-      'https://energy888-1.onrender.com',
+      'https://energy888-advanced-socket.onrender.com',
       'https://energy888-unified-server.onrender.com',
       'http://localhost:3000',
       'http://localhost:3001'

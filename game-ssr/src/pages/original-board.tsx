@@ -187,6 +187,62 @@ export default function OriginalBoardPage() {
           </div>
         </div>
 
+        {/* Информация о доске */}
+        <div style={{
+          background: 'rgba(0, 0, 0, 0.8)',
+          backdropFilter: 'blur(15px)',
+          borderRadius: '15px',
+          padding: '30px',
+          marginBottom: '30px',
+          border: '2px solid rgba(255, 255, 255, 0.3)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
+        }}>
+          <h2 style={{ color: 'white', marginTop: 0, marginBottom: '20px' }}>
+            📋 Описание полной игровой доски
+          </h2>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+            <div>
+              <h3 style={{ color: '#4CAF50', marginBottom: '15px' }}>
+                🔵 Внутренний круг (24 клетки)
+              </h3>
+              <ul style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px', lineHeight: '1.6' }}>
+                <li>🎯 Возможности (малые/большие сделки)</li>
+                <li>🛍️ Всякая всячина (обязательные траты)</li>
+                <li>❤️ Благотворительность</li>
+                <li>💰 PayDay (зарплата)</li>
+                <li>🏪 Рынок (покупатели активов)</li>
+                <li>👶 Ребенок (увеличение расходов)</li>
+                <li>🎲 Шанс (случайные события)</li>
+                <li>💸 Налоги</li>
+                <li>🏠 Недвижимость</li>
+                <li>📈 Акции</li>
+                <li>💼 Бизнес</li>
+                <li>🎓 Образование</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 style={{ color: '#FF9800', marginBottom: '15px' }}>
+                🔲 Внешний квадрат (52 клетки)
+              </h3>
+              <ul style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px', lineHeight: '1.6' }}>
+                <li>🏠 Недвижимость (разные типы)</li>
+                <li>📈 Акции (различные компании)</li>
+                <li>💼 Бизнес (разные отрасли)</li>
+                <li>🎯 Возможности</li>
+                <li>🛍️ Расходы</li>
+                <li>🎲 Шанс</li>
+                <li>💸 Налоги</li>
+                <li>🏦 Банк</li>
+                <li>👮 Тюрьма</li>
+                <li>🅿️ Парковка</li>
+                <li>🚀 Старт</li>
+                <li>🏁 Финиш</li>
+              </ul>
+            </div>
+          </div>
+        </div>
 
         {/* Полная игровая доска */}
         <div style={{

@@ -61,7 +61,7 @@ check_server "Game App" "https://energy888.onrender.com" "200"
 game_status=$?
 
 # Проверка Socket Server (если уже создан)
-check_server "Socket Server" "https://energy888-1.onrender.com" "200"
+check_server "Socket Server" "https://energy888-advanced-socket.onrender.com" "200"
 unified_status=$?
 
 echo ""
@@ -75,8 +75,8 @@ fi
 
 # Проверка Socket Server API (если доступен)
 if [ $unified_status -eq 0 ]; then
-    check_api "Socket Health" "https://energy888-1.onrender.com/health" "ok"
-    check_api "Socket Token" "https://energy888-1.onrender.com/tg/new-token" "token"
+    check_api "Socket Health" "https://energy888-advanced-socket.onrender.com/health" "ok"
+    check_api "Socket Token" "https://energy888-advanced-socket.onrender.com/tg/new-token" "token"
 fi
 
 echo ""
@@ -114,7 +114,7 @@ fi
 
 if [ $game_status -eq 0 ] && [ $unified_status -eq 0 ]; then
     echo "2. Обновите Game App с новыми переменными:"
-    echo "   - NEXT_PUBLIC_SOCKET_URL=https://energy888-1.onrender.com"
+    echo "   - NEXT_PUBLIC_SOCKET_URL=https://energy888-advanced-socket.onrender.com"
     echo "   - NEXT_PUBLIC_TELEGRAM_BOT=energy_m_bot"
     echo "3. Пересоберите Game App"
 fi
@@ -123,6 +123,6 @@ echo ""
 echo "🔗 Полезные ссылки:"
 echo "   - Bot Server: https://botenergy-7to1.onrender.com"
 echo "   - Game App: https://energy888.onrender.com"
-echo "   - Socket Server: https://energy888-1.onrender.com"
+echo "   - Socket Server: https://energy888-advanced-socket.onrender.com"
 echo "   - Telegram Bot: https://t.me/energy_m_bot"
 echo "   - Render Dashboard: https://dashboard.render.com"
