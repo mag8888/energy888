@@ -69,6 +69,12 @@ const BankModal = ({
   const [success, setSuccess] = useState('');
   const [isConnected, setIsConnected] = useState(socket?.connected || false);
   const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Состояние кредитной системы
+  const [currentCredit, setCurrentCredit] = useState(0);
+  const [creditAmount, setCreditAmount] = useState('');
+  const [showCreditModal, setShowCreditModal] = useState(false);
+  const [isProcessingCredit, setIsProcessingCredit] = useState(false);
 
   // Добавление CSS анимации shimmer
   useEffect(() => {
@@ -113,6 +119,112 @@ const BankModal = ({
     
     return player;
   }, [gamePlayers, playerData?.id, playerData?.username]);
+
+  // Расчет денежного потока (доход - расходы - кредитные платежи)
+  const calculateCashFlow = useCallback(() => {
+    const currentPlayer = getCurrentPlayer();
+    if (!currentPlayer) return 0;
+    
+    const income = currentPlayer.income || 1200; // Доход по умолчанию
+    const expenses = currentPlayer.expenses || 800; // Расходы по умолчанию
+    const creditPayments = currentCredit * 0.1; // 10% от кредита как ежемесячный платеж
+    
+    return income - expenses - creditPayments;
+  }, [getCurrentPlayer, currentCredit]);
+
+  // Расчет максимального кредита (денежный поток * 10)
+  const getMaxCreditAmount = useCallback(() => {
+    const cashFlow = calculateCashFlow();
+    return Math.max(0, Math.floor(cashFlow / 100) * 1000); // Кратно 1000
+  }, [calculateCashFlow]);
+
+  // Обработка взятия кредита
+  const handleTakeCredit = useCallback(() => {
+    const amount = parseInt(creditAmount);
+    if (!amount || amount <= 0 || amount % 1000 !== 0) {
+      setError('Сумма кредита должна быть кратной 1000');
+      return;
+    }
+    
+    const maxCredit = getMaxCreditAmount();
+    if (amount > maxCredit) {
+      setError(`Максимальный кредит: $${maxCredit.toLocaleString()}`);
+      return;
+    }
+    
+    setIsProcessingCredit(true);
+    
+    // Эмулируем взятие кредита
+    setTimeout(() => {
+      setCurrentCredit(prev => prev + amount);
+      setBankBalance(prev => prev + amount);
+      
+      // Добавляем в историю
+      const newTransaction = {
+        id: Date.now().toString(),
+        type: 'credit',
+        amount: amount,
+        description: `Взят кредит на $${amount.toLocaleString()}`,
+        timestamp: new Date().toISOString(),
+        from: 'Банк',
+        to: playerData?.username || 'Игрок',
+        status: 'completed',
+        balanceAfter: bankBalance + amount
+      };
+      
+      setTransferHistory(prev => [newTransaction, ...prev]);
+      setSuccess(`Кредит на $${amount.toLocaleString()} успешно взят`);
+      setCreditAmount('');
+      setShowCreditModal(false);
+      setIsProcessingCredit(false);
+      
+      if (onBankBalanceChange) {
+        onBankBalanceChange(bankBalance + amount);
+      }
+    }, 1000);
+  }, [creditAmount, getMaxCreditAmount, bankBalance, playerData?.username, onBankBalanceChange]);
+
+  // Обработка погашения кредита
+  const handleRepayCredit = useCallback((amount) => {
+    if (amount > currentCredit) {
+      setError('Нельзя погасить больше, чем взято в кредит');
+      return;
+    }
+    
+    if (amount > bankBalance) {
+      setError('Недостаточно средств для погашения');
+      return;
+    }
+    
+    setIsProcessingCredit(true);
+    
+    // Эмулируем погашение кредита
+    setTimeout(() => {
+      setCurrentCredit(prev => prev - amount);
+      setBankBalance(prev => prev - amount);
+      
+      // Добавляем в историю
+      const newTransaction = {
+        id: Date.now().toString(),
+        type: 'credit',
+        amount: -amount,
+        description: `Погашен кредит на $${amount.toLocaleString()}`,
+        timestamp: new Date().toISOString(),
+        from: playerData?.username || 'Игрок',
+        to: 'Банк',
+        status: 'completed',
+        balanceAfter: bankBalance - amount
+      };
+      
+      setTransferHistory(prev => [newTransaction, ...prev]);
+      setSuccess(`Кредит на $${amount.toLocaleString()} успешно погашен`);
+      setIsProcessingCredit(false);
+      
+      if (onBankBalanceChange) {
+        onBankBalanceChange(bankBalance - amount);
+      }
+    }, 1000);
+  }, [currentCredit, bankBalance, playerData?.username, onBankBalanceChange]);
 
   // Получение начального баланса из профессии
   const getInitialBalance = useCallback(() => {
@@ -672,37 +784,63 @@ const BankModal = ({
                 {/* Кредитная информация */}
                 <Box sx={{ mt: 'auto' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <CheckCircle sx={{ color: '#4CAF50', mr: 1, fontSize: 16 }} />
+                    <CreditCard sx={{ color: currentCredit > 0 ? '#f44336' : '#4CAF50', mr: 1, fontSize: 16 }} />
                     <Typography variant="body2" sx={{ color: 'white' }}>
-                      Кредит: $0
+                      Кредит: ${currentCredit.toLocaleString()}
                     </Typography>
                   </Box>
-                  <Typography variant="body2" sx={{ color: '#9C27B0', mb: 2 }}>
-                    Макс. кредит: $38,000
+                  <Typography variant="body2" sx={{ color: '#9C27B0', mb: 1 }}>
+                    Макс. кредит: ${getMaxCreditAmount().toLocaleString()}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#FFC107', mb: 2, fontSize: '12px' }}>
+                    Денежный поток: ${calculateCashFlow().toLocaleString()}/мес
                   </Typography>
                   
                   <Box sx={{ display: 'flex', gap: 1 }}>
+                    {currentCredit > 0 ? (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => handleRepayCredit(currentCredit)}
+                        disabled={isProcessingCredit || bankBalance < currentCredit}
+                        sx={{
+                          background: '#4CAF50',
+                          color: 'white',
+                          flex: 1,
+                          '&:hover': { background: '#45a049' },
+                          '&:disabled': { background: 'rgba(255, 255, 255, 0.1)' }
+                        }}
+                      >
+                        <CheckCircle sx={{ mr: 0.5, fontSize: 16 }} />
+                        ПОГАСИТЬ
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        disabled
+                        sx={{
+                          background: '#4CAF50',
+                          color: 'white',
+                          flex: 1,
+                          opacity: 0.7
+                        }}
+                      >
+                        <CheckCircle sx={{ mr: 0.5, fontSize: 16 }} />
+                        БЕЗ КРЕДИТОВ
+                      </Button>
+                    )}
                     <Button
                       variant="contained"
                       size="small"
+                      onClick={() => setShowCreditModal(true)}
+                      disabled={isProcessingCredit || getMaxCreditAmount() <= 0}
                       sx={{
-                        background: '#4CAF50',
+                        background: getMaxCreditAmount() > 0 ? '#f44336' : 'rgba(255, 255, 255, 0.1)',
                         color: 'white',
                         flex: 1,
-                        '&:hover': { background: '#45a049' }
-                      }}
-                    >
-                      <CheckCircle sx={{ mr: 0.5, fontSize: 16 }} />
-                      БЕЗ КРЕДИТОВ
-                    </Button>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      sx={{
-                        background: '#f44336',
-                        color: 'white',
-                        flex: 1,
-                        '&:hover': { background: '#d32f2f' }
+                        '&:hover': { background: getMaxCreditAmount() > 0 ? '#d32f2f' : 'rgba(255, 255, 255, 0.1)' },
+                        '&:disabled': { background: 'rgba(255, 255, 255, 0.1)' }
                       }}
                     >
                       <CreditCard sx={{ mr: 0.5, fontSize: 16 }} />
@@ -999,6 +1137,135 @@ const BankModal = ({
           {success}
         </Alert>
       </Snackbar>
+
+      {/* Модальное окно для выбора суммы кредита */}
+      <Dialog
+        open={showCreditModal}
+        onClose={() => setShowCreditModal(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+            borderRadius: '20px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          pb: 2,
+          pt: 3,
+          px: 3,
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <CreditCard sx={{ color: '#f44336', fontSize: 28 }} />
+            <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'white' }}>
+              Взять кредит
+            </Typography>
+          </Box>
+          <IconButton 
+            onClick={() => setShowCreditModal(false)} 
+            sx={{ color: 'white' }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent sx={{ p: 3 }}>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body1" sx={{ color: 'white', mb: 2 }}>
+              Выберите сумму кредита (кратную 1000):
+            </Typography>
+            
+            <TextField
+              fullWidth
+              label="Сумма кредита ($)"
+              type="number"
+              value={creditAmount}
+              onChange={(e) => setCreditAmount(e.target.value)}
+              placeholder="Введите сумму, кратную 1000"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: 'white',
+                  borderRadius: '12px',
+                  '& fieldset': {
+                    borderColor: 'rgba(255, 255, 255, 0.2)'
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'rgba(255, 255, 255, 0.4)'
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#f44336',
+                    borderWidth: '2px'
+                  }
+                },
+                '& .MuiInputLabel-root': {
+                  color: 'rgba(255, 255, 255, 0.7)'
+                }
+              }}
+            />
+          </Box>
+
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', mb: 1 }}>
+              Максимальный кредит: <strong style={{ color: '#9C27B0' }}>${getMaxCreditAmount().toLocaleString()}</strong>
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', mb: 1 }}>
+              Текущий денежный поток: <strong style={{ color: '#FFC107' }}>${calculateCashFlow().toLocaleString()}/мес</strong>
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+              Ежемесячный платеж: <strong style={{ color: '#f44336' }}>${creditAmount ? (parseInt(creditAmount) * 0.1).toLocaleString() : '0'}/мес</strong>
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="contained"
+              onClick={handleTakeCredit}
+              disabled={!creditAmount || isProcessingCredit || parseInt(creditAmount) % 1000 !== 0 || parseInt(creditAmount) > getMaxCreditAmount()}
+              sx={{
+                flex: 1,
+                background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+                color: 'white',
+                py: 1.5,
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%)'
+                },
+                '&:disabled': {
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  color: 'rgba(255, 255, 255, 0.3)'
+                }
+              }}
+            >
+              {isProcessingCredit ? 'Обработка...' : 'Взять кредит'}
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => setShowCreditModal(false)}
+              sx={{
+                borderColor: 'rgba(255, 255, 255, 0.3)',
+                color: 'white',
+                py: 1.5,
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                '&:hover': {
+                  borderColor: '#f44336',
+                  backgroundColor: 'rgba(244, 67, 54, 0.1)'
+                }
+              }}
+            >
+              Отмена
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };
