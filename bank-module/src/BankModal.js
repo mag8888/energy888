@@ -618,7 +618,7 @@ const BankModal = ({
         overflow: 'hidden'
       }}>
         <Grid container spacing={2} sx={{ height: '100%' }}>
-          {/* Левая панель - Баланс и статистика */}
+          {/* 1. Левая панель - Баланс и статистика */}
           <Grid item xs={12} md={4} sx={{ height: '100%' }}>
             <Card sx={{ 
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
@@ -857,10 +857,10 @@ const BankModal = ({
             </Card>
           </Grid>
 
-          {/* Правая панель - Переводы и история */}
+          {/* Правая панель - 2. Перевод средств, 3. История */}
           <Grid item xs={12} md={8} sx={{ height: '100%' }}>
             <Grid container spacing={2} sx={{ height: '100%' }}>
-              {/* Форма перевода */}
+              {/* 2. Перевод средств */}
               <Grid item xs={12} sx={{ height: '50%' }}>
                 <Card sx={{ 
                   background: 'rgba(255, 255, 255, 0.05)',
@@ -870,7 +870,7 @@ const BankModal = ({
                 }}>
                   <CardContent sx={{ p: 3 }}>
                     <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: 'white' }}>
-                      Перевод средств
+                      перевод средств
                     </Typography>
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
@@ -996,7 +996,7 @@ const BankModal = ({
                 </Card>
               </Grid>
 
-              {/* История операций */}
+              {/* 3. История */}
               <Grid item xs={12} sx={{ height: '50%' }}>
                 <Card sx={{ 
                   background: 'rgba(255, 255, 255, 0.1)',
@@ -1016,7 +1016,7 @@ const BankModal = ({
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                       <History sx={{ color: '#8B5CF6' }} />
                       <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'white' }}>
-                        История операций
+                        история
                       </Typography>
                       <Chip 
                         label={transferHistory.length} 

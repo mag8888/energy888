@@ -28,3 +28,4 @@ export interface BankModuleProps {
 
 declare const BankModule: React.FC<BankModuleProps>;
 export default BankModule;
+

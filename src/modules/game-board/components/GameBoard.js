@@ -194,6 +194,12 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                 border: '3px solid rgba(255,255,255,0.4)',
                 boxShadow: 'inset 0 3px 6px rgba(255,255,255,0.3), inset 0 -3px 6px rgba(0,0,0,0.2)',
                 position: 'relative',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  boxShadow: 'inset 0 3px 6px rgba(255,255,255,0.4), inset 0 -3px 6px rgba(0,0,0,0.3), 0 0 20px rgba(139, 92, 246, 0.5)'
+                },
                 '&::before': {
                   content: '""',
                   position: 'absolute',
@@ -207,32 +213,40 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                   zIndex: -1
                 }
               }}
+              onClick={openBankModal}
             >
               <Typography
                 variant="h5"
                 sx={{
                   color: 'white',
                   fontWeight: '900',
-                  fontSize: '22px',
+                  fontSize: '18px',
                   textShadow: '0 4px 8px rgba(0,0,0,0.6), 0 0 15px rgba(255,255,255,0.4)',
-                  letterSpacing: '3px',
+                  letterSpacing: '1px',
                   textAlign: 'center',
                   lineHeight: 1.1,
                   fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
                 }}
               >
-                ЦЕНТР
+                БАНК
               </Typography>
-              <Box
+              <Typography
+                variant="caption"
                 sx={{
-                  width: '30px',
-                  height: '4px',
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%)',
-                  borderRadius: '2px',
-                  mt: 1.5,
-                  boxShadow: '0 0 12px rgba(255,255,255,0.6)'
+                  color: 'white',
+                  fontWeight: '600',
+                  fontSize: '8px',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.6)',
+                  textAlign: 'center',
+                  lineHeight: 1.2,
+                  mt: 0.5,
+                  opacity: 0.9
                 }}
-              />
+              >
+                Нажмите для открытия
+                <br />
+                банковских операций
+              </Typography>
             </Box>
           </Box>
         </motion.div>
@@ -406,10 +420,10 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           }}
           style={{
             position: 'absolute',
-            top: '20px',
-            left: '20px',
-            width: '100px',
-            height: '80px',
+            top: '15px',
+            left: '15px',
+            width: '90px',
+            height: '70px',
             background: 'linear-gradient(145deg, #10B981 0%, #059669 30%, #047857 60%, #065F46 100%)',
             borderRadius: '25px',
             display: 'flex',
@@ -700,6 +714,263 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
             }}
           >
             Рынок
+          </Typography>
+        </motion.div>
+
+        {/* Дополнительные сделки по сторонам */}
+        {/* Верхняя сторона - дополнительные сделки */}
+        <motion.div
+          initial={{ scale: 0, opacity: 0, rotate: 0 }}
+          animate={{ scale: 1, opacity: 1, rotate: 0 }}
+          transition={{ 
+            delay: 0.9, 
+            duration: 0.6,
+            type: "spring",
+            stiffness: 150,
+            damping: 15
+          }}
+          style={{
+            position: 'absolute',
+            top: '25px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '80px',
+            height: '60px',
+            background: 'linear-gradient(145deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%)',
+            borderRadius: '15px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            cursor: 'pointer',
+            boxShadow: `
+              0 0 0 2px rgba(255,255,255,0.2),
+              0 6px 15px rgba(139, 92, 246, 0.4),
+              0 0 25px rgba(139, 92, 246, 0.2),
+              inset 0 2px 0 rgba(255,255,255,0.3),
+              inset 0 -2px 0 rgba(0,0,0,0.2)
+            `,
+            zIndex: 4,
+            border: '1px solid rgba(255,255,255,0.15)'
+          }}
+          onClick={() => openCellPopup({ id: 'top-deal', name: 'Сделка' })}
+          whileHover={{ 
+            scale: 1.08,
+            boxShadow: `
+              0 0 0 3px rgba(255,255,255,0.4),
+              0 8px 20px rgba(139, 92, 246, 0.6),
+              0 0 30px rgba(139, 92, 246, 0.3),
+              inset 0 2px 0 rgba(255,255,255,0.5)
+            `
+          }}
+          whileTap={{ scale: 0.92 }}
+        >
+          <Typography sx={{ fontSize: '14px', mb: 0.5 }}>💎</Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'white',
+              fontWeight: '800',
+              fontSize: '10px',
+              textAlign: 'center',
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+              letterSpacing: '0.5px',
+              lineHeight: 1.2
+            }}
+          >
+            Сделка
+          </Typography>
+        </motion.div>
+
+        {/* Правая сторона - дополнительные сделки */}
+        <motion.div
+          initial={{ scale: 0, opacity: 0, rotate: 0 }}
+          animate={{ scale: 1, opacity: 1, rotate: 0 }}
+          transition={{ 
+            delay: 1.0, 
+            duration: 0.6,
+            type: "spring",
+            stiffness: 150,
+            damping: 15
+          }}
+          style={{
+            position: 'absolute',
+            right: '25px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: '70px',
+            height: '50px',
+            background: 'linear-gradient(145deg, #EC4899 0%, #DB2777 50%, #BE185D 100%)',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            cursor: 'pointer',
+            boxShadow: `
+              0 0 0 2px rgba(255,255,255,0.2),
+              0 6px 15px rgba(236, 72, 153, 0.4),
+              0 0 25px rgba(236, 72, 153, 0.2),
+              inset 0 2px 0 rgba(255,255,255,0.3),
+              inset 0 -2px 0 rgba(0,0,0,0.2)
+            `,
+            zIndex: 4,
+            border: '1px solid rgba(255,255,255,0.15)'
+          }}
+          onClick={() => openCellPopup({ id: 'right-deal', name: 'Сделка' })}
+          whileHover={{ 
+            scale: 1.08,
+            boxShadow: `
+              0 0 0 3px rgba(255,255,255,0.4),
+              0 8px 20px rgba(236, 72, 153, 0.6),
+              0 0 30px rgba(236, 72, 153, 0.3),
+              inset 0 2px 0 rgba(255,255,255,0.5)
+            `
+          }}
+          whileTap={{ scale: 0.92 }}
+        >
+          <Typography sx={{ fontSize: '12px', mb: 0.3 }}>🎯</Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'white',
+              fontWeight: '800',
+              fontSize: '9px',
+              textAlign: 'center',
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+              letterSpacing: '0.5px',
+              lineHeight: 1.2
+            }}
+          >
+            Сделка
+          </Typography>
+        </motion.div>
+
+        {/* Нижняя сторона - дополнительные сделки */}
+        <motion.div
+          initial={{ scale: 0, opacity: 0, rotate: 0 }}
+          animate={{ scale: 1, opacity: 1, rotate: 0 }}
+          transition={{ 
+            delay: 1.1, 
+            duration: 0.6,
+            type: "spring",
+            stiffness: 150,
+            damping: 15
+          }}
+          style={{
+            position: 'absolute',
+            bottom: '25px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '80px',
+            height: '60px',
+            background: 'linear-gradient(145deg, #06B6D4 0%, #0891B2 50%, #0E7490 100%)',
+            borderRadius: '15px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            cursor: 'pointer',
+            boxShadow: `
+              0 0 0 2px rgba(255,255,255,0.2),
+              0 6px 15px rgba(6, 182, 212, 0.4),
+              0 0 25px rgba(6, 182, 212, 0.2),
+              inset 0 2px 0 rgba(255,255,255,0.3),
+              inset 0 -2px 0 rgba(0,0,0,0.2)
+            `,
+            zIndex: 4,
+            border: '1px solid rgba(255,255,255,0.15)'
+          }}
+          onClick={() => openCellPopup({ id: 'bottom-deal', name: 'Сделка' })}
+          whileHover={{ 
+            scale: 1.08,
+            boxShadow: `
+              0 0 0 3px rgba(255,255,255,0.4),
+              0 8px 20px rgba(6, 182, 212, 0.6),
+              0 0 30px rgba(6, 182, 212, 0.3),
+              inset 0 2px 0 rgba(255,255,255,0.5)
+            `
+          }}
+          whileTap={{ scale: 0.92 }}
+        >
+          <Typography sx={{ fontSize: '14px', mb: 0.5 }}>⚡</Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'white',
+              fontWeight: '800',
+              fontSize: '10px',
+              textAlign: 'center',
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+              letterSpacing: '0.5px',
+              lineHeight: 1.2
+            }}
+          >
+            Сделка
+          </Typography>
+        </motion.div>
+
+        {/* Левая сторона - дополнительные сделки */}
+        <motion.div
+          initial={{ scale: 0, opacity: 0, rotate: 0 }}
+          animate={{ scale: 1, opacity: 1, rotate: 0 }}
+          transition={{ 
+            delay: 1.2, 
+            duration: 0.6,
+            type: "spring",
+            stiffness: 150,
+            damping: 15
+          }}
+          style={{
+            position: 'absolute',
+            left: '25px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: '70px',
+            height: '50px',
+            background: 'linear-gradient(145deg, #84CC16 0%, #65A30D 50%, #4D7C0F 100%)',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            cursor: 'pointer',
+            boxShadow: `
+              0 0 0 2px rgba(255,255,255,0.2),
+              0 6px 15px rgba(132, 204, 22, 0.4),
+              0 0 25px rgba(132, 204, 22, 0.2),
+              inset 0 2px 0 rgba(255,255,255,0.3),
+              inset 0 -2px 0 rgba(0,0,0,0.2)
+            `,
+            zIndex: 4,
+            border: '1px solid rgba(255,255,255,0.15)'
+          }}
+          onClick={() => openCellPopup({ id: 'left-deal', name: 'Сделка' })}
+          whileHover={{ 
+            scale: 1.08,
+            boxShadow: `
+              0 0 0 3px rgba(255,255,255,0.4),
+              0 8px 20px rgba(132, 204, 22, 0.6),
+              0 0 30px rgba(132, 204, 22, 0.3),
+              inset 0 2px 0 rgba(255,255,255,0.5)
+            `
+          }}
+          whileTap={{ scale: 0.92 }}
+        >
+          <Typography sx={{ fontSize: '12px', mb: 0.3 }}>🚀</Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'white',
+              fontWeight: '800',
+              fontSize: '9px',
+              textAlign: 'center',
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+              letterSpacing: '0.5px',
+              lineHeight: 1.2
+            }}
+          >
+            Сделка
           </Typography>
         </motion.div>
 
@@ -1104,6 +1375,36 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
     );
   };
 
+  // Рендер кнопки броска кубика
+  const renderDiceButton = () => {
+    return (
+      <Box sx={{ mb: 2 }}>
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={rollDice}
+          disabled={!canRollDice || isRolling}
+          sx={{
+            background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+            color: 'white',
+            py: 1.5,
+            fontSize: '16px',
+            fontWeight: 'bold',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+            },
+            '&:disabled': {
+              background: '#6B7280',
+              color: 'rgba(255,255,255,0.5)'
+            }
+          }}
+        >
+          {isRolling ? 'Бросаем...' : `🎲 Бросить кубик${diceValue ? ` (${diceValue})` : ''}`}
+        </Button>
+      </Box>
+    );
+  };
+
   // Рендер панели управления
   const renderControlPanel = () => {
     return (
@@ -1168,9 +1469,6 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
 
     return (
       <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" sx={{ color: 'white', mb: 1 }}>
-          Время хода: {turnTimeLeft}с
-        </Typography>
         <LinearProgress
           variant="determinate"
           value={progress}
@@ -1183,6 +1481,9 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
             }
           }}
         />
+        <Typography variant="body2" sx={{ color: 'white', mt: 1, textAlign: 'center' }}>
+          {turnTimeLeft}с
+        </Typography>
       </Box>
     );
   };
@@ -1232,83 +1533,18 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           {/* Правая панель - все элементы управления */}
           <Grid item xs={12} md={4}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {/* Банк */}
+              {/* 1. Банк */}
               {renderBankSection()}
               
-              {/* Активы */}
-              {renderAssetsSection()}
+              {/* 2. Бросить кубик */}
+              {renderDiceButton()}
               
-              {/* Управление */}
-              {renderControlPanel()}
-              
-              {/* Таймер */}
+              {/* 3. Время хода (только шкала и таймер) */}
               {renderTurnTimer()}
               
-              {/* Игроки */}
+              {/* 4. Очередь игроков */}
               {renderPlayersPanel()}
               
-              {/* Текущий игрок */}
-              {currentPlayer && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="h6" sx={{ mb: 2, color: 'white', fontWeight: 'bold' }}>
-                    Текущий игрок
-                  </Typography>
-                  <Box
-                    sx={{
-                      p: 2,
-                      background: 'rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      border: '1px solid rgba(255,255,255,0.2)'
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                      <Avatar
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          bgcolor: currentPlayer.color
-                        }}
-                      >
-                        {currentPlayer.username?.charAt(0).toUpperCase()}
-                      </Avatar>
-                      <Box>
-                        <Typography variant="body1" sx={{ color: 'white', fontWeight: 'bold' }}>
-                          {currentPlayer.username}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-                          Баланс: {currentPlayerBalance} 💰
-                        </Typography>
-                      </Box>
-                    </Box>
-                    
-                    <Typography variant="caption" sx={{ color: 'white', mb: 1 }}>
-                      Активы: {currentPlayerAssets.length}
-                    </Typography>
-                    
-                    {currentPlayerAssets.length > 0 && (
-                      <Box sx={{ mt: 1 }}>
-                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-                          Последние активы:
-                        </Typography>
-                        {currentPlayerAssets.slice(-3).map((asset, index) => (
-                          <Chip
-                            key={index}
-                            label={asset.name || asset.type}
-                            size="small"
-                            sx={{
-                              mr: 0.5,
-                              mb: 0.5,
-                              bgcolor: 'rgba(255,255,255,0.2)',
-                              color: 'white',
-                              fontSize: '10px'
-                            }}
-                          />
-                        ))}
-                      </Box>
-                    )}
-                  </Box>
-                </Box>
-              )}
             </Box>
           </Grid>
         </Grid>

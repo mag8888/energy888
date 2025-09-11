@@ -23,3 +23,4 @@ export interface BankModuleProps {
   onBankBalanceChange: (balance: number) => void;
   transferHistory?: Transaction[];
 }
+
