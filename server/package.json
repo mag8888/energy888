@@ -4,7 +4,7 @@
   "description": "Advanced Socket.IO server for Energy of Money with MongoDB, professions, dreams, and hall of fame",
   "main": "railway-server.cjs",
   "scripts": {
-    "start": "node railway-server.cjs",
+    "start": "node test-server.js",
     "start:advanced": "node simple-advanced-server.cjs",
     "dev": "nodemon advanced-socket-server.cjs",
     "test": "node test-advanced-server.js"
