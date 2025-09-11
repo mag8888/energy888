@@ -27,6 +27,7 @@ interface Room {
     dream?: string;
     position?: number;
     money?: number;
+    socketId?: string;
   }>;
 }
 
