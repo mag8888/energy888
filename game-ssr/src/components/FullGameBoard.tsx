@@ -88,6 +88,16 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
   const [timeLeft, setTimeLeft] = useState(120); // 2 минуты в секундах
   const [hasRolled, setHasRolled] = useState(false);
   const [rollTime, setRollTime] = useState(0);
+  
+  // Состояния для системы ходов
+  const [gameStarted, setGameStarted] = useState(false);
+  const [shuffling, setShuffling] = useState(false);
+  const [shuffleTime, setShuffleTime] = useState(10);
+  const [turnOrder, setTurnOrder] = useState<Player[]>([]);
+  const [currentTurnIndex, setCurrentTurnIndex] = useState(0);
+  const [playerPositions, setPlayerPositions] = useState<{[key: string]: number}>({});
+  const [isMoving, setIsMoving] = useState(false);
+  const [canPassTurn, setCanPassTurn] = useState(false);
 
   // Адаптивные размеры
   const getBoardSize = () => {
@@ -105,8 +115,69 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
   const boardSize = getBoardSize();
   const scale = getScale();
 
-  const handleRollDice = () => {
-    if (isRolling) return;
+  // Функция для перемешивания игроков
+  const shufflePlayers = (players: Player[]) => {
+    const shuffled = [...players];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Функция для получения текущего игрока
+  const getCurrentPlayer = () => {
+    if (turnOrder.length === 0) return null;
+    return turnOrder[currentTurnIndex];
+  };
+
+  // Функция для перехода к следующему ходу
+  const nextTurn = () => {
+    setCurrentTurnIndex((prev) => (prev + 1) % turnOrder.length);
+    setHasRolled(false);
+    setCanPassTurn(false);
+    setTimeLeft(120); // Сброс таймера
+  };
+
+  // Функция для движения фишки
+  const movePlayerPiece = async (playerId: string, steps: number) => {
+    setIsMoving(true);
+    const currentPosition = playerPositions[playerId] || 0;
+    
+    for (let i = 1; i <= steps; i++) {
+      const newPosition = (currentPosition + i) % 24; // 24 внутренние клетки
+      setPlayerPositions(prev => ({
+        ...prev,
+        [playerId]: newPosition
+      }));
+      
+      // Задержка 0.5 секунды на клетку
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    
+    setIsMoving(false);
+  };
+
+  // Функция для начала игры
+  const startGame = () => {
+    setGameStarted(true);
+    setShuffling(true);
+    setShuffleTime(10);
+    
+    // Перемешиваем игроков
+    const shuffledPlayers = shufflePlayers(players);
+    setTurnOrder(shuffledPlayers);
+    
+    // Инициализируем позиции игроков
+    const initialPositions: {[key: string]: number} = {};
+    shuffledPlayers.forEach(player => {
+      initialPositions[player.id] = 0; // Все начинают с клетки 0
+    });
+    setPlayerPositions(initialPositions);
+  };
+
+  const handleRollDice = async () => {
+    if (isRolling || isMoving) return;
     
     setIsRolling(true);
     setDiceValue(null);
@@ -114,25 +185,60 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
     setRollTime(Date.now());
     
     // Анимация броска кубика
-    setTimeout(() => {
+    setTimeout(async () => {
       const value = Math.floor(Math.random() * 6) + 1;
       setDiceValue(value);
       setIsRolling(false);
+      
+      // Движение фишки
+      const currentPlayer = getCurrentPlayer();
+      if (currentPlayer) {
+        await movePlayerPiece(currentPlayer.id, value);
+      }
+      
+      // Активируем кнопку "Передать ход" через 5 секунд
+      setTimeout(() => {
+        setCanPassTurn(true);
+      }, 5000);
+      
       onRollDice();
     }, 1000);
   };
 
   const handleEndTurn = () => {
-    // Логика завершения хода
-    setHasRolled(false);
-    setTimeLeft(120);
+    // Переход к следующему ходу
+    nextTurn();
     setRollTime(0);
-    // Здесь должна быть логика перехода к следующему игроку
   };
+
+  // Таймер перемешивания
+  useEffect(() => {
+    if (!shuffling) return;
+
+    const timer = setInterval(() => {
+      setShuffleTime(prev => {
+        if (prev <= 1) {
+          setShuffling(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [shuffling]);
 
   // Таймер хода
   useEffect(() => {
-    if (!isMyTurn) {
+    if (!gameStarted || shuffling) {
+      setTimeLeft(120);
+      setHasRolled(false);
+      setRollTime(0);
+      return;
+    }
+
+    const currentPlayer = getCurrentPlayer();
+    if (!currentPlayer || currentPlayer.id !== currentPlayer?.id) {
       setTimeLeft(120);
       setHasRolled(false);
       setRollTime(0);
@@ -151,7 +257,7 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isMyTurn]);
+  }, [gameStarted, shuffling, currentTurnIndex, turnOrder]);
 
   // Проверка на переход кнопки в "переход хода"
   useEffect(() => {
@@ -626,35 +732,48 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
 
   // Рендер фишек игроков
   const renderPlayerTokens = () => {
-    return players.map((player, index) => {
+    // Используем turnOrder если игра началась, иначе обычный порядок
+    const playersToRender = gameStarted ? turnOrder : players;
+    
+    return playersToRender.map((player, index) => {
       const color = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][index % 5];
+      const position = playerPositions[player.id] || 0;
       
-      // Упрощенное позиционирование - показываем на старте
-      const x = 400 + (index * 30) - (players.length * 15);
-      const y = 400;
+      // Вычисляем позицию на основе номера клетки
+      const angle = (position * 360) / 24;
+      const radius = 168 * scale;
+      const centerX = boardSize / 2;
+      const centerY = boardSize / 2;
+      const x = centerX + Math.cos((angle - 90) * Math.PI / 180) * radius;
+      const y = centerY + Math.sin((angle - 90) * Math.PI / 180) * radius;
+      
+      // Смещаем фишки, чтобы они не накладывались
+      const offsetX = (index % 2) * 20 - 10;
+      const offsetY = Math.floor(index / 2) * 20 - 10;
       
       return (
         <div
           key={player.id}
           style={{
             position: 'absolute',
-            left: x - 10,
-            top: y - 10,
-            width: 20,
-            height: 20,
+            left: x - 10 + offsetX,
+            top: y - 10 + offsetY,
+            width: 20 * scale,
+            height: 20 * scale,
             background: color,
             borderRadius: '50%',
-            border: '2px solid white',
+            border: `${2 * scale}px solid white`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '10px',
+            fontSize: `${10 * scale}px`,
             color: 'white',
             fontWeight: 'bold',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-            zIndex: 4
+            boxShadow: `0 ${2 * scale}px ${8 * scale}px rgba(0,0,0,0.3)`,
+            zIndex: 4,
+            transition: 'all 0.5s ease'
           }}
-          title={`${player.name} (${player.position || 0})`}
+          title={`${player.name} (${player.profession || 'Предприниматель'}) - Позиция: ${position + 1}`}
         >
           {index + 1}
         </div>
@@ -1110,44 +1229,66 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
             Очередность игроков
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {players.map((player, index) => (
-              <div
-                key={player.id}
-                style={{
-                  background: index === currentIndex 
-                    ? 'linear-gradient(45deg, #4CAF50, #45a049)' 
-                    : 'rgba(255, 255, 255, 0.1)',
-                  padding: '12px',
-                  borderRadius: '10px',
-                  border: index === currentIndex ? '2px solid #4CAF50' : '1px solid rgba(255, 255, 255, 0.2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                <div style={{
-                  width: '30px',
-                  height: '30px',
-                  background: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][index % 5],
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontWeight: 'bold',
-                  fontSize: '14px'
-                }}>
-                  {index + 1}
+            {(gameStarted ? turnOrder : players).map((player, index) => {
+              const isCurrentTurn = gameStarted && index === currentTurnIndex;
+              const isMyPlayer = player.id === currentPlayer?.id;
+              
+              return (
+                <div
+                  key={player.id}
+                  style={{
+                    background: isCurrentTurn 
+                      ? 'linear-gradient(45deg, #4CAF50, #45a049)' 
+                      : 'rgba(255, 255, 255, 0.1)',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    border: isCurrentTurn ? '2px solid #4CAF50' : '1px solid rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    transition: 'all 0.3s ease',
+                    opacity: gameStarted && !isCurrentTurn ? 0.7 : 1
+                  }}
+                >
+                  <div style={{
+                    width: '30px',
+                    height: '30px',
+                    background: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][index % 5],
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '14px'
+                  }}>
+                    {index + 1}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
+                      {player.name}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#ccc' }}>
+                      {player.profession || 'Предприниматель'}
+                    </div>
+                    {gameStarted && (
+                      <div style={{ fontSize: '10px', color: '#aaa' }}>
+                        Позиция: {(playerPositions[player.id] || 0) + 1}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#ccc', textAlign: 'right' }}>
+                    {gameStarted ? (
+                      isCurrentTurn ? (
+                        isMyPlayer ? '🎯 Ваш ход' : '⏳ Ходит'
+                      ) : '⏸️ Ожидание'
+                    ) : (
+                      player.isReady ? '✅ Готов' : '⏳ Не готов'
+                    )}
+                  </div>
                 </div>
-                <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
-                  {player.name}
-                </div>
-                {index === currentIndex && (
-                  <div style={{ marginLeft: 'auto', fontSize: '20px' }}>👑</div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
