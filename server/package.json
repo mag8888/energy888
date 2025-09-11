@@ -2,9 +2,10 @@
   "name": "energy888-advanced-socket-server",
   "version": "1.0.0",
   "description": "Advanced Socket.IO server for Energy of Money with MongoDB, professions, dreams, and hall of fame",
-  "main": "simple-advanced-server.cjs",
+  "main": "index.js",
   "scripts": {
-    "start": "node simple-advanced-server.cjs",
+    "start": "node index.js",
+    "start:advanced": "node simple-advanced-server.cjs",
     "dev": "nodemon advanced-socket-server.cjs",
     "test": "node test-advanced-server.js"
   },
