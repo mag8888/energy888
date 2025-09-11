@@ -75,7 +75,7 @@ export default function AdvancedRoom() {
     }
 
     // Подключаемся к Socket.IO
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://energy888-advanced-socket.onrender.com';
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://botenergy-7to1-production.up.railway.app';
     console.log('🔌 Подключаемся к Advanced Socket.IO:', socketUrl);
     
     const newSocket = io(socketUrl, {

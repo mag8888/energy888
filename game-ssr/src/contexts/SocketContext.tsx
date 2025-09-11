@@ -29,7 +29,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     const qp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
     const qpUrl = qp?.get('socket') || undefined;
     const lsUrl = typeof window !== 'undefined' ? (localStorage.getItem('SOCKET_URL') || undefined) : undefined;
-    const envUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
+    const envUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://botenergy-7to1-production.up.railway.app';
     const resolvedUrl = qpUrl || lsUrl || envUrl || 'https://energy888-advanced-socket.onrender.com';
     
     if (lsUrl !== resolvedUrl && typeof window !== 'undefined') {
