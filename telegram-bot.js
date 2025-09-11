@@ -73,7 +73,7 @@ async function handleMessage(update) {
         text: `🎮 <b>Добро пожаловать в Energy of Money!</b>\n\n` +
               `👋 Привет, ${message.from.first_name}!\n\n` +
               `🎯 Это игра про управление деньгами и достижение целей.\n\n` +
-              `🔗 <a href="https://energy888.onrender.com">Играть в Energy of Money</a>\n\n` +
+              `🔗 <a href="https://botenergy-7to1-production.up.railway.app">Играть в Energy of Money</a>\n\n` +
               `💡 <b>Команды бота:</b>\n` +
               `/start - Начать\n` +
               `/help - Помощь\n` +
@@ -92,7 +92,7 @@ async function handleMessage(update) {
               `2. Создайте комнату или присоединитесь к существующей\n` +
               `3. Выберите профессию и мечту\n` +
               `4. Начните играть!\n\n` +
-              `🔗 <a href="https://energy888.onrender.com">Играть в Energy of Money</a>\n\n` +
+              `🔗 <a href="https://botenergy-7to1-production.up.railway.app">Играть в Energy of Money</a>\n\n` +
               `💬 <b>Поддержка:</b>\n` +
               `Если у вас есть вопросы, напишите @mag8888`,
         parse_mode: 'HTML',
@@ -103,7 +103,7 @@ async function handleMessage(update) {
       await sendTelegramRequest('sendMessage', {
         chat_id: chatId,
         text: `🎮 <b>Переход к игре</b>\n\n` +
-              `🔗 <a href="https://energy888.onrender.com">Играть в Energy of Money</a>\n\n` +
+              `🔗 <a href="https://botenergy-7to1-production.up.railway.app">Играть в Energy of Money</a>\n\n` +
               `💡 <i>Игра откроется в новом окне</i>`,
         parse_mode: 'HTML',
         disable_web_page_preview: true
@@ -113,7 +113,7 @@ async function handleMessage(update) {
       await sendTelegramRequest('sendMessage', {
         chat_id: chatId,
         text: `🏠 <b>Список комнат</b>\n\n` +
-              `🔗 <a href="https://energy888.onrender.com/simple-rooms">Просмотреть комнаты</a>\n\n` +
+              `🔗 <a href="https://botenergy-7to1-production.up.railway.app/rooms">Просмотреть комнаты</a>\n\n` +
               `💡 <i>Там вы сможете создать новую комнату или присоединиться к существующей</i>`,
         parse_mode: 'HTML',
         disable_web_page_preview: true
@@ -125,7 +125,7 @@ async function handleMessage(update) {
         chat_id: chatId,
         text: `❓ <b>Неизвестная команда</b>\n\n` +
               `Используйте /help для списка доступных команд.\n\n` +
-              `🔗 <a href="https://energy888.onrender.com">Играть в Energy of Money</a>`,
+              `🔗 <a href="https://botenergy-7to1-production.up.railway.app">Играть в Energy of Money</a>`,
         parse_mode: 'HTML',
         disable_web_page_preview: true
       });
@@ -159,7 +159,7 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify({
       status: 'Bot is running',
       bot: 'https://t.me/energy_m_bot',
-      game: 'https://energy888.onrender.com/',
+      game: 'https://botenergy-7to1-production.up.railway.app/',
       timestamp: new Date().toISOString()
     }));
   }
@@ -216,7 +216,7 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`🤖 Telegram Bot запущен на порту ${PORT}`);
   console.log(`🔗 Webhook URL: ${WEBHOOK_URL}`);
-  console.log(`🌐 Game URL: https://energy888.onrender.com`);
+  console.log(`🌐 Game URL: https://botenergy-7to1-production.up.railway.app`);
   
   // Устанавливаем webhook при запуске
   sendTelegramRequest('setWebhook', {
