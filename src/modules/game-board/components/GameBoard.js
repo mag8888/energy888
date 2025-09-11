@@ -52,6 +52,21 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
     hideSnackbar
   } = uiState;
 
+  // Состояние для модального окна профессии игрока
+  const [showPlayerProfessionModal, setShowPlayerProfessionModal] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+
+  // Функции для работы с модальным окном профессии игрока
+  const openPlayerProfessionModal = (player) => {
+    setSelectedPlayer(player);
+    setShowPlayerProfessionModal(true);
+  };
+
+  const closePlayerProfessionModal = () => {
+    setShowPlayerProfessionModal(false);
+    setSelectedPlayer(null);
+  };
+
   const {
     diceValue,
     isRolling,
@@ -63,6 +78,7 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
     currentPlayerBalance,
     canRollDice,
     rollDice,
+    handlePassTurn,
     handlePlayerMove,
     handleProfessionCard,
     handleMarketCard,
@@ -834,6 +850,7 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                 transition={{ delay: index * 0.1, duration: 0.3 }}
               >
                 <Box
+                  onClick={() => openPlayerProfessionModal(player)}
                   sx={{
                     p: 1.5,
                     mb: 1,
@@ -848,6 +865,7 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                     alignItems: 'center',
                     gap: 1.5,
                     position: 'relative',
+                    cursor: 'pointer',
                     transition: 'all 0.3s ease',
                     '&:hover': {
                       background: isCurrentTurn 
@@ -1106,37 +1124,85 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
 
   // Рендер панели управления
   const renderControlPanel = () => {
+    // Определяем статус текущего игрока
+    const isMyTurn = currentPlayer && currentPlayer.socketId === playerData?.socketId;
+    const hasRolledDice = diceValue > 0;
+    
     return (
       <Box sx={{ mb: 2 }}>
         <Typography variant="h6" sx={{ mb: 2, color: 'white', fontWeight: 'bold' }}>
-          Управление
+          {isMyTurn ? 'Ваш ход' : 'Ожидание хода'}
         </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={rollDice}
-              disabled={!canRollDice || isRolling}
-              sx={{
-                background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                color: 'white',
-                py: 1.5,
-                fontSize: '16px',
-                fontWeight: 'bold',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
-                },
-                '&:disabled': {
+          {isMyTurn && !hasRolledDice && (
+            <Grid item xs={12}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={rollDice}
+                disabled={!canRollDice || isRolling}
+                sx={{
+                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                  color: 'white',
+                  py: 1.5,
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+                  },
+                  '&:disabled': {
+                    background: '#6B7280',
+                    color: 'rgba(255,255,255,0.5)'
+                  }
+                }}
+              >
+                {isRolling ? 'Бросаем...' : '🎲 Бросить кости'}
+              </Button>
+            </Grid>
+          )}
+          
+          {isMyTurn && hasRolledDice && (
+            <Grid item xs={12}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={handlePassTurn}
+                sx={{
+                  background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                  color: 'white',
+                  py: 1.5,
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #D97706 0%, #B45309 100%)'
+                  }
+                }}
+              >
+                ✅ Передать ход
+              </Button>
+            </Grid>
+          )}
+          
+          {!isMyTurn && (
+            <Grid item xs={12}>
+              <Button
+                fullWidth
+                variant="contained"
+                disabled
+                sx={{
                   background: '#6B7280',
-                  color: 'rgba(255,255,255,0.5)'
-                }
-              }}
-            >
-              {isRolling ? 'Бросаем...' : `🎲 Бросить кости${diceValue ? ` (${diceValue})` : ''}`}
-            </Button>
-          </Grid>
-          <Grid item xs={12} sm={6}>
+                  color: 'rgba(255,255,255,0.5)',
+                  py: 1.5,
+                  fontSize: '16px',
+                  fontWeight: 'bold'
+                }}
+              >
+                ⏳ Ожидание хода
+              </Button>
+            </Grid>
+          )}
+          
+          <Grid item xs={12}>
             <Button
               fullWidth
               variant="contained"
@@ -1286,6 +1352,127 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* Модальное окно профессии игрока */}
+      <Dialog
+        open={showPlayerProfessionModal}
+        onClose={closePlayerProfessionModal}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+            borderRadius: '20px',
+            border: '2px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          color: 'white', 
+          textAlign: 'center', 
+          fontSize: '24px',
+          fontWeight: 'bold',
+          pb: 1
+        }}>
+          Профессия игрока
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: 'center', py: 3 }}>
+          {selectedPlayer && (
+            <Box>
+              <Box sx={{ mb: 3 }}>
+                <Box
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: '50%',
+                    background: `linear-gradient(145deg, ${selectedPlayer.color} 0%, ${selectedPlayer.color}CC 100%)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '3px solid white',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+                    margin: '0 auto 16px'
+                  }}
+                >
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      color: 'white',
+                      fontWeight: '800',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                    }}
+                  >
+                    {selectedPlayer.username?.charAt(0).toUpperCase()}
+                  </Typography>
+                </Box>
+                <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', mb: 2 }}>
+                  {selectedPlayer.username}
+                </Typography>
+              </Box>
+              
+              <Box sx={{ 
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: '15px',
+                p: 3,
+                border: '1px solid rgba(255,255,255,0.2)'
+              }}>
+                <Typography variant="h6" sx={{ color: '#4CAF50', fontWeight: 'bold', mb: 2 }}>
+                  {selectedPlayer.profession || 'Предприниматель'}
+                </Typography>
+                
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mt: 2 }}>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', mb: 1 }}>
+                      Стартовый капитал
+                    </Typography>
+                    <Typography variant="h6" sx={{ color: '#4CAF50', fontWeight: 'bold' }}>
+                      {selectedPlayer.startingMoney || 1000}₽
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', mb: 1 }}>
+                      Месячный доход
+                    </Typography>
+                    <Typography variant="h6" sx={{ color: '#2196F3', fontWeight: 'bold' }}>
+                      {selectedPlayer.monthlyIncome || 500}₽
+                    </Typography>
+                  </Box>
+                </Box>
+                
+                <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1 }}>
+                    Текущий баланс
+                  </Typography>
+                  <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold' }}>
+                    {selectedPlayer.balance || 0}₽
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
+          <Button
+            onClick={closePlayerProfessionModal}
+            variant="contained"
+            sx={{
+              background: 'linear-gradient(45deg, #667eea, #764ba2)',
+              color: 'white',
+              px: 4,
+              py: 1.5,
+              borderRadius: '25px',
+              fontWeight: 'bold',
+              '&:hover': {
+                background: 'linear-gradient(45deg, #764ba2, #667eea)'
+              }
+            }}
+          >
+            Закрыть
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Fragment>
   );
 };

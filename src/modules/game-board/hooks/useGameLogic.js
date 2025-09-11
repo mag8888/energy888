@@ -183,6 +183,20 @@ export const useGameLogic = (gamePlayers, currentTurn, isHost, updateCurrentPlay
     return card && card.type === 'stock';
   };
 
+  // Передача хода следующему игроку
+  const handlePassTurn = useCallback(() => {
+    if (!currentPlayer) return;
+    
+    // Сбрасываем значение кубика
+    setDiceValue(0);
+    
+    // Отправляем на сервер запрос на передачу хода
+    socket.emit('passTurn', {
+      roomId: socket.roomId,
+      playerId: currentPlayer.socketId
+    });
+  }, [currentPlayer]);
+
   return {
     diceValue,
     isRolling,
@@ -194,6 +208,7 @@ export const useGameLogic = (gamePlayers, currentTurn, isHost, updateCurrentPlay
     currentPlayerBalance,
     canRollDice,
     rollDice,
+    handlePassTurn,
     handlePlayerMove,
     handleProfessionCard,
     handleMarketCard,
