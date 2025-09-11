@@ -214,7 +214,7 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
     });
   };
 
-  // Рендер внешних клеток (52 в квадрате) - УВЕЛИЧЕНЫ НА 15%
+  // Рендер внешних клеток (52 в квадрате) - СИММЕТРИЧНО
   const renderOuterCells = () => {
     const cells = [];
     const cellSize = 46; // Увеличено на 15% с 40 до 46
@@ -291,7 +291,7 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
     // Правый столбец (12 клеток) - СИММЕТРИЧНО
     for (let i = 0; i < 12; i++) {
       const cell = OUTER_CELLS[14 + i];
-      const x = startX + 13 * (cellSize + spacing); // Симметрично относительно левого столбца
+      const x = startX + 13 * (cellSize + spacing); // Правый край доски
       const y = startY + (i + 1) * (cellSize + spacing);
       cells.push(
         <div
@@ -419,7 +419,7 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
     // Левый столбец (12 клеток, снизу вверх) - СИММЕТРИЧНО
     for (let i = 0; i < 12; i++) {
       const cell = OUTER_CELLS[40 + i];
-      const x = startX;
+      const x = startX; // Левый край доски
       const y = startY + (12 - i) * (cellSize + spacing);
       cells.push(
         <div
