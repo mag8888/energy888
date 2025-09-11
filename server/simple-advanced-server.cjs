@@ -56,6 +56,55 @@ function parsePostData(req, callback) {
   });
 }
 
+// Функция для очистки дубликатов игроков в комнате
+async function removeDuplicatePlayers(roomId) {
+  try {
+    if (!db) return;
+    
+    const room = await db.collection('rooms').findOne({ id: roomId });
+    if (!room || !room.players) return;
+    
+    // Группируем игроков по email
+    const playersByEmail = {};
+    const uniquePlayers = [];
+    
+    for (const player of room.players) {
+      const key = player.email || player.name;
+      if (!playersByEmail[key]) {
+        playersByEmail[key] = [];
+      }
+      playersByEmail[key].push(player);
+    }
+    
+    // Оставляем только последнего игрока для каждого email
+    for (const email in playersByEmail) {
+      const players = playersByEmail[email];
+      if (players.length > 1) {
+        console.log(`🧹 Найдены дубликаты для ${email}:`, players.length);
+        // Сортируем по времени присоединения и берем последнего
+        players.sort((a, b) => new Date(b.joinedAt || 0) - new Date(a.joinedAt || 0));
+        uniquePlayers.push(players[0]);
+      } else {
+        uniquePlayers.push(players[0]);
+      }
+    }
+    
+    // Обновляем комнату, если есть изменения
+    if (uniquePlayers.length !== room.players.length) {
+      await db.collection('rooms').updateOne(
+        { id: roomId },
+        { $set: { players: uniquePlayers } }
+      );
+      console.log(`✅ Очищены дубликаты в комнате ${roomId}: ${room.players.length} -> ${uniquePlayers.length}`);
+    }
+    
+    return uniquePlayers;
+  } catch (error) {
+    console.error('❌ Ошибка очистки дубликатов:', error);
+    return room.players;
+  }
+}
+
 // Профессии и мечты
 const PROFESSIONS = [
   'Предприниматель', 'Инвестор', 'Финансист', 'Консультант', 
@@ -384,10 +433,41 @@ io.on('connection', (socket) => {
         return;
       }
       
-      // Проверяем, не присоединен ли уже игрок
-      const existingPlayer = room.players.find(p => p.socketId === socket.id);
+      // Проверяем, не присоединен ли уже игрок по email или имени
+      const existingPlayer = room.players.find(p => 
+        p.email === playerEmail || p.name === playerName
+      );
       if (existingPlayer) {
-        socket.emit('join-room-error', { error: 'Already in room' });
+        // Если игрок уже есть, обновляем его socketId и отправляем обновленную комнату
+        await db.collection('rooms').updateOne(
+          { id: roomId, 'players.id': existingPlayer.id },
+          { $set: { 'players.$.socketId': socket.id } }
+        );
+        
+        // Присоединяемся к комнате
+        socket.join(roomId);
+        
+        console.log('🔄 Игрок переподключился:', playerName, 'к комнате:', roomId);
+        
+        // Получаем обновленную комнату
+        const updatedRoom = await db.collection('rooms').findOne({ id: roomId });
+        
+        // Отправляем обновленную информацию о комнате
+        socket.emit('room-joined', {
+          roomId: updatedRoom.id,
+          roomName: updatedRoom.name,
+          players: updatedRoom.players,
+          maxPlayers: updatedRoom.maxPlayers,
+          professionSelectionMode: updatedRoom.professionSelectionMode,
+          availableProfessions: updatedRoom.availableProfessions
+        });
+        
+        // Уведомляем всех в комнате
+        io.to(roomId).emit('player-joined', {
+          player: existingPlayer,
+          players: updatedRoom.players
+        });
+        
         return;
       }
       
@@ -418,6 +498,9 @@ io.on('connection', (socket) => {
       socket.join(roomId);
       
       console.log('👤 Игрок присоединился:', playerName, 'к комнате:', roomId);
+      
+      // Очищаем дубликаты игроков
+      const cleanedPlayers = await removeDuplicatePlayers(roomId);
       
       // Получаем обновленную комнату
       const updatedRoom = await db.collection('rooms').findOne({ id: roomId });
@@ -573,6 +656,9 @@ io.on('connection', (socket) => {
       );
       
       console.log('✅ Готовность игрока:', room.players[playerIndex].name, newReadyState ? 'готов' : 'не готов');
+      
+      // Очищаем дубликаты игроков
+      await removeDuplicatePlayers(roomId);
       
       // Получаем обновленную комнату
       const updatedRoom = await db.collection('rooms').findOne({ id: roomId });
