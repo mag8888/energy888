@@ -22,6 +22,7 @@ interface Player {
   isReady: boolean;
   profession?: string;
   dream?: string;
+  socketId?: string;
 }
 
 
