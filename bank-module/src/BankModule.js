@@ -538,19 +538,6 @@ const BankModule = ({
             )}
           </Box>
           
-          {/* Индикатор клика */}
-          <Box sx={{ 
-            textAlign: 'center', 
-            mt: 2,
-            opacity: 0.6
-          }}>
-            <Typography variant="caption" sx={{ 
-              color: 'rgba(255, 255, 255, 0.5)',
-              fontSize: '0.7rem'
-            }}>
-              Нажмите для открытия банковских операций
-            </Typography>
-          </Box>
         </CardContent>
       </Card>
       
