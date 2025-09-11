@@ -620,9 +620,22 @@ const BankModal = ({
               flexDirection: 'column'
             }}>
               <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: 'white', textAlign: 'center' }}>
-                  Финансовый обзор
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 3 }}>
+                  <AccountBalance sx={{ color: '#4CAF50', mr: 1, fontSize: 24 }} />
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'white', mr: 2 }}>
+                    Банк
+                  </Typography>
+                  <Chip 
+                    label="Активен" 
+                    size="small" 
+                    sx={{ 
+                      background: '#4CAF50', 
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '10px'
+                    }} 
+                  />
+                </Box>
                 
                 {/* Текущий баланс */}
                 <Box sx={{ textAlign: 'center', mb: 3 }}>
@@ -856,7 +869,7 @@ const BankModal = ({
                 }}>
                   <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                      <History sx={{ color: '#8B5CF6' }} />
+                      <Schedule sx={{ color: '#8B5CF6' }} />
                       <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'white' }}>
                         История операций
                       </Typography>
