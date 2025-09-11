@@ -13,7 +13,7 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 
 const isRailway = process.env.RAILWAY_ENVIRONMENT === 'production';
 
-console.log('🚀 Запуск сервера:', {
+console.log('🚀 Запуск сервера с полным фронтендом:', {
   environment: process.env.NODE_ENV || 'development',
   railway: isRailway,
   port: PORT,
