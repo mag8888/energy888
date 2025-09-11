@@ -91,11 +91,30 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
   const renderGameBoard = () => {
     return (
       <motion.div
-        initial={{ scale: 0.8, opacity: 0, rotateY: -15 }}
-        animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-        transition={{ duration: 1, type: "spring", stiffness: 80 }}
-        whileHover={{ scale: 1.02 }}
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          minHeight: '600px',
+          background: 'radial-gradient(circle at center, rgba(30, 30, 60, 0.8) 0%, rgba(10, 10, 30, 0.95) 100%)',
+          borderRadius: '20px',
+          overflow: 'hidden',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1)'
+        }}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
+        <style jsx>{`
+          @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+          }
+        `}</style>
         <Box
           sx={{
             position: 'relative',
@@ -408,6 +427,151 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
           );
         })}
 
+
+        {/* Центральный логотип */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 2
+          }}
+        >
+          <Box
+            sx={{
+              width: '160px',
+              height: '160px',
+              background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 32px rgba(255, 215, 0, 0.4), 0 0 0 4px rgba(255, 215, 0, 0.2)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Внутренний круг с градиентом */}
+            <Box
+              sx={{
+                width: '140px',
+                height: '140px',
+                background: 'radial-gradient(circle, #000000 0%, #1a1a1a 100%)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative'
+              }}
+            >
+              {/* Центральный результат броска кубика */}
+              <Typography
+                sx={{
+                  fontSize: '48px',
+                  fontWeight: 'bold',
+                  color: '#FFD700',
+                  textShadow: '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 165, 0, 0.6)',
+                  zIndex: 3,
+                  position: 'relative',
+                  animation: isRolling ? 'diceRoll 0.1s infinite' : 'none',
+                  '@keyframes diceRoll': {
+                    '0%': { transform: 'rotate(0deg) scale(1)' },
+                    '25%': { transform: 'rotate(90deg) scale(1.1)' },
+                    '50%': { transform: 'rotate(180deg) scale(0.9)' },
+                    '75%': { transform: 'rotate(270deg) scale(1.1)' },
+                    '100%': { transform: 'rotate(360deg) scale(1)' }
+                  }
+                }}
+              >
+                {diceValue}
+              </Typography>
+              
+              {/* Энергетические линии */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  borderRadius: '50%',
+                  background: 'conic-gradient(from 0deg, transparent 0deg, rgba(255, 215, 0, 0.3) 45deg, transparent 90deg, rgba(255, 165, 0, 0.3) 135deg, transparent 180deg, rgba(255, 140, 0, 0.3) 225deg, transparent 270deg, rgba(255, 215, 0, 0.3) 315deg, transparent 360deg)',
+                  animation: 'rotate 4s linear infinite'
+                }}
+              />
+              
+              {/* Дополнительные светящиеся точки */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%'
+                }}
+              >
+                {[0, 60, 120, 180, 240, 300].map((angle, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      position: 'absolute',
+                      width: '6px',
+                      height: '6px',
+                      background: '#FFD700',
+                      borderRadius: '50%',
+                      top: '50%',
+                      left: '50%',
+                      transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-50px)`,
+                      boxShadow: '0 0 10px rgba(255, 215, 0, 0.8)',
+                      animation: `pulse ${2 + index * 0.3}s ease-in-out infinite`
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+            
+            {/* Внешние монеты */}
+            <Box
+              sx={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%'
+              }}
+            >
+              {[45, 135, 225, 315].map((angle, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    position: 'absolute',
+                    width: '24px',
+                    height: '24px',
+                    background: 'radial-gradient(circle, #FFD700 0%, #FFA500 100%)',
+                    borderRadius: '50%',
+                    top: '50%',
+                    left: '50%',
+                    transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-70px)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(255, 215, 0, 0.6)',
+                    border: '2px solid #FFD700'
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      color: '#000000'
+                    }}
+                  >
+                    $
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </Box>
 
         {/* Игроки на доске */}
         {gamePlayers.map((player, index) => {
