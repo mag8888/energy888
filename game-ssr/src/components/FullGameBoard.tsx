@@ -661,31 +661,141 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
         overflow: 'hidden'
       }}>
-      {/* Центральная область с золотым логотипом */}
+      {/* Центральный логотип с анимацией */}
       <div
         style={{
           position: 'absolute',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '200px',
-          height: '200px',
-          background: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 10px 30px rgba(156, 39, 176, 0.4)',
-          zIndex: 1
+          zIndex: 2
         }}
       >
-        <div style={{
-          fontSize: '60px',
-          color: '#FFD700',
-          textShadow: '0 0 20px rgba(255, 215, 0, 0.8)',
-          fontWeight: 'bold'
-        }}>
-          💰
+        <div
+          style={{
+            width: '160px',
+            height: '160px',
+            background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 32px rgba(255, 215, 0, 0.4), 0 0 0 4px rgba(255, 215, 0, 0.2)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Внутренний круг с градиентом */}
+          <div
+            style={{
+              width: '140px',
+              height: '140px',
+              background: 'radial-gradient(circle, #000000 0%, #1a1a1a 100%)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative'
+            }}
+          >
+            {/* Центральный результат броска кубика */}
+            <div
+              style={{
+                fontSize: '48px',
+                fontWeight: 'bold',
+                color: '#FFD700',
+                textShadow: '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 165, 0, 0.6)',
+                zIndex: 3,
+                position: 'relative',
+                animation: isRolling ? 'diceRoll 0.1s infinite' : 'none'
+              }}
+            >
+              {diceValue || '🎲'}
+            </div>
+            
+            {/* Энергетические линии */}
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                borderRadius: '50%',
+                background: 'conic-gradient(from 0deg, transparent 0deg, rgba(255, 215, 0, 0.3) 45deg, transparent 90deg, rgba(255, 165, 0, 0.3) 135deg, transparent 180deg, rgba(255, 140, 0, 0.3) 225deg, transparent 270deg, rgba(255, 215, 0, 0.3) 315deg, transparent 360deg)',
+                animation: 'rotate 4s linear infinite'
+              }}
+            />
+            
+            {/* Дополнительные светящиеся точки */}
+            <div
+              style={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%'
+              }}
+            >
+              {[0, 60, 120, 180, 240, 300].map((angle, index) => (
+                <div
+                  key={index}
+                  style={{
+                    position: 'absolute',
+                    width: '6px',
+                    height: '6px',
+                    background: '#FFD700',
+                    borderRadius: '50%',
+                    top: '50%',
+                    left: '50%',
+                    transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-50px)`,
+                    boxShadow: '0 0 10px rgba(255, 215, 0, 0.8)',
+                    animation: `pulse ${2 + index * 0.3}s ease-in-out infinite`
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+          
+          {/* Внешние монеты */}
+          <div
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              borderRadius: '50%'
+            }}
+          >
+            {[45, 135, 225, 315].map((angle, index) => (
+              <div
+                key={index}
+                style={{
+                  position: 'absolute',
+                  width: '24px',
+                  height: '24px',
+                  background: 'radial-gradient(circle, #FFD700 0%, #FFA500 100%)',
+                  borderRadius: '50%',
+                  top: '50%',
+                  left: '50%',
+                  transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-70px)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(255, 215, 0, 0.6)',
+                  border: '2px solid #FFD700'
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    color: '#000000'
+                  }}
+                >
+                  $
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -1073,6 +1183,21 @@ const FullGameBoard: React.FC<FullGameBoardProps> = ({
         @keyframes blink {
           0%, 50% { opacity: 1; }
           51%, 100% { opacity: 0.3; }
+        }
+        @keyframes rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        @keyframes diceRoll {
+          0% { transform: rotate(0deg) scale(1); }
+          25% { transform: rotate(90deg) scale(1.1); }
+          50% { transform: rotate(180deg) scale(0.9); }
+          75% { transform: rotate(270deg) scale(1.1); }
+          100% { transform: rotate(360deg) scale(1); }
         }
       `}</style>
     </div>
