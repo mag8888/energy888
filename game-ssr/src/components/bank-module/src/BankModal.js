@@ -54,8 +54,7 @@ const BankModal = ({
   socket, 
   roomId,
   bankBalance: externalBankBalance = 0,
-  onBankBalanceChange,
-  transferHistory: externalTransferHistory = []
+  onBankBalanceChange
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -315,20 +314,15 @@ const BankModal = ({
       onBankBalanceChange(balanceToSet);
     }
     
-    // Загружаем историю транзакций из внешнего источника или localStorage
+    // Загружаем историю транзакций из localStorage
     let history = [];
-    
-    // Приоритет: внешняя история > localStorage
-    if (externalTransferHistory && externalTransferHistory.length > 0) {
-      history = externalTransferHistory;
-      console.log('📜 [BankModal] Используем внешнюю историю транзакций:', history.length, 'записей');
-    } else if (playerData?.id && roomId) {
+    if (playerData?.id && roomId) {
       const savedHistory = localStorage.getItem(`bank_history_${playerData.id}_${roomId}`);
       
       if (savedHistory) {
         try {
           history = JSON.parse(savedHistory);
-          console.log('📜 [BankModal] Загружена история транзакций из localStorage:', history.length, 'записей для пользователя', playerData.id);
+          console.log('📜 [BankModal] Загружена история транзакций:', history.length, 'записей для пользователя', playerData.id);
         } catch (error) {
           console.error('❌ [BankModal] Ошибка загрузки истории:', error);
           history = [];
@@ -544,10 +538,8 @@ const BankModal = ({
           background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
           borderRadius: '20px',
           overflow: 'hidden',
-          height: isMobile ? '100vh' : '95vh',
-          width: isMobile ? '100vw' : '95vw',
-          maxHeight: '95vh',
-          maxWidth: '95vw',
+          minHeight: isMobile ? '100vh' : 'auto',
+          maxHeight: isMobile ? '100vh' : '90vh',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
           backdropFilter: 'blur(20px)',
@@ -611,147 +603,30 @@ const BankModal = ({
       </DialogTitle>
 
       <DialogContent sx={{ 
-        p: 2,
+        p: 3,
         background: 'transparent',
-        borderRadius: '0 0 20px 20px',
-        height: 'calc(100% - 80px)',
-        overflow: 'hidden'
+        borderRadius: '0 0 20px 20px'
       }}>
-        <Grid container spacing={2} sx={{ height: '100%' }}>
-          {/* Левая панель - Финансовая информация */}
-          <Grid item xs={12} md={4} sx={{ height: '100%' }}>
-            <Card sx={{ 
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '16px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column'
-            }}>
-              <CardContent sx={{ 
-                height: '100%', 
-                display: 'flex', 
-                flexDirection: 'column',
-                p: 3
-              }}>
-                {/* Текущий баланс */}
-                <Box sx={{ textAlign: 'center', mb: 4 }}>
-                  <Typography variant="h3" sx={{ 
-                    color: '#10B981', 
-                    fontWeight: 'bold', 
-                    mb: 1,
-                    textShadow: '0 0 20px rgba(16, 185, 129, 0.5)'
-                  }}>
-                    ${displayBalance}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                    Доступно для операций
-                  </Typography>
-                </Box>
-
-                {/* Финансовая сводка */}
-                <Box sx={{ mb: 4 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                    <TrendingUp sx={{ color: '#10B981' }} />
-                    <Typography variant="body1" sx={{ color: '#10B981', fontWeight: 'bold' }}>
-                      Доход: $10,000
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                    <TrendingDown sx={{ color: '#EF4444' }} />
-                    <Typography variant="body1" sx={{ color: '#EF4444', fontWeight: 'bold' }}>
-                      Расходы: $6,200
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                    <AttachMoney sx={{ color: '#F59E0B' }} />
-                    <Typography variant="body1" sx={{ color: '#F59E0B', fontWeight: 'bold' }}>
-                      PAYDAY: $3,800/мес
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {/* Кредитная информация */}
-                <Box sx={{ 
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '12px',
-                  p: 2,
-                  mb: 3
-                }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <Box sx={{ 
-                      width: 8, 
-                      height: 8, 
-                      backgroundColor: '#10B981', 
-                      borderRadius: '50%' 
-                    }} />
-                    <Typography variant="body2" sx={{ color: 'white' }}>
-                      Кредит: $0
-                    </Typography>
-                  </Box>
-                  <Typography variant="body2" sx={{ color: '#8B5CF6', fontWeight: 'bold' }}>
-                    Макс. кредит: $38,000
-                  </Typography>
-                </Box>
-
-                {/* Кнопки кредитов */}
-                <Box sx={{ display: 'flex', gap: 1, flex: 1, alignItems: 'flex-end' }}>
-                  <Button
-                    variant="contained"
-                    startIcon={<CheckCircle />}
-                    sx={{
-                      flex: 1,
-                      background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                      color: 'white',
-                      py: 1,
-                      borderRadius: '8px',
-                      fontWeight: 'bold',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
-                      }
-                    }}
-                  >
-                    БЕЗ КРЕДИТОВ
-                  </Button>
-                  <Button
-                    variant="contained"
-                    startIcon={<CreditCard />}
-                    sx={{
-                      flex: 1,
-                      background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
-                      color: 'white',
-                      py: 1,
-                      borderRadius: '8px',
-                      fontWeight: 'bold',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)'
-                      }
-                    }}
-                  >
-                    ВЗЯТЬ
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Правая панель - Переводы и история */}
-          <Grid item xs={12} md={8} sx={{ height: '100%' }}>
-            <Grid container spacing={2} sx={{ height: '100%' }}>
+        <Grid container spacing={3} sx={{ height: '100%' }}>
+          {/* Основная панель - Переводы и история */}
+          <Grid item xs={12} sx={{ height: '100%' }}>
+            <Grid container spacing={3} sx={{ height: '100%' }}>
               {/* Форма перевода */}
               <Grid item xs={12} sx={{ height: '50%' }}>
                 <Card sx={{ 
                   background: 'rgba(255, 255, 255, 0.05)',
                   backdropFilter: 'blur(10px)',
                   borderRadius: '16px',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column'
                 }}>
-                  <CardContent sx={{ p: 3 }}>
+                  <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: 'white' }}>
                       Перевод средств
                     </Typography>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={2} sx={{ flex: 1 }}>
                       <Grid item xs={12} sm={6}>
                         <FormControl fullWidth>
                           <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
@@ -886,12 +761,7 @@ const BankModal = ({
                   display: 'flex',
                   flexDirection: 'column'
                 }}>
-                  <CardContent sx={{ 
-                    height: '100%', 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    p: 2
-                  }}>
+                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                       <History sx={{ color: '#8B5CF6' }} />
                       <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'white' }}>
@@ -920,7 +790,7 @@ const BankModal = ({
                         </Typography>
                       </Box>
                     ) : (
-                      <List sx={{ maxHeight: 400, overflow: 'auto' }}>
+                      <List sx={{ flex: 1, overflow: 'auto' }}>
                         {transferHistory.map((transaction, index) => (
                           <React.Fragment key={transaction.id}>
                             <ListItem sx={{ 

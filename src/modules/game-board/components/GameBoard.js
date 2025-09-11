@@ -365,11 +365,10 @@ const GameBoard = ({ roomId, playerData, onExit }) => {
                 background: 'linear-gradient(145deg, #00BCD4 0%, #0097A7 30%, #006064 60%, #004D40 100%)',
                 borderRadius: '8px',
                 display: 'flex',
-                alignItems: index < sideLength ? 'flex-start' : 'center', // Для верхней стороны (1-13) выравниваем по верху
-                justifyContent: index < sideLength ? 'flex-end' : 'center', // Для верхней стороны (1-13) выравниваем по правому краю
+                alignItems: 'center',
+                justifyContent: 'center',
                 cursor: 'pointer',
                 transform: 'translate(-50%, -50%)',
-                padding: index < sideLength ? '2px 4px 0 0' : '0', // Добавляем отступы для верхней стороны
                 boxShadow: `
                   0 0 0 2px rgba(255,255,255,0.25),
                   0 4px 8px rgba(0, 188, 212, 0.35),

@@ -618,7 +618,7 @@ const BankModal = ({
         overflow: 'hidden'
       }}>
         <Grid container spacing={2} sx={{ height: '100%' }}>
-          {/* Левая панель - Финансовая информация */}
+          {/* Левая панель - Баланс и кредитная информация */}
           <Grid item xs={12} md={4} sx={{ height: '100%' }}>
             <Card sx={{ 
               background: 'rgba(255, 255, 255, 0.05)',
@@ -629,20 +629,14 @@ const BankModal = ({
               display: 'flex',
               flexDirection: 'column'
             }}>
-              <CardContent sx={{ 
-                height: '100%', 
-                display: 'flex', 
-                flexDirection: 'column',
-                p: 3
-              }}>
+              <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: 'white', textAlign: 'center' }}>
+                  Финансовый обзор
+                </Typography>
+                
                 {/* Текущий баланс */}
-                <Box sx={{ textAlign: 'center', mb: 4 }}>
-                  <Typography variant="h3" sx={{ 
-                    color: '#10B981', 
-                    fontWeight: 'bold', 
-                    mb: 1,
-                    textShadow: '0 0 20px rgba(16, 185, 129, 0.5)'
-                  }}>
+                <Box sx={{ textAlign: 'center', mb: 3 }}>
+                  <Typography variant="h4" sx={{ color: '#4CAF50', fontWeight: 'bold', mb: 1 }}>
                     ${displayBalance}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
@@ -651,86 +645,67 @@ const BankModal = ({
                 </Box>
 
                 {/* Финансовая сводка */}
-                <Box sx={{ mb: 4 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                    <TrendingUp sx={{ color: '#10B981' }} />
-                    <Typography variant="body1" sx={{ color: '#10B981', fontWeight: 'bold' }}>
+                <Box sx={{ mb: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <TrendingUp sx={{ color: '#4CAF50', mr: 1 }} />
+                    <Typography variant="body2" sx={{ color: '#4CAF50' }}>
                       Доход: $10,000
                     </Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                    <TrendingDown sx={{ color: '#EF4444' }} />
-                    <Typography variant="body1" sx={{ color: '#EF4444', fontWeight: 'bold' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <TrendingDown sx={{ color: '#f44336', mr: 1 }} />
+                    <Typography variant="body2" sx={{ color: '#f44336' }}>
                       Расходы: $6,200
                     </Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                    <AttachMoney sx={{ color: '#F59E0B' }} />
-                    <Typography variant="body1" sx={{ color: '#F59E0B', fontWeight: 'bold' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <AttachMoney sx={{ color: '#FFC107', mr: 1 }} />
+                    <Typography variant="body2" sx={{ color: '#FFC107' }}>
                       PAYDAY: $3,800/мес
                     </Typography>
                   </Box>
                 </Box>
 
                 {/* Кредитная информация */}
-                <Box sx={{ 
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '12px',
-                  p: 2,
-                  mb: 3
-                }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <Box sx={{ 
-                      width: 8, 
-                      height: 8, 
-                      backgroundColor: '#10B981', 
-                      borderRadius: '50%' 
-                    }} />
+                <Box sx={{ mt: 'auto' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <CheckCircle sx={{ color: '#4CAF50', mr: 1, fontSize: 16 }} />
                     <Typography variant="body2" sx={{ color: 'white' }}>
                       Кредит: $0
                     </Typography>
                   </Box>
-                  <Typography variant="body2" sx={{ color: '#8B5CF6', fontWeight: 'bold' }}>
+                  <Typography variant="body2" sx={{ color: '#9C27B0', mb: 2 }}>
                     Макс. кредит: $38,000
                   </Typography>
-                </Box>
-
-                {/* Кнопки кредитов */}
-                <Box sx={{ display: 'flex', gap: 1, flex: 1, alignItems: 'flex-end' }}>
-                  <Button
-                    variant="contained"
-                    startIcon={<CheckCircle />}
-                    sx={{
-                      flex: 1,
-                      background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                      color: 'white',
-                      py: 1,
-                      borderRadius: '8px',
-                      fontWeight: 'bold',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
-                      }
-                    }}
-                  >
-                    БЕЗ КРЕДИТОВ
-                  </Button>
-                  <Button
-                    variant="contained"
-                    startIcon={<CreditCard />}
-                    sx={{
-                      flex: 1,
-                      background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
-                      color: 'white',
-                      py: 1,
-                      borderRadius: '8px',
-                      fontWeight: 'bold',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)'
-                      }
-                    }}
-                  >
-                    ВЗЯТЬ
-                  </Button>
+                  
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      sx={{
+                        background: '#4CAF50',
+                        color: 'white',
+                        flex: 1,
+                        '&:hover': { background: '#45a049' }
+                      }}
+                    >
+                      <CheckCircle sx={{ mr: 0.5, fontSize: 16 }} />
+                      БЕЗ КРЕДИТОВ
+                    </Button>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      sx={{
+                        background: '#f44336',
+                        color: 'white',
+                        flex: 1,
+                        '&:hover': { background: '#d32f2f' }
+                      }}
+                    >
+                      <CreditCard sx={{ mr: 0.5, fontSize: 16 }} />
+                      ВЗЯТЬ
+                    </Button>
+                  </Box>
                 </Box>
               </CardContent>
             </Card>
