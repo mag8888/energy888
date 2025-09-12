@@ -8,7 +8,7 @@
     "build:memory": "NODE_OPTIONS='--max-old-space-size=6144' next build",
     "build:minimal": "NODE_OPTIONS='--max-old-space-size=8192' next build",
     "start": "npx serve@latest out -p ${PORT:-3000}",
-    "start:prod": "npm run build && npx serve@latest out -p $PORT",
+    "start:prod": "npm run build && npx serve@latest out -p ${PORT:-3000}",
     "lint": "next lint"
   },
   "engines": {

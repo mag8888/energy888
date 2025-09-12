@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "chmod +x start-railway.sh && ./start-railway.sh"
+startCommand = "npm run build:minimal && npm start"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
@@ -11,4 +11,3 @@ restartPolicyMaxRetries = 3
 [env]
 NODE_OPTIONS = "--max-old-space-size=8192"
 NODE_ENV = "production"
-PORT = "3000"
