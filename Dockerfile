@@ -4,20 +4,12 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy all files from game-ssr directory
-COPY game-ssr/ .
-
-# Install dependencies
-RUN npm install --omit=dev --no-audit --no-fund
-
-# Build the application
-RUN npm run build:minimal
-
-# Copy server.js from root
-COPY server.js ./
+# Copy only the test files
+COPY index.html ./
+COPY simple-server.js ./
 
 # Expose port
 EXPOSE 3000
 
-# Start the application
-CMD ["node", "server.js"]
+# Start the simple server
+CMD ["node", "simple-server.js"]
