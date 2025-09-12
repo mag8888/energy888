@@ -4,13 +4,11 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy only the test files
-COPY index.html ./
-COPY simple-server.js ./
+# Copy only the bot-render.js file (всё встроено в него)
 COPY bot-render.js ./
 
 # Expose port
 EXPOSE 3000
 
-# Start the bot-render.js (который перенаправляет на simple-server.js)
+# Start the bot-render.js
 CMD ["node", "bot-render.js"]
