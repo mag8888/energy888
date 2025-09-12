@@ -21,12 +21,18 @@ npm run build:memory
 
 # Check if build was successful
 if [ $? -eq 0 ]; then
-    echo "Build completed successfully!"
-    echo "Build size:"
-    du -sh .next
-    du -sh out
+    echo "✅ Build completed successfully!"
+    echo "📊 Build size:"
+    du -sh .next 2>/dev/null || echo "No .next directory"
+    du -sh out 2>/dev/null || echo "No out directory"
+    echo "🚀 Starting server with serve..."
+    npx serve@latest out -p $PORT
 else
-    echo "Build failed, trying with even more memory..."
+    echo "❌ Build failed, trying with even more memory..."
     export NODE_OPTIONS="--max-old-space-size=8192 --max-semi-space-size=2048"
     npm run build:memory
+    if [ $? -eq 0 ]; then
+        echo "✅ Build completed on retry!"
+        npx serve@latest out -p $PORT
+    fi
 fi

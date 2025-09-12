@@ -32,6 +32,8 @@ if [ $? -eq 0 ]; then
     echo "📊 Build size:"
     du -sh .next 2>/dev/null || echo "No .next directory"
     du -sh out 2>/dev/null || echo "No out directory"
+    echo "🚀 Starting server with serve..."
+    npx serve@latest out -p $PORT
 else
     echo "❌ Build failed even with maximum memory allocation"
     echo "💡 Consider reducing component complexity or splitting the build"
