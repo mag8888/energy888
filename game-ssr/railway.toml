@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "cd game-ssr && chmod +x build-minimal.sh && ./build-minimal.sh"
+startCommand = "chmod +x build-minimal.sh && ./build-minimal.sh"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
