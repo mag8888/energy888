@@ -307,3 +307,4 @@ const getPlayerColor = (index: number) => {
 };
 
 export default FullGameBoardOptimized;
+

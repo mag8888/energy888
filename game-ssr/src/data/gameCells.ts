@@ -88,3 +88,4 @@ export const OUTER_CELLS = [
   { id: 51, type: 'opportunity', name: 'Возможность', color: '#10B981', icon: '🎯' },
   { id: 52, type: 'payday', name: 'Зарплата', color: '#FFD700', icon: '💰', description: 'Получите зарплату' }
 ];
+

@@ -91,3 +91,5 @@ If build still fails:
 - `src/components/FullGameBoardOptimized.tsx` - Memory-optimized component
 - `build-memory.sh` - Memory-optimized build script
 - `build-minimal.sh` - Fallback build script
+
+
