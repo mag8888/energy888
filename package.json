@@ -1,12 +1,16 @@
 {
-  "name": "energy888-telegram-bot",
-  "private": true,
-  "version": "0.1.0",
+  "name": "energy-money-frontend",
+  "version": "1.0.0",
+  "description": "Energy of Money Game Frontend",
+  "main": "server.js",
   "scripts": {
-    "start": "node telegram-bot.js",
-    "dev": "node telegram-bot.js"
+    "start": "node server.js",
+    "build": "cd game-ssr && npm run build:minimal",
+    "dev": "cd game-ssr && npm run dev"
   },
-  "dependencies": {},
+  "dependencies": {
+    "serve": "^14.2.1"
+  },
   "engines": {
     "node": ">=18.0.0"
   }

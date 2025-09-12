@@ -4,14 +4,20 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
+# Copy package.json first for better caching
+COPY package*.json ./
+
+# Install root dependencies
+RUN npm install --omit=dev --no-audit --no-fund
+
 # Copy all files from game-ssr directory
 COPY game-ssr/ .
 
-# Install dependencies
-RUN npm install --omit=dev --no-audit --no-fund
+# Install game-ssr dependencies
+RUN cd game-ssr && npm install --omit=dev --no-audit --no-fund
 
 # Build the application
-RUN npm run build:minimal
+RUN cd game-ssr && npm run build:minimal
 
 # Expose port
 EXPOSE 3000

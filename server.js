@@ -6,6 +6,9 @@ const path = require('path');
 console.log('🚀 Starting Energy of Money Game Server...');
 console.log('📁 Working directory:', process.cwd());
 console.log('📁 Files in directory:', require('fs').readdirSync(process.cwd()));
+console.log('📦 Package.json exists:', require('fs').existsSync('package.json'));
+console.log('📦 Server.js exists:', require('fs').existsSync('server.js'));
+console.log('📦 Game-ssr exists:', require('fs').existsSync('game-ssr'));
 
 // Set environment variables
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
