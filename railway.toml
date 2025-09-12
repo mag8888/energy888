@@ -2,14 +2,14 @@
 builder = "dockerfile"
 
 [deploy]
-startCommand = "node simple-server.js"
+startCommand = "node bot-render.js"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 
 [deploy]
-startCommand = "node simple-server.js"
+startCommand = "node bot-render.js"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"

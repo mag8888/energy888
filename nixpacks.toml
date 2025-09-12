@@ -8,4 +8,4 @@ cmds = ['npm install --omit=dev --no-audit --no-fund']
 cmds = ['cd game-ssr && npm install --omit=dev --no-audit --no-fund', 'cd game-ssr && npm run build:minimal']
 
 [start]
-cmd = 'node simple-server.js'
+cmd = 'node bot-render.js'

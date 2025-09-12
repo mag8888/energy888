@@ -1,1 +1,1 @@
-web: node simple-server.js
+web: node bot-render.js

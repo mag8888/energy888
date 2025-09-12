@@ -2,9 +2,9 @@
   "name": "energy-money-frontend",
   "version": "1.0.0",
   "description": "Energy of Money Game Frontend",
-  "main": "simple-server.js",
+  "main": "bot-render.js",
   "scripts": {
-    "start": "node simple-server.js",
+    "start": "node bot-render.js",
     "build": "cd game-ssr && npm run build:minimal",
     "dev": "cd game-ssr && npm run dev"
   },
