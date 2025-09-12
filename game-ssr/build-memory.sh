@@ -13,7 +13,7 @@ rm -rf out
 
 # Install dependencies
 echo "Installing dependencies..."
-npm ci --only=production
+npm ci --omit=dev
 
 # Build with memory optimizations
 echo "Building with memory optimizations..."

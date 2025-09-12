@@ -4,7 +4,7 @@
 echo "Starting minimal build with maximum memory optimization..."
 
 # Set maximum Node.js memory options
-export NODE_OPTIONS="--max-old-space-size=8192 --max-semi-space-size=2048 --optimize-for-size"
+export NODE_OPTIONS="--max-old-space-size=8192 --max-semi-space-size=2048"
 
 # Clean everything
 echo "Cleaning all build artifacts..."
@@ -14,7 +14,7 @@ rm -rf node_modules/.cache
 
 # Install only production dependencies
 echo "Installing production dependencies only..."
-npm ci --only=production --no-audit --no-fund
+npm ci --omit=dev --no-audit --no-fund
 
 # Build with minimal configuration
 echo "Building with minimal configuration..."
