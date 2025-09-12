@@ -1,6 +1,6 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "deploy": {
-    "startCommand": "npm run build && npm start"
+    "startCommand": "chmod +x build-memory.sh && ./build-memory.sh && npm start"
   }
 }
