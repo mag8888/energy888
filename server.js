@@ -17,17 +17,15 @@ process.env.PORT = process.env.PORT || '3000';
 console.log(`📡 Server will run on port: ${process.env.PORT}`);
 console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
 
-// Check if game-ssr directory exists
-const gameSsrPath = path.join(process.cwd(), 'game-ssr');
-if (!require('fs').existsSync(gameSsrPath)) {
-  console.error('❌ game-ssr directory not found!');
+// Check if out directory exists (built Next.js app)
+const outPath = path.join(process.cwd(), 'out');
+if (!require('fs').existsSync(outPath)) {
+  console.error('❌ out directory not found! Build the app first.');
   console.log('📁 Available directories:', require('fs').readdirSync(process.cwd()));
   process.exit(1);
 }
 
-// Change to game-ssr directory
-process.chdir(gameSsrPath);
-console.log('📁 Changed to game-ssr directory:', process.cwd());
+console.log('📁 Working in root directory:', process.cwd());
 
 // Start the serve process
 const serveProcess = spawn('npx', ['serve@latest', 'out', '-p', process.env.PORT], {
