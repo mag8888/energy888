@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "chmod +x build-minimal.sh && ./build-minimal.sh"
+startCommand = "chmod +x start-railway.sh && ./start-railway.sh"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
@@ -11,3 +11,4 @@ restartPolicyMaxRetries = 3
 [env]
 NODE_OPTIONS = "--max-old-space-size=8192"
 NODE_ENV = "production"
+PORT = "3000"
