@@ -68,7 +68,7 @@ export default function AdvancedRooms() {
     creatorProfession: '',
     creatorDream: '',
     assignProfessionToAll: false,
-    professionSelectionMode: 'choice',
+    professionSelectionMode: 'assigned',
     password: ''
   });
   const [loading, setLoading] = useState(false);

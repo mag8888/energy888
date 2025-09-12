@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Socket.IO Connection Test</title>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Socket.IO Connection Test</h1>
+    <div id="status">Testing...</div>
+    <div id="logs"></div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const logsDiv = document.getElementById('logs');
+        
+        function log(message) {
+            console.log(message);
+            logsDiv.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+        }
+        
+        // Test both servers
+        const servers = [
+            'https://botenergy-7to1-production.up.railway.app',
+            'https://energy888-advanced-socket.onrender.com'
+        ];
+        
+        let currentServer = 0;
+        
+        function testConnection() {
+            const server = servers[currentServer];
+            log('Testing connection to: ' + server);
+            
+            const socket = io(server, {
+                transports: ['websocket', 'polling'],
+                timeout: 10000
+            });
+            
+            socket.on('connect', () => {
+                log('✅ Connected to ' + server + ' (ID: ' + socket.id + ')');
+                statusDiv.innerHTML = '✅ Connected to ' + server;
+                socket.disconnect();
+            });
+            
+            socket.on('connect_error', (error) => {
+                log('❌ Connection error to ' + server + ': ' + error.message);
+                if (currentServer < servers.length - 1) {
+                    currentServer++;
+                    setTimeout(testConnection, 1000);
+                } else {
+                    statusDiv.innerHTML = '❌ All connections failed';
+                }
+            });
+            
+            socket.on('disconnect', () => {
+                log('🔌 Disconnected from ' + server);
+            });
+        }
+        
+        testConnection();
+    </script>
+</body>
+</html>

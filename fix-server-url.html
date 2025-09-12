@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Исправление URL сервера</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 600px; 
+            margin: 50px auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+        }
+        .error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Исправление URL сервера</h1>
+        
+        <div class="error">
+            <h3>⚠️ Проблема найдена!</h3>
+            <p>Сервер <code>energy888-advanced-socket.onrender.com</code> не работает.</p>
+            <p>Нужно переключиться на рабочий сервер Railway.</p>
+        </div>
+        
+        <div class="status" id="status">
+            <div>Текущий Socket URL: <span id="currentUrl">Загрузка...</span></div>
+            <div>Статус: <span id="connectionStatus">Проверка...</span></div>
+        </div>
+        
+        <button onclick="fixServerUrl()">🔧 Исправить URL сервера</button>
+        <button onclick="testConnection()">🧪 Тестировать подключение</button>
+        <button onclick="goToGame()">🎮 Перейти к игре</button>
+        
+        <div id="logs" style="margin-top: 20px; text-align: left; font-size: 14px;"></div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script>
+        function log(message) {
+            console.log(message);
+            const logs = document.getElementById('logs');
+            logs.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+        }
+        
+        function updateStatus() {
+            const currentUrl = localStorage.getItem('SOCKET_URL') || 'Не установлен';
+            document.getElementById('currentUrl').textContent = currentUrl;
+            
+            if (currentUrl.includes('energy888-advanced-socket.onrender.com')) {
+                document.getElementById('connectionStatus').textContent = '❌ Неправильный сервер (не работает)';
+                document.getElementById('connectionStatus').style.color = '#ff6b6b';
+            } else if (currentUrl.includes('botenergy-7to1-production.up.railway.app')) {
+                document.getElementById('connectionStatus').textContent = '✅ Правильный сервер (Railway)';
+                document.getElementById('connectionStatus').style.color = '#4CAF50';
+            } else {
+                document.getElementById('connectionStatus').textContent = '⚠️ Неизвестный сервер';
+                document.getElementById('connectionStatus').style.color = '#ffa500';
+            }
+        }
+        
+        function fixServerUrl() {
+            log('🔧 Исправляем URL сервера...');
+            
+            // Очищаем localStorage
+            localStorage.clear();
+            log('✅ Очищен localStorage');
+            
+            // Устанавливаем правильный URL Railway
+            localStorage.setItem('SOCKET_URL', 'https://botenergy-7to1-production.up.railway.app');
+            log('✅ Установлен правильный URL: ' + localStorage.getItem('SOCKET_URL'));
+            
+            updateStatus();
+            
+            setTimeout(() => {
+                log('🔄 Перезагружаем страницу...');
+                window.location.reload();
+            }, 2000);
+        }
+        
+        function testConnection() {
+            log('🧪 Тестируем подключение к Railway серверу...');
+            
+            const server = 'https://botenergy-7to1-production.up.railway.app';
+            const socket = io(server, {
+                transports: ['websocket', 'polling'],
+                timeout: 10000
+            });
+            
+            socket.on('connect', () => {
+                log('✅ Подключение к Railway успешно! ID: ' + socket.id);
+                socket.disconnect();
+            });
+            
+            socket.on('connect_error', (error) => {
+                log('❌ Ошибка подключения к Railway: ' + error.message);
+            });
+            
+            socket.on('disconnect', () => {
+                log('🔌 Отключились от Railway сервера');
+            });
+        }
+        
+        function goToGame() {
+            // Добавляем параметры для принудительного обновления
+            const gameUrl = 'https://botenergy-7to1-production.up.railway.app/simple-rooms/';
+            const url = new URL(gameUrl);
+            url.searchParams.set('t', Date.now().toString());
+            url.searchParams.set('socket', 'https://botenergy-7to1-production.up.railway.app');
+            
+            window.open(url.toString(), '_blank');
+        }
+        
+        // Обновляем статус при загрузке
+        updateStatus();
+        
+        // Автоматически исправляем, если обнаружен неправильный сервер
+        if (localStorage.getItem('SOCKET_URL') && localStorage.getItem('SOCKET_URL').includes('energy888-advanced-socket.onrender.com')) {
+            log('⚠️ Обнаружен неправильный сервер, применяем исправление...');
+            setTimeout(fixServerUrl, 1000);
+        }
+    </script>
+</body>
+</html>
+

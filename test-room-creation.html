@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест создания комнат</title>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Тест создания комнат</h1>
+    <div id="status">Подключение...</div>
+    <button onclick="testCreateRoom()">Создать тестовую комнату</button>
+    <button onclick="getRooms()">Получить список комнат</button>
+    <div id="logs"></div>
+
+    <script>
+        const socket = io('https://botenergy-7to1-production.up.railway.app', {
+            transports: ['websocket', 'polling'],
+            timeout: 10000
+        });
+        
+        function log(message) {
+            console.log(message);
+            document.getElementById('logs').innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+        }
+        
+        socket.on('connect', () => {
+            log('✅ Подключен к серверу: ' + socket.id);
+            document.getElementById('status').textContent = 'Подключен: ' + socket.id;
+        });
+        
+        socket.on('disconnect', () => {
+            log('❌ Отключен от сервера');
+            document.getElementById('status').textContent = 'Отключен';
+        });
+        
+        socket.on('connect_error', (error) => {
+            log('❌ Ошибка подключения: ' + error.message);
+            document.getElementById('status').textContent = 'Ошибка подключения';
+        });
+        
+        socket.on('room-created', (room) => {
+            log('✅ Комната создана: ' + JSON.stringify(room));
+        });
+        
+        socket.on('rooms-list', (rooms) => {
+            log('📋 Список комнат: ' + JSON.stringify(rooms));
+        });
+        
+        socket.on('error', (error) => {
+            log('❌ Ошибка: ' + JSON.stringify(error));
+        });
+        
+        function testCreateRoom() {
+            log('🏠 Создаем тестовую комнату...');
+            socket.emit('create-room', {
+                name: 'Тестовая комната',
+                maxPlayers: 4,
+                creatorUsername: 'Тестер',
+                professionSelectionMode: 'assigned',
+                timing: 120
+            });
+        }
+        
+        function getRooms() {
+            log('📋 Запрашиваем список комнат...');
+            socket.emit('get-rooms');
+        }
+        
+        // Автоматически получаем список комнат при подключении
+        socket.on('connect', () => {
+            setTimeout(() => {
+                getRooms();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

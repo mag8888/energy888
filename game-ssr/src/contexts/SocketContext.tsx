@@ -25,12 +25,23 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socketUrl, setSocketUrl] = useState('');
 
   useEffect(() => {
+    // Очищаем localStorage от неправильных URL
+    if (typeof window !== 'undefined') {
+      const storedUrl = localStorage.getItem('SOCKET_URL');
+      if (storedUrl && storedUrl.includes('localhost')) {
+        localStorage.removeItem('SOCKET_URL');
+      }
+    }
+    
     // Определяем URL для Socket
     const qp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
     const qpUrl = qp?.get('socket') || undefined;
     const lsUrl = typeof window !== 'undefined' ? (localStorage.getItem('SOCKET_URL') || undefined) : undefined;
-    const envUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://botenergy-7to1-production.up.railway.app';
-    const resolvedUrl = qpUrl || lsUrl || envUrl || 'https://energy888-advanced-socket.onrender.com';
+    // Принудительно используем правильный URL для production
+    const isProduction = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
+    const envUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
+    const validEnvUrl = envUrl && !envUrl.includes('localhost') ? envUrl : undefined;
+    const resolvedUrl = qpUrl || lsUrl || validEnvUrl || (isProduction ? 'https://botenergy-7to1-production.up.railway.app' : 'https://botenergy-7to1-production.up.railway.app');
     
     if (lsUrl !== resolvedUrl && typeof window !== 'undefined') {
       localStorage.setItem('SOCKET_URL', resolvedUrl);

@@ -29,7 +29,7 @@ export default function SimpleRooms() {
     maxPlayers: 4,
     timing: 120,
     gameDuration: 180, // 3 часа по умолчанию
-    professionSelectionMode: 'choice',
+    professionSelectionMode: 'assigned',
     assignProfessionToAll: false,
     availableProfessions: ['entrepreneur'] // По умолчанию только Предприниматель
   });
@@ -95,7 +95,7 @@ export default function SimpleRooms() {
         timing: roomData.turnTime || roomData.timing || 120,
         gameDuration: Math.floor((roomData.gameDurationSec || 3600) / 60), // конвертируем в минуты
         createdAt: Date.now(),
-        professionSelectionMode: 'choice',
+        professionSelectionMode: 'assigned',
         availableProfessions: [],
         currentPlayers: roomData.currentPlayers || roomData.players || 0,
         turnTime: roomData.turnTime || roomData.timing || 120
@@ -134,9 +134,19 @@ export default function SimpleRooms() {
       setMessage('Ошибка подключения к серверу');
     };
 
+    const handleRoomCreated = (room: any) => {
+      console.log('🏠 Комната создана:', room);
+      setMessage('Комната создана успешно!');
+      setShowCreateForm(false);
+      
+      // Обновляем список комнат
+      socket.emit('get-rooms');
+    };
+
     // Подписываемся на события
     socket.on('rooms-list', handleRoomsList);
     socket.on('room-joined', handleRoomJoined);
+    socket.on('room-created', handleRoomCreated);
     socket.on('rooms-updated', handleRoomsUpdated);
     socket.on('connect_error', handleConnectError);
 
@@ -144,6 +154,7 @@ export default function SimpleRooms() {
     return () => {
       socket.off('rooms-list', handleRoomsList);
       socket.off('room-joined', handleRoomJoined);
+      socket.off('room-created', handleRoomCreated);
       socket.off('rooms-updated', handleRoomsUpdated);
       socket.off('connect_error', handleConnectError);
     };

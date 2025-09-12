@@ -14,10 +14,12 @@ function DebugInfo() {
   useEffect(() => {
     try {
       const envUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
+      // Игнорируем localhost URL из переменной окружения
+      const validEnvUrl = envUrl && !envUrl.includes('localhost') ? envUrl : undefined;
       const qp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
       const qpUrl = qp?.get('socket') || undefined;
       const lsUrl = typeof window !== 'undefined' ? (localStorage.getItem('SOCKET_URL') || undefined) : undefined;
-      const resolvedUrl = qpUrl || lsUrl || envUrl || 'https://energy888-advanced-socket.onrender.com';
+      const resolvedUrl = qpUrl || lsUrl || validEnvUrl || 'https://botenergy-7to1-production.up.railway.app';
       
       setDebugInfo({
         socketUrl: resolvedUrl,
