@@ -1,0 +1,19 @@
+{
+  "name": "energy-money-lobby",
+  "version": "1.0.0",
+  "description": "Energy of Money - Lobby and Room Selection Module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "socket.io": "^4.7.4",
+    "uuid": "^9.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
