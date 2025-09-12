@@ -7,7 +7,7 @@
     "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
     "build:memory": "NODE_OPTIONS='--max-old-space-size=6144' next build",
     "build:minimal": "NODE_OPTIONS='--max-old-space-size=8192' next build",
-    "start": "npx serve@latest out -p 3000",
+    "start": "node start.js",
     "start:prod": "npm run build && npx serve@latest out -p 3000",
     "lint": "next lint"
   },
