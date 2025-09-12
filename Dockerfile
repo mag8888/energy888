@@ -17,4 +17,4 @@ RUN npm run build:minimal
 EXPOSE 3000
 
 # Start the application
-CMD ["node", "start.js"]
+CMD ["node", "server.js"]
