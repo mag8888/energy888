@@ -4,14 +4,11 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files from game-ssr directory
-COPY game-ssr/package*.json ./
+# Copy all files from game-ssr directory
+COPY game-ssr/ .
 
 # Install dependencies
-RUN npm ci --omit=dev --no-audit --no-fund
-
-# Copy source code from game-ssr directory
-COPY game-ssr/ .
+RUN npm install --omit=dev --no-audit --no-fund
 
 # Build the application
 RUN npm run build:minimal
