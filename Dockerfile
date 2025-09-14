@@ -4,11 +4,17 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy only the bot-render.js file (всё встроено в него)
-COPY bot-render.js ./
+# Copy package.json first for better caching
+COPY package.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the bot-render-advanced.js file
+COPY bot-render-advanced.js ./
 
 # Expose port
 EXPOSE 3000
 
-# Start the bot-render.js
-CMD ["node", "bot-render.js"]
+# Start the bot-render-advanced.js
+CMD ["node", "bot-render-advanced.js"]
