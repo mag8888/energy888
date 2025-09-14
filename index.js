@@ -47,7 +47,7 @@ const html = `<!DOCTYPE html>
         }
         .locations {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin: 30px 0;
         }
@@ -366,6 +366,19 @@ const html = `<!DOCTYPE html>
             </div>
         </div>
         
+        <div class="location-content" id="market-content">
+            <div class="location-title">🛒 Рынок</div>
+            <div class="location-description">
+                На рынке вы можете покупать и продавать товары, находить выгодные предложения 
+                и развивать свои торговые навыки.
+            </div>
+            <div class="location-actions">
+                <button class="action-btn" onclick="buyGoods()">🛒 Покупать</button>
+                <button class="action-btn" onclick="sellGoods()">💰 Продавать</button>
+                <button class="action-btn" onclick="findDeals()">🔍 Искать сделки</button>
+            </div>
+        </div>
+        
         <div class="location-content" id="investments-content">
             <div class="location-title">📈 Инвестиции</div>
             <div class="location-description">
@@ -615,6 +628,44 @@ const html = `<!DOCTYPE html>
                 showMessage('Вы изучили основы бизнеса!');
             } else {
                 showMessage('Недостаточно денег для обучения!');
+            }
+        }
+        
+        // Функции для рынка
+        function buyGoods() {
+            if (money >= 1000) {
+                const cost = Math.floor(Math.random() * 500) + 500;
+                money -= cost;
+                energy -= 10;
+                showMessage('Купили товары за $' + cost);
+                updateStats();
+            } else {
+                showMessage('Недостаточно денег!');
+            }
+        }
+        
+        function sellGoods() {
+            if (energy >= 15) {
+                const profit = Math.floor(Math.random() * 800) + 200;
+                money += profit;
+                energy -= 15;
+                showMessage('Продали товары! Получили $' + profit);
+                updateStats();
+            } else {
+                showMessage('Недостаточно энергии!');
+            }
+        }
+        
+        function findDeals() {
+            if (energy >= 25) {
+                energy -= 25;
+                const bonus = Math.floor(Math.random() * 1000) + 500;
+                money += bonus;
+                level += 1;
+                showMessage('Нашли выгодную сделку! +$' + bonus + ', +1 уровень');
+                updateStats();
+            } else {
+                showMessage('Недостаточно энергии!');
             }
         }
         
