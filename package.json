@@ -2,10 +2,10 @@
   "name": "energy-money-telegram-bot",
   "version": "1.0.0",
   "description": "Energy of Money Telegram Bot",
-  "main": "bot-render-advanced.js",
+  "main": "bot-render-secure.js",
   "scripts": {
-    "start": "node bot-render-advanced.js",
-    "dev": "node bot-render-advanced.js",
+    "start": "node bot-render-secure.js",
+    "dev": "node bot-render-secure.js",
     "build": "echo 'No build step required'"
   },
   "dependencies": {

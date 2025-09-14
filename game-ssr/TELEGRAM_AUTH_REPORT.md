@@ -5,7 +5,7 @@
 ### 🔧 НАСТРОЙКИ ВЫПОЛНЕНЫ:
 
 1. **✅ Переменные окружения установлены:**
-   - `BOT_TOKEN=8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI`
+   - `BOT_TOKEN=your_bot_token_here`
    - `NEXT_PUBLIC_TELEGRAM_BOT=energy_m_bot`
    - `NEXT_PUBLIC_SOCKET_URL=http://localhost:3001`
 
@@ -119,7 +119,7 @@ help - Помощь по игре
 ### Для Render.com:
 ```bash
 # В настройках переменных окружения
-BOT_TOKEN=8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI
+BOT_TOKEN=your_bot_token_here
 NEXT_PUBLIC_TELEGRAM_BOT=energy_m_bot
 NEXT_PUBLIC_SOCKET_URL=https://money8888-production.up.railway.app
 ```
@@ -127,7 +127,7 @@ NEXT_PUBLIC_SOCKET_URL=https://money8888-production.up.railway.app
 ### Для Vercel:
 ```bash
 # В настройках переменных окружения
-BOT_TOKEN=8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI
+BOT_TOKEN=your_bot_token_here
 NEXT_PUBLIC_TELEGRAM_BOT=energy_m_bot
 NEXT_PUBLIC_SOCKET_URL=https://money8888-production.up.railway.app
 ```

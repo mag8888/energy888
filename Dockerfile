@@ -10,11 +10,13 @@ COPY package.json ./
 # Install dependencies
 RUN npm install
 
-# Copy the bot-render-advanced.js file
-COPY bot-render-advanced.js ./
+# Copy the secure bot files
+COPY bot-render-secure.js ./
+COPY config.js ./
+COPY logger.js ./
 
 # Expose port
 EXPOSE 3000
 
-# Start the bot-render-advanced.js
-CMD ["node", "bot-render-advanced.js"]
+# Start the secure bot
+CMD ["node", "bot-render-secure.js"]

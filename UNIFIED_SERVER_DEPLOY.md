@@ -23,7 +23,7 @@
 ### 3. Environment Variables
 ```
 NODE_ENV=production
-BOT_TOKEN=8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI
+BOT_TOKEN=your_bot_token_here
 PORT=10000
 ```
 
