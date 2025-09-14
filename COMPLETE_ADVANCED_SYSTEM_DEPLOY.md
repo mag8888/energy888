@@ -3,7 +3,7 @@
 ## 📋 Обзор системы
 
 ### Компоненты:
-1. **🎮 Game App** (Next.js) - `https://energy888.onrender.com`
+1. **🎮 Game App** (Next.js) - `https://money8888-production.up.railway.app`
 2. **🔌 Advanced Socket Server** (Node.js + MongoDB) - новый
 3. **🤖 Telegram Bot** (Railway) - `https://newbot-production-fa32.up.railway.app`
 
@@ -52,7 +52,7 @@ MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/energy888
 ### 1. Обновите переменные окружения
 В Render.com для Game App добавьте:
 ```
-NEXT_PUBLIC_SOCKET_URL=https://energy888-advanced-socket.onrender.com
+NEXT_PUBLIC_SOCKET_URL=https://money8888-production.up.railway.app
 ```
 
 ### 2. Добавьте новые страницы
@@ -125,7 +125,7 @@ socket.on('rooms-list', (rooms) => {
 
 ### Game App (Render.com)
 ```
-NEXT_PUBLIC_SOCKET_URL=https://energy888-advanced-socket.onrender.com
+NEXT_PUBLIC_SOCKET_URL=https://money8888-production.up.railway.app
 ```
 
 ### Advanced Socket Server (Render.com)
@@ -138,7 +138,7 @@ MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/energy888
 ### Telegram Bot (Railway)
 ```
 BOT_TOKEN=your_bot_token
-GAME_URL=https://energy888.onrender.com
+GAME_URL=https://money8888-production.up.railway.app
 NODE_ENV=production
 ```
 

@@ -8,7 +8,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["https://energy888.onrender.com", "http://localhost:3000", "https://energy888-unified-server.onrender.com"],
+    origin: ["https://money8888-production.up.railway.app"],
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -23,7 +23,7 @@ const bot = new Telegraf(BOT_TOKEN);
 
 // Middleware
 app.use(cors({
-  origin: ["https://energy888.onrender.com", "http://localhost:3000", "https://energy888-unified-server.onrender.com"],
+  origin: ["https://money8888-production.up.railway.app"],
   credentials: true
 }));
 app.use(express.json());
@@ -291,7 +291,7 @@ async function handleLogin(ctx, token) {
     
     // Отправляем данные пользователя на наш сервер
     const serverUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://energy888-unified-server.onrender.com'
+      ? 'https://money8888-production.up.railway.app'
       : `http://localhost:${PORT}`;
     
     const response = await fetch(`${serverUrl}/tg/authorize`, {
@@ -329,7 +329,7 @@ bot.command('help', (ctx) => {
 /start - Начать работу с ботом
 /help - Показать эту справку
 
-🌐 Игра: https://energy888.onrender.com
+🌐 Игра: https://money8888-production.up.railway.app
   `);
 });
 

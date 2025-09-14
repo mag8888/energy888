@@ -71,7 +71,7 @@
 ### ✅ Работает:
 - **Бот:** @energy_m_bot (newBot модуль)
 - **Webhook:** https://newbot-production-fa32.up.railway.app/webhook
-- **Игра:** https://botenergy-7to1-production.up.railway.app
+- **Игра:** https://money8888-production.up.railway.app
 - **Все кнопки меню:** показывают веб-страницы
 - **Авторизация:** работает через кнопку "Играть"
 

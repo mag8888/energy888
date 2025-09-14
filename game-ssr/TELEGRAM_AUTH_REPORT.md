@@ -121,7 +121,7 @@ help - Помощь по игре
 # В настройках переменных окружения
 BOT_TOKEN=8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI
 NEXT_PUBLIC_TELEGRAM_BOT=energy_m_bot
-NEXT_PUBLIC_SOCKET_URL=https://your-socket-server.onrender.com
+NEXT_PUBLIC_SOCKET_URL=https://money8888-production.up.railway.app
 ```
 
 ### Для Vercel:
@@ -129,7 +129,7 @@ NEXT_PUBLIC_SOCKET_URL=https://your-socket-server.onrender.com
 # В настройках переменных окружения
 BOT_TOKEN=8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI
 NEXT_PUBLIC_TELEGRAM_BOT=energy_m_bot
-NEXT_PUBLIC_SOCKET_URL=https://your-socket-server.vercel.app
+NEXT_PUBLIC_SOCKET_URL=https://money8888-production.up.railway.app
 ```
 
 ## 📝 ИТОГ:

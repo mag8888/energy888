@@ -131,7 +131,7 @@
             }
             
             // Устанавливаем правильный URL
-            localStorage.setItem('SOCKET_URL', 'https://energy888-advanced-socket.onrender.com');
+            localStorage.setItem('SOCKET_URL', 'https://money8888-production.up.railway.app');
             log('✅ Установлен правильный Socket URL: ' + localStorage.getItem('SOCKET_URL'));
             
             // Дополнительно для Safari - принудительно обновляем
@@ -185,7 +185,7 @@
         function testConnection() {
             log('🧪 Тестируем подключение...');
             
-            const server = 'https://energy888-advanced-socket.onrender.com';
+            const server = 'https://money8888-production.up.railway.app';
             const socket = io(server, {
                 transports: ['websocket', 'polling'],
                 timeout: 10000,
@@ -208,11 +208,11 @@
         
         function goToGame() {
             // Для Safari добавляем параметры для принудительного обновления
-            const gameUrl = 'https://botenergy-7to1-production.up.railway.app/simple-rooms/';
+            const gameUrl = 'https://money8888-production.up.railway.app/simple-rooms/';
             const url = new URL(gameUrl);
             url.searchParams.set('t', Date.now().toString());
             url.searchParams.set('safari', 'true');
-            url.searchParams.set('socket', 'https://energy888-advanced-socket.onrender.com');
+            url.searchParams.set('socket', 'https://money8888-production.up.railway.app');
             
             window.open(url.toString(), '_blank');
         }

@@ -6,7 +6,7 @@
 
 const axios = require('axios');
 
-const RENDER_URL = 'https://botenergy-7to1.onrender.com';
+const RENDER_URL = 'https://money8888-production.up.railway.app';
 
 async function checkStatus() {
     console.log('🔍 Проверяем статус бота на Render...\n');

@@ -1,15 +1,16 @@
 {
-  "name": "energy-money-frontend",
+  "name": "energy-money-telegram-bot",
   "version": "1.0.0",
-  "description": "Energy of Money Game Frontend",
-  "main": "bot-render.js",
+  "description": "Energy of Money Telegram Bot",
+  "main": "bot-render-advanced.js",
   "scripts": {
-    "start": "node bot-render.js",
-    "build": "cd game-ssr && npm run build:minimal",
-    "dev": "cd game-ssr && npm run dev"
+    "start": "node bot-render-advanced.js",
+    "dev": "node bot-render-advanced.js",
+    "build": "echo 'No build step required'"
   },
   "dependencies": {
-    "serve": "^14.2.1"
+    "telegraf": "^4.15.6",
+    "socket.io": "^4.8.1"
   },
   "engines": {
     "node": ">=18.0.0"

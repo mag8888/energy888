@@ -8,7 +8,7 @@ if (localStorage.getItem('SOCKET_URL') && localStorage.getItem('SOCKET_URL').inc
 }
 
 // Устанавливаем правильный URL
-localStorage.setItem('SOCKET_URL', 'https://energy888-advanced-socket.onrender.com');
+localStorage.setItem('SOCKET_URL', 'https://money8888-production.up.railway.app');
 console.log('✅ Установлен правильный Socket URL:', localStorage.getItem('SOCKET_URL'));
 
 // Перезагружаем страницу

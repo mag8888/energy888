@@ -27,9 +27,9 @@ Render все еще запускает `node bot-simple.js` вместо `node 
 ## 🧪 Проверка после исправления
 
 Через 2-3 минуты проверьте:
-- **Health check**: https://botenergy-7to1.onrender.com/health
-- **API изображений**: https://botenergy-7to1.onrender.com/api/images
-- **Главная страница**: https://botenergy-7to1.onrender.com/
+- **Health check**: https://money8888-production.up.railway.app/health
+- **API изображений**: https://money8888-production.up.railway.app/api/images
+- **Главная страница**: https://money8888-production.up.railway.app/
 
 ## 🎯 Что исправит
 

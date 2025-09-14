@@ -3,7 +3,7 @@ const express = require('express');
 
 // Токен бота
 const BOT_TOKEN = '8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI';
-const GAME_URL = 'https://energy8.vercel.app/';
+const GAME_URL = 'https://money8888-production.up.railway.app/';
 const GOOGLE_DRIVE_URL = 'https://drive.google.com/uc?export=view&id=';
 const PORT = process.env.PORT || 3000;
 

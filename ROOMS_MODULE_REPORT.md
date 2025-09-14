@@ -101,7 +101,7 @@ modules/rooms/
 ### **Конфигурация:**
 ```javascript
 const corsOptions = {
-  origin: ['https://energy-of-money-1game.onrender.com', ...],
+  origin: ['https://money8888-production.up.railway.app', ...],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 };

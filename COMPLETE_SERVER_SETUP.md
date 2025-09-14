@@ -13,17 +13,17 @@
 ## 🎯 Серверы для настройки
 
 ### 1. ✅ Bot Server (УЖЕ РАБОТАЕТ)
-- **URL**: https://botenergy-7to1.onrender.com
+- **URL**: https://money8888-production.up.railway.app
 - **Bot**: [@energy_m_bot](https://t.me/energy_m_bot)
 - **Статус**: ✅ Работает
 
 ### 2. 🔧 Unified Server (НУЖНО НАСТРОИТЬ)
-- **URL**: https://energy888-unified-server.onrender.com
+- **URL**: https://money8888-production.up.railway.app
 - **Назначение**: Socket.IO + Telegram API
 - **Статус**: ⏳ Нужно создать
 
 ### 3. 🎮 Game App (УЖЕ РАБОТАЕТ)
-- **URL**: https://energy888.onrender.com
+- **URL**: https://money8888-production.up.railway.app
 - **Назначение**: Next.js приложение
 - **Статус**: ✅ Работает
 
@@ -60,9 +60,9 @@ PORT=10000
 ### Шаг 3: Проверка деплоя
 
 После деплоя проверьте:
-- **Статус**: https://energy888-unified-server.onrender.com/
-- **Health**: https://energy888-unified-server.onrender.com/health
-- **API**: https://energy888-unified-server.onrender.com/tg/new-token
+- **Статус**: https://money8888-production.up.railway.app/
+- **Health**: https://money8888-production.up.railway.app/health
+- **API**: https://money8888-production.up.railway.app/tg/new-token
 
 ## 🔗 Обновление Game App
 
@@ -70,7 +70,7 @@ PORT=10000
 
 В настройках `energy888` на Render.com добавьте:
 ```
-NEXT_PUBLIC_SOCKET_URL=https://energy888-unified-server.onrender.com
+NEXT_PUBLIC_SOCKET_URL=https://money8888-production.up.railway.app
 NEXT_PUBLIC_TELEGRAM_BOT=energy_m_bot
 ```
 
@@ -85,13 +85,13 @@ NEXT_PUBLIC_TELEGRAM_BOT=energy_m_bot
 ### 1. Проверка Unified Server
 ```bash
 # Статус сервера
-curl https://energy888-unified-server.onrender.com/
+curl https://money8888-production.up.railway.app/
 
 # Health check
-curl https://energy888-unified-server.onrender.com/health
+curl https://money8888-production.up.railway.app/health
 
 # Создание токена
-curl https://energy888-unified-server.onrender.com/tg/new-token
+curl https://money8888-production.up.railway.app/tg/new-token
 ```
 
 ### 2. Проверка Telegram Bot
@@ -99,7 +99,7 @@ curl https://energy888-unified-server.onrender.com/tg/new-token
 2. Должен ответить приветствием
 
 ### 3. Проверка Game App
-1. Откройте https://energy888.onrender.com
+1. Откройте https://money8888-production.up.railway.app
 2. Перейдите в раздел "Комнаты"
 3. Попробуйте создать комнату
 4. Проверьте, что комнаты отображаются

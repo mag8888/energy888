@@ -22,7 +22,7 @@ function DebugInfo() {
       const qp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
       const qpUrl = qp?.get('socket') || undefined;
       const lsUrl = typeof window !== 'undefined' ? (localStorage.getItem('SOCKET_URL') || undefined) : undefined;
-      const resolvedUrl = qpUrl || lsUrl || validEnvUrl || 'https://botenergy-7to1-production.up.railway.app';
+      const resolvedUrl = qpUrl || lsUrl || validEnvUrl || 'https://money8888-production.up.railway.app';
       
       setDebugInfo({
         socketUrl: resolvedUrl,

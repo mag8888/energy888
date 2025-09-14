@@ -6,7 +6,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["https://energy888.onrender.com", "http://localhost:3000"],
+    origin: ["https://money8888-production.up.railway.app", "http://localhost:3000"],
     methods: ["GET", "POST"],
     credentials: true
   }

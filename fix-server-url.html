@@ -82,7 +82,7 @@
             if (currentUrl.includes('energy888-advanced-socket.onrender.com')) {
                 document.getElementById('connectionStatus').textContent = '❌ Неправильный сервер (не работает)';
                 document.getElementById('connectionStatus').style.color = '#ff6b6b';
-            } else if (currentUrl.includes('botenergy-7to1-production.up.railway.app')) {
+            } else if (currentUrl.includes('money8888-production.up.railway.app')) {
                 document.getElementById('connectionStatus').textContent = '✅ Правильный сервер (Railway)';
                 document.getElementById('connectionStatus').style.color = '#4CAF50';
             } else {
@@ -99,7 +99,7 @@
             log('✅ Очищен localStorage');
             
             // Устанавливаем правильный URL Railway
-            localStorage.setItem('SOCKET_URL', 'https://botenergy-7to1-production.up.railway.app');
+            localStorage.setItem('SOCKET_URL', 'https://money8888-production.up.railway.app');
             log('✅ Установлен правильный URL: ' + localStorage.getItem('SOCKET_URL'));
             
             updateStatus();
@@ -113,7 +113,7 @@
         function testConnection() {
             log('🧪 Тестируем подключение к Railway серверу...');
             
-            const server = 'https://botenergy-7to1-production.up.railway.app';
+            const server = 'https://money8888-production.up.railway.app';
             const socket = io(server, {
                 transports: ['websocket', 'polling'],
                 timeout: 10000
@@ -135,10 +135,10 @@
         
         function goToGame() {
             // Добавляем параметры для принудительного обновления
-            const gameUrl = 'https://botenergy-7to1-production.up.railway.app/simple-rooms/';
+            const gameUrl = 'https://money8888-production.up.railway.app/simple-rooms/';
             const url = new URL(gameUrl);
             url.searchParams.set('t', Date.now().toString());
-            url.searchParams.set('socket', 'https://botenergy-7to1-production.up.railway.app');
+            url.searchParams.set('socket', 'https://money8888-production.up.railway.app');
             
             window.open(url.toString(), '_blank');
         }

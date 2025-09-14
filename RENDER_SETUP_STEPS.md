@@ -53,9 +53,9 @@ PORT = 10000
 
 ### 2.1 Проверьте статус
 После деплоя проверьте:
-- **Статус**: https://energy888-unified-server.onrender.com/
-- **Health**: https://energy888-unified-server.onrender.com/health
-- **API**: https://energy888-unified-server.onrender.com/tg/new-token
+- **Статус**: https://money8888-production.up.railway.app/
+- **Health**: https://money8888-production.up.railway.app/health
+- **API**: https://money8888-production.up.railway.app/tg/new-token
 
 ### 2.2 Запустите проверку
 ```bash
@@ -77,7 +77,7 @@ PORT = 10000
 Перейдите в раздел **"Environment"** и добавьте:
 
 ```
-NEXT_PUBLIC_SOCKET_URL = https://energy888-unified-server.onrender.com
+NEXT_PUBLIC_SOCKET_URL = https://money8888-production.up.railway.app
 NEXT_PUBLIC_TELEGRAM_BOT = energy_m_bot
 ```
 
@@ -96,7 +96,7 @@ NEXT_PUBLIC_TELEGRAM_BOT = energy_m_bot
 Все серверы должны показать ✅ OK
 
 ### 4.2 Протестируйте игру
-1. Откройте https://energy888.onrender.com
+1. Откройте https://money8888-production.up.railway.app
 2. Перейдите в "Комнаты"
 3. Создайте тестовую комнату
 4. Убедитесь, что комната появилась в списке

@@ -107,7 +107,7 @@ socket.on('rooms-list', (rooms) => {
 
 Обновите переменные окружения в Game App:
 ```
-NEXT_PUBLIC_SOCKET_URL=https://energy888-advanced-socket.onrender.com
+NEXT_PUBLIC_SOCKET_URL=https://money8888-production.up.railway.app
 ```
 
 ## 📈 Мониторинг

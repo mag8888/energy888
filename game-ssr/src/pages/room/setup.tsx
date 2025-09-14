@@ -57,7 +57,7 @@ export default function RoomSetup() {
     }
 
     // Подключаемся к Socket.IO
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://botenergy-7to1-production.up.railway.app';
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://money8888-production.up.railway.app';
     console.log('🔌 Подключаемся к Socket.IO:', socketUrl);
 
     const newSocket = io(socketUrl, {

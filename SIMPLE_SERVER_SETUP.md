@@ -24,15 +24,15 @@ PORT=10000
 ```
 
 ### 4. После деплоя проверьте:
-- **Статус**: https://energy888-simple-server.onrender.com/
-- **Health**: https://energy888-simple-server.onrender.com/health
-- **API**: https://energy888-simple-server.onrender.com/tg/new-token
+- **Статус**: https://money8888-production.up.railway.app/
+- **Health**: https://money8888-production.up.railway.app/health
+- **API**: https://money8888-production.up.railway.app/tg/new-token
 
 ## 🔧 Обновите Game App
 
 Добавьте Environment Variables в `game-ssr`:
 ```
-NEXT_PUBLIC_SOCKET_URL=https://energy888-simple-server.onrender.com
+NEXT_PUBLIC_SOCKET_URL=https://money8888-production.up.railway.app
 NEXT_PUBLIC_TELEGRAM_BOT=energy_m_bot
 ```
 

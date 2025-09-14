@@ -2,7 +2,7 @@ const { Telegraf, Markup } = require('telegraf');
 
 // Токен бота
 const BOT_TOKEN = '8480976603:AAEcYvQ51AEQqeVtaJDypGfg_xMcO7ar2rI';
-const GAME_URL = 'https://energy8.vercel.app/';
+const GAME_URL = 'https://money8888-production.up.railway.app/';
 
 const bot = new Telegraf(BOT_TOKEN);
 

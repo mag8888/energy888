@@ -15,9 +15,9 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     
     const allowedOrigins = [
-      'https://energy-of-money-1game.onrender.com',
-      'https://energy888-advanced-socket.onrender.com',
-      'https://energy888-unified-server.onrender.com',
+      'https://money8888-production.up.railway.app',
+      'https://money8888-production.up.railway.app',
+      'https://money8888-production.up.railway.app',
       'http://localhost:3000',
       'http://localhost:3001'
     ];
@@ -49,9 +49,9 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
-      'https://energy-of-money-1game.onrender.com',
-      'https://energy888-advanced-socket.onrender.com',
-      'https://energy888-unified-server.onrender.com',
+      'https://money8888-production.up.railway.app',
+      'https://money8888-production.up.railway.app',
+      'https://money8888-production.up.railway.app',
       'http://localhost:3000',
       'http://localhost:3001'
     ],

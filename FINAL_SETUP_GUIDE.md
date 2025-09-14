@@ -2,8 +2,8 @@
 
 ## ✅ Что уже готово:
 - ✅ Код запушен на GitHub: `https://github.com/mag8888/energy888`
-- ✅ Bot Server работает: `https://botenergy-7to1.onrender.com`
-- ✅ Game App работает: `https://energy888.onrender.com`
+- ✅ Bot Server работает: `https://money8888-production.up.railway.app`
+- ✅ Game App работает: `https://money8888-production.up.railway.app`
 - ✅ Скрипт проверки создан: `./check-servers.sh`
 
 ## 🚀 ЧТО НУЖНО СДЕЛАТЬ:
@@ -40,16 +40,16 @@
 ### Шаг 3: Проверьте Unified Server
 
 После деплоя проверьте:
-- **Статус**: https://energy888-unified-server.onrender.com/
-- **Health**: https://energy888-unified-server.onrender.com/health
-- **API**: https://energy888-unified-server.onrender.com/tg/new-token
+- **Статус**: https://money8888-production.up.railway.app/
+- **Health**: https://money8888-production.up.railway.app/health
+- **API**: https://money8888-production.up.railway.app/tg/new-token
 
 ### Шаг 4: Обновите Game App
 
 1. **Зайдите в настройки `energy888` на Render.com**
 2. **Добавьте Environment Variables**:
    ```
-   NEXT_PUBLIC_SOCKET_URL=https://energy888-unified-server.onrender.com
+   NEXT_PUBLIC_SOCKET_URL=https://money8888-production.up.railway.app
    NEXT_PUBLIC_TELEGRAM_BOT=energy_m_bot
    ```
 3. **Нажмите "Manual Deploy" → "Deploy latest commit"**
@@ -67,7 +67,7 @@
 ## 🧪 Тестирование
 
 ### 1. Проверка комнат
-1. Откройте https://energy888.onrender.com
+1. Откройте https://money8888-production.up.railway.app
 2. Перейдите в "Комнаты"
 3. Создайте тестовую комнату
 4. Убедитесь, что комната появилась в списке

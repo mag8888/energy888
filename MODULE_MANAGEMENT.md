@@ -15,7 +15,7 @@
 
 ### 3. 🖥️ **server/** - Основной сервер
 - **Статус:** ✅ АКТИВЕН
-- **URL:** https://botenergy-7to1-production.up.railway.app
+- **URL:** https://money8888-production.up.railway.app
 - **Функции:** Socket.IO, комнаты, игра
 
 ## 🔒 ПРАВИЛА РАБОТЫ
@@ -52,7 +52,7 @@
 - **Активный бот:** newBot (menu-bot-v2.js)
 - **Активный сервер:** server (Socket.IO)
 - **Webhook:** newbot-production-fa32.up.railway.app
-- **Игра:** botenergy-7to1-production.up.railway.app
+- **Игра:** money8888-production.up.railway.app
 
 ## ⚠️ ВАЖНО
 

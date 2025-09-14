@@ -199,9 +199,9 @@ const server = http.createServer((req, res) => {
 const io = new Server(server, {
   cors: {
     origin: [
-      "https://energy888.onrender.com",
+      "https://money8888-production.up.railway.app",
       "http://localhost:3000",
-      "https://energy888-socket-server.onrender.com"
+      "https://money8888-production.up.railway.app"
     ],
     methods: ["GET", "POST"],
     credentials: true

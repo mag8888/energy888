@@ -165,7 +165,7 @@ bot.command('help', (ctx) => {
 /help - Показать эту справку
 
 🌐 Веб-интерфейс:
-https://botenergy-7to1.onrender.com/
+https://money8888-production.up.railway.app/
   `);
 });
 

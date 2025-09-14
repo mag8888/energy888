@@ -42,7 +42,7 @@ PORT=10000
 - `POST /tg/authorize` - Авторизация через Telegram
 
 ### Socket.IO
-- `ws://energy888-unified-server.onrender.com` - WebSocket подключение
+- `wss://money8888-production.up.railway.app` - WebSocket подключение
 - События: `getRooms`, `createRoom`, `joinRoomMeta`
 
 ## 🔗 Интеграция с клиентом
@@ -51,20 +51,20 @@ PORT=10000
 ```typescript
 // next.config.cjs
 env: {
-  NEXT_PUBLIC_SOCKET_URL: 'https://energy888-unified-server.onrender.com',
+  NEXT_PUBLIC_SOCKET_URL: 'https://money8888-production.up.railway.app',
   NEXT_PUBLIC_TELEGRAM_BOT: 'energy_m_bot',
 }
 ```
 
 ### CORS настройки
 Сервер настроен для работы с:
-- `https://energy888.onrender.com` (основное приложение)
-- `https://energy888-unified-server.onrender.com` (сам сервер)
+- `https://money8888-production.up.railway.app` (основное приложение)
+- `https://money8888-production.up.railway.app` (сам сервер)
 
 ## 🤖 Telegram Bot
 
 ### Существующий бот
-- **URL**: [https://botenergy-7to1.onrender.com](https://botenergy-7to1.onrender.com)
+- **URL**: [https://money8888-production.up.railway.app](https://money8888-production.up.railway.app)
 - **Bot**: [@energy_m_bot](https://t.me/energy_m_bot)
 
 ### Интеграция
@@ -96,7 +96,7 @@ git push origin main
 
 ## ✅ Проверка работы
 
-1. **Сервер**: https://energy888-unified-server.onrender.com/health
+1. **Сервер**: https://money8888-production.up.railway.app/health
 2. **Telegram**: Отправьте `/start` боту @energy_m_bot
 3. **Socket.IO**: Подключение через клиент
 

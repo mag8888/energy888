@@ -20,7 +20,7 @@ const getSocketUrl = () => {
   }
   
   // Fallback на правильный сервер
-  const defaultUrl = 'https://energy888-advanced-socket.onrender.com';
+  const defaultUrl = 'https://money8888-production.up.railway.app';
   console.log('🔌 Socket URL по умолчанию:', defaultUrl);
   return defaultUrl;
 };

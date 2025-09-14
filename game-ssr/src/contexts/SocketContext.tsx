@@ -41,7 +41,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     const isProduction = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
     const envUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
     const validEnvUrl = envUrl && !envUrl.includes('localhost') ? envUrl : undefined;
-    const resolvedUrl = qpUrl || lsUrl || validEnvUrl || (isProduction ? 'https://botenergy-7to1-production.up.railway.app' : 'https://botenergy-7to1-production.up.railway.app');
+    const resolvedUrl = qpUrl || lsUrl || validEnvUrl || (isProduction ? 'https://money8888-production.up.railway.app' : 'https://money8888-production.up.railway.app');
     
     if (lsUrl !== resolvedUrl && typeof window !== 'undefined') {
       localStorage.setItem('SOCKET_URL', resolvedUrl);

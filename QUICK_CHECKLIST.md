@@ -19,14 +19,14 @@
 - [ ] `PORT = 10000`
 
 ### Проверка:
-- [ ] Статус: https://energy888-unified-server.onrender.com/
-- [ ] Health: https://energy888-unified-server.onrender.com/health
-- [ ] API: https://energy888-unified-server.onrender.com/tg/new-token
+- [ ] Статус: https://money8888-production.up.railway.app/
+- [ ] Health: https://money8888-production.up.railway.app/health
+- [ ] API: https://money8888-production.up.railway.app/tg/new-token
 
 ## 🎮 Game App обновление
 
 ### Environment Variables:
-- [ ] `NEXT_PUBLIC_SOCKET_URL = https://energy888-unified-server.onrender.com`
+- [ ] `NEXT_PUBLIC_SOCKET_URL = https://money8888-production.up.railway.app`
 - [ ] `NEXT_PUBLIC_TELEGRAM_BOT = energy_m_bot`
 
 ### Пересборка:
@@ -40,7 +40,7 @@
 - [ ] Все серверы должны показать ✅ OK
 
 ### Тестирование:
-- [ ] Открыть https://energy888.onrender.com
+- [ ] Открыть https://money8888-production.up.railway.app
 - [ ] Перейти в "Комнаты"
 - [ ] Создать тестовую комнату
 - [ ] Убедиться, что комната появилась

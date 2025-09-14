@@ -19,7 +19,7 @@
 ### 1. Создайте файл `.env`:
 ```bash
 BOT_TOKEN=ваш_токен_бота_здесь
-GAME_URL=https://botenergy-7to1-production.up.railway.app
+GAME_URL=https://money8888-production.up.railway.app
 MONGODB_URI=ваша_строка_подключения_mongodb
 ```
 

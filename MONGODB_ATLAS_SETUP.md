@@ -67,17 +67,17 @@ envVars:
 
 1. **Статус сервера:**
    ```bash
-   curl https://your-app-name.onrender.com/
+   curl https://money8888-production.up.railway.app/
    ```
 
 2. **Статистика:**
    ```bash
-   curl https://your-app-name.onrender.com/stats
+   curl https://money8888-production.up.railway.app/stats
    ```
 
 3. **Зал славы:**
    ```bash
-   curl https://your-app-name.onrender.com/hall-of-fame
+   curl https://money8888-production.up.railway.app/hall-of-fame
    ```
 
 ## Безопасность

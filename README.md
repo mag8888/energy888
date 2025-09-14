@@ -40,7 +40,7 @@ npm start
 ## 🔗 Ссылки
 
 - **Бот**: https://t.me/energy_money_bot
-- **Игра**: https://energy8.vercel.app/
+- **Игра**: https://money8888-production.up.railway.app/
 - **Менеджер**: https://t.me/Aurelia_8888
 
 ## 📝 Лицензия
