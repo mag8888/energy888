@@ -8,4 +8,4 @@ cmds = ['npm install --omit=dev --no-audit --no-fund']
 cmds = ['echo "No build step required"']
 
 [start]
-cmd = 'node server-simple.js'
+cmd = 'node index.js'

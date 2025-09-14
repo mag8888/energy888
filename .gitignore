@@ -6,5 +6,6 @@ build/
 .vercel/
 .DS_Store
 *.log
+.nixpacks
 game-ssr/node_modules/
 game-ssr/.next/
