@@ -1,18 +1,11 @@
 {
-  "name": "energy-money-telegram-bot",
+  "name": "energy-money-bot",
   "version": "1.0.0",
-  "description": "Energy of Money Telegram Bot",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node index.js",
-    "build": "echo 'No build step required'"
+    "start": "node index.js"
   },
   "dependencies": {
-    "telegraf": "^4.15.6",
     "socket.io": "^4.8.1"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   }
 }

@@ -2,12 +2,6 @@ const http = require('http');
 const { Server } = require('socket.io');
 
 const PORT = process.env.PORT || 3000;
-const BOT_TOKEN = process.env.BOT_TOKEN;
-
-if (!BOT_TOKEN) {
-  console.error('BOT_TOKEN not configured');
-  process.exit(1);
-}
 
 console.log('Starting server on port', PORT);
 
