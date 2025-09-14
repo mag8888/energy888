@@ -47,9 +47,12 @@ const html = `<!DOCTYPE html>
         }
         .locations {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
             margin: 30px 0;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .location-btn {
             background: linear-gradient(45deg, #667eea, #764ba2);
@@ -62,6 +65,11 @@ const html = `<!DOCTYPE html>
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
         .location-btn:hover {
             transform: translateY(-5px);
@@ -73,6 +81,17 @@ const html = `<!DOCTYPE html>
         .location-btn.active {
             background: linear-gradient(45deg, #4CAF50, #45a049);
             transform: scale(1.05);
+        }
+        
+        .location-btn[data-location="game"] {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .location-btn[data-location="game"]:hover {
+            background: linear-gradient(45deg, #FF5252, #FF7043);
+            transform: translateY(-8px) scale(1.05);
         }
         .location-content {
             margin-top: 30px;
@@ -295,23 +314,23 @@ const html = `<!DOCTYPE html>
             <button class="location-btn active" data-location="home" onclick="switchLocation('home')">
                 🏠 Дом
             </button>
+            <button class="location-btn" data-location="game" onclick="switchLocation('game')">
+                🎲 Игра
+            </button>
             <button class="location-btn" data-location="bank" onclick="switchLocation('bank')">
                 🏦 Банк
             </button>
-            <button class="location-btn" data-location="market" onclick="switchLocation('market')">
-                🛒 Рынок
-            </button>
             <button class="location-btn" data-location="work" onclick="switchLocation('work')">
                 💼 Работа
+            </button>
+            <button class="location-btn" data-location="market" onclick="switchLocation('market')">
+                🛒 Рынок
             </button>
             <button class="location-btn" data-location="investments" onclick="switchLocation('investments')">
                 📈 Инвестиции
             </button>
             <button class="location-btn" data-location="education" onclick="switchLocation('education')">
                 🎓 Образование
-            </button>
-            <button class="location-btn" data-location="game" onclick="switchLocation('game')">
-                🎲 Игра
             </button>
         </div>
         
