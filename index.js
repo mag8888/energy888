@@ -134,6 +134,125 @@ const html = `<!DOCTYPE html>
             color: #666;
             font-size: 0.9em;
         }
+        .game-board-container {
+            margin-top: 20px;
+        }
+        
+        .game-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 2px;
+            width: 100%;
+            max-width: 600px;
+            height: 600px;
+            margin: 0 auto;
+            border: 3px solid #333;
+            border-radius: 10px;
+            background: #f0f0f0;
+            padding: 10px;
+        }
+        
+        .game-cell {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .game-cell:hover {
+            background: #e0e0e0;
+            transform: scale(1.05);
+        }
+        
+        .game-cell.start {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .game-cell.income {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .game-cell.expense {
+            background: #f44336;
+            color: white;
+        }
+        
+        .game-cell.investment {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .game-cell.opportunity {
+            background: #9C27B0;
+            color: white;
+        }
+        
+        .game-cell.player {
+            background: #FFD700;
+            color: #333;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+        
+        .game-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .player-info, .game-status {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .player-stats div {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .game-status div {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        #gameMessage {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .dice-animation {
+            animation: diceRoll 0.5s ease-in-out;
+        }
+        
+        @keyframes diceRoll {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(180deg); }
+            75% { transform: rotate(270deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         @media (max-width: 600px) {
             .locations {
                 grid-template-columns: 1fr;
@@ -141,6 +260,13 @@ const html = `<!DOCTYPE html>
             .container {
                 margin: 10px;
                 padding: 20px;
+            }
+            .game-board {
+                height: 400px;
+                max-width: 400px;
+            }
+            .game-info {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -183,6 +309,9 @@ const html = `<!DOCTYPE html>
             </button>
             <button class="location-btn" data-location="education" onclick="switchLocation('education')">
                 🎓 Образование
+            </button>
+            <button class="location-btn" data-location="game" onclick="switchLocation('game')">
+                🎲 Игра
             </button>
         </div>
         
@@ -262,6 +391,43 @@ const html = `<!DOCTYPE html>
                 <button class="action-btn" onclick="studyBusiness()">🚀 Бизнес</button>
             </div>
         </div>
+        
+        <div class="location-content" id="game-content">
+            <div class="location-title">🎲 Energy of Money - Игровая Доска</div>
+            <div class="location-description">
+                Добро пожаловать на игровую доску! Здесь вы можете играть в оригинальную игру 
+                "Energy of Money" с полной механикой и интерактивностью.
+            </div>
+            
+            <div class="game-board-container">
+                <div class="game-controls">
+                    <button class="action-btn" onclick="rollDice()">🎲 Бросить кубик</button>
+                    <button class="action-btn" onclick="startNewGame()">🔄 Новая игра</button>
+                    <button class="action-btn" onclick="showRules()">📋 Правила</button>
+                </div>
+                
+                <div class="game-board" id="gameBoard">
+                    <!-- Игровая доска будет создана динамически -->
+                </div>
+                
+                <div class="game-info">
+                    <div class="player-info">
+                        <h3>Игрок 1</h3>
+                        <div class="player-stats">
+                            <div>💰 Деньги: $<span id="playerMoney">10000</span></div>
+                            <div>⚡ Энергия: <span id="playerEnergy">100</span></div>
+                            <div>📈 Уровень: <span id="playerLevel">1</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="game-status">
+                        <div id="currentPlayer">Ход игрока 1</div>
+                        <div id="diceResult">Бросьте кубик</div>
+                        <div id="gameMessage">Добро пожаловать в игру!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <script src="/socket.io/socket.io.js"></script>
@@ -273,6 +439,13 @@ const html = `<!DOCTYPE html>
         let money = 10000;
         let energy = 100;
         let level = 1;
+        
+        // Игровые переменные
+        let gameBoard = [];
+        let playerPosition = 0;
+        let gameStarted = false;
+        let currentPlayer = 1;
+        let diceValue = 0;
         
         function switchLocation(location) {
             // Убираем активный класс со всех кнопок и контента
@@ -481,6 +654,202 @@ const html = `<!DOCTYPE html>
         socket.on('message', (data) => {
             showMessage(data.message);
         });
+        
+        // Игровые функции
+        function createGameBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+            
+            // Создаем 8x8 сетку
+            for (let i = 0; i < 64; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'game-cell';
+                cell.id = 'cell-' + i;
+                cell.onclick = () => cellClick(i);
+                
+                // Определяем тип клетки
+                if (i === 0) {
+                    cell.className += ' start';
+                    cell.innerHTML = '🏠<br>СТАРТ';
+                } else if (i % 8 === 0) {
+                    cell.className += ' income';
+                    cell.innerHTML = '💰<br>ДОХОД';
+                } else if (i % 8 === 1) {
+                    cell.className += ' expense';
+                    cell.innerHTML = '💸<br>РАСХОД';
+                } else if (i % 8 === 2) {
+                    cell.className += ' investment';
+                    cell.innerHTML = '📈<br>ИНВЕСТ';
+                } else if (i % 8 === 3) {
+                    cell.className += ' opportunity';
+                    cell.innerHTML = '🎯<br>ВОЗМОЖ';
+                } else {
+                    cell.innerHTML = i;
+                }
+                
+                board.appendChild(cell);
+            }
+            
+            // Размещаем игрока на старте
+            updatePlayerPosition();
+        }
+        
+        function cellClick(cellIndex) {
+            if (!gameStarted) return;
+            
+            const cell = document.getElementById('cell-' + cellIndex);
+            const cellType = getCellType(cellIndex);
+            
+            showMessage('Клетка ' + cellIndex + ': ' + cellType);
+            handleCellAction(cellType, cellIndex);
+        }
+        
+        function getCellType(cellIndex) {
+            if (cellIndex === 0) return 'start';
+            if (cellIndex % 8 === 0) return 'income';
+            if (cellIndex % 8 === 1) return 'expense';
+            if (cellIndex % 8 === 2) return 'investment';
+            if (cellIndex % 8 === 3) return 'opportunity';
+            return 'neutral';
+        }
+        
+        function handleCellAction(cellType, cellIndex) {
+            switch(cellType) {
+                case 'start':
+                    showMessage('Вы на старте! Получите бонус $1000!');
+                    money += 1000;
+                    break;
+                case 'income':
+                    const incomeAmount = Math.floor(Math.random() * 500) + 100;
+                    showMessage('Доход! Получили $' + incomeAmount);
+                    money += incomeAmount;
+                    break;
+                case 'expense':
+                    const expenseAmount = Math.floor(Math.random() * 300) + 50;
+                    showMessage('Расход! Потратили $' + expenseAmount);
+                    money -= expenseAmount;
+                    break;
+                case 'investment':
+                    const investAmount = Math.floor(Math.random() * 1000) + 200;
+                    if (money >= investAmount) {
+                        showMessage('Инвестиция! Потратили $' + investAmount);
+                        money -= investAmount;
+                        level++;
+                    } else {
+                        showMessage('Недостаточно денег для инвестиции!');
+                    }
+                    break;
+                case 'opportunity':
+                    const opportunityAmount = Math.floor(Math.random() * 2000) + 500;
+                    showMessage('Возможность! Получили $' + opportunityAmount);
+                    money += opportunityAmount;
+                    break;
+            }
+            
+            updateStats();
+            updateGameStats();
+        }
+        
+        function rollDice() {
+            if (!gameStarted) {
+                showMessage('Сначала начните новую игру!');
+                return;
+            }
+            
+            diceValue = Math.floor(Math.random() * 6) + 1;
+            document.getElementById('diceResult').textContent = 'Выпало: ' + diceValue;
+            document.getElementById('diceResult').classList.add('dice-animation');
+            
+            setTimeout(() => {
+                document.getElementById('diceResult').classList.remove('dice-animation');
+                movePlayer(diceValue);
+            }, 500);
+        }
+        
+        function movePlayer(steps) {
+            const oldPosition = playerPosition;
+            playerPosition = (playerPosition + steps) % 64;
+            
+            updatePlayerPosition();
+            
+            const cellType = getCellType(playerPosition);
+            showMessage('Переместились на ' + steps + ' клеток! Клетка: ' + cellType);
+            
+            setTimeout(() => {
+                handleCellAction(cellType, playerPosition);
+            }, 1000);
+        }
+        
+        function updatePlayerPosition() {
+            // Убираем класс player со всех клеток
+            document.querySelectorAll('.game-cell').forEach(cell => {
+                cell.classList.remove('player');
+            });
+            
+            // Добавляем класс player к текущей позиции
+            const currentCell = document.getElementById('cell-' + playerPosition);
+            if (currentCell) {
+                currentCell.classList.add('player');
+            }
+        }
+        
+        function startNewGame() {
+            gameStarted = true;
+            playerPosition = 0;
+            money = 10000;
+            energy = 100;
+            level = 1;
+            
+            createGameBoard();
+            updateStats();
+            updateGameStats();
+            
+            document.getElementById('gameMessage').textContent = 'Новая игра начата! Бросьте кубик!';
+            showMessage('Новая игра начата! Удачи!');
+        }
+        
+        function showRules() {
+            const rules = 
+                'ПРАВИЛА ИГРЫ:\n\n' +
+                '1. Бросьте кубик, чтобы переместиться по доске\n' +
+                '2. 🏠 СТАРТ - получите бонус $1000\n' +
+                '3. 💰 ДОХОД - получите случайную сумму\n' +
+                '4. 💸 РАСХОД - потратьте случайную сумму\n' +
+                '5. 📈 ИНВЕСТ - инвестируйте и повысьте уровень\n' +
+                '6. 🎯 ВОЗМОЖНОСТЬ - получите большой бонус\n' +
+                '7. Цель: накопить как можно больше денег!';
+            
+            showMessage(rules);
+        }
+        
+        function updateGameStats() {
+            document.getElementById('playerMoney').textContent = money.toLocaleString();
+            document.getElementById('playerEnergy').textContent = energy;
+            document.getElementById('playerLevel').textContent = level;
+            document.getElementById('currentPlayer').textContent = 'Ход игрока ' + currentPlayer;
+        }
+        
+        // Инициализация игровой доски при переключении на игру
+        function switchLocation(location) {
+            // Убираем активный класс со всех кнопок и контента
+            document.querySelectorAll('.location-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.location-content').forEach(content => content.classList.remove('active'));
+            
+            // Добавляем активный класс к выбранной кнопке и контенту
+            document.querySelector('[data-location="' + location + '"]').classList.add('active');
+            document.getElementById(location + '-content').classList.add('active');
+            
+            currentLocation = location;
+            console.log('Switched to location:', location);
+            
+            // Если переключились на игру, создаем доску
+            if (location === 'game' && !gameStarted) {
+                createGameBoard();
+            }
+            
+            // Отправляем событие на сервер
+            socket.emit('locationChange', { location: location });
+        }
     </script>
 </body>
 </html>`;
