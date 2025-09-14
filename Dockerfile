@@ -10,11 +10,11 @@ COPY package.json ./
 # Install dependencies
 RUN npm install
 
-# Copy only the main bot file (everything is embedded)
-COPY bot-render-secure.js ./
+# Copy the simple server file
+COPY server-simple.js ./
 
 # Expose port
 EXPOSE 3000
 
-# Start the bot
-CMD ["node", "bot-render-secure.js"]
+# Start the server
+CMD ["node", "server-simple.js"]
