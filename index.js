@@ -280,8 +280,8 @@ const html = `<!DOCTYPE html>
             document.querySelectorAll('.location-content').forEach(content => content.classList.remove('active'));
             
             // Добавляем активный класс к выбранной кнопке и контенту
-            document.querySelector(`[data-location="${location}"]`).classList.add('active');
-            document.getElementById(`${location}-content`).classList.add('active');
+            document.querySelector('[data-location="' + location + '"]').classList.add('active');
+            document.getElementById(location + '-content').classList.add('active');
             
             currentLocation = location;
             console.log('Switched to location:', location);
@@ -448,18 +448,17 @@ const html = `<!DOCTYPE html>
         function showMessage(message) {
             // Создаем временное уведомление
             const notification = document.createElement('div');
-            notification.style.cssText = \`
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: #4CAF50;
-                color: white;
-                padding: 15px 20px;
-                border-radius: 10px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                z-index: 1000;
-                animation: slideIn 0.3s ease;
-            \`;
+            notification.style.cssText = 
+                'position: fixed;' +
+                'top: 20px;' +
+                'right: 20px;' +
+                'background: #4CAF50;' +
+                'color: white;' +
+                'padding: 15px 20px;' +
+                'border-radius: 10px;' +
+                'box-shadow: 0 5px 15px rgba(0,0,0,0.3);' +
+                'z-index: 1000;' +
+                'animation: slideIn 0.3s ease;';
             notification.textContent = message;
             document.body.appendChild(notification);
             
