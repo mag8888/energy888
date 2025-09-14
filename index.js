@@ -491,6 +491,11 @@ const html = `<!DOCTYPE html>
             currentLocation = location;
             console.log('Switched to location:', location);
             
+            // Если переключились на игру, создаем доску
+            if (location === 'game' && !gameStarted) {
+                createGameBoard();
+            }
+            
             // Отправляем событие на сервер
             socket.emit('locationChange', { location: location });
         }
@@ -897,28 +902,6 @@ const html = `<!DOCTYPE html>
             document.getElementById('playerEnergy').textContent = energy;
             document.getElementById('playerLevel').textContent = level;
             document.getElementById('currentPlayer').textContent = 'Ход игрока ' + currentPlayer;
-        }
-        
-        // Инициализация игровой доски при переключении на игру
-        function switchLocation(location) {
-            // Убираем активный класс со всех кнопок и контента
-            document.querySelectorAll('.location-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.location-content').forEach(content => content.classList.remove('active'));
-            
-            // Добавляем активный класс к выбранной кнопке и контенту
-            document.querySelector('[data-location="' + location + '"]').classList.add('active');
-            document.getElementById(location + '-content').classList.add('active');
-            
-            currentLocation = location;
-            console.log('Switched to location:', location);
-            
-            // Если переключились на игру, создаем доску
-            if (location === 'game' && !gameStarted) {
-                createGameBoard();
-            }
-            
-            // Отправляем событие на сервер
-            socket.emit('locationChange', { location: location });
         }
     </script>
 </body>
